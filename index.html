@@ -24,36 +24,47 @@
                     <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Auditoria</button>
                     <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Dashboard</button>
                 </div>
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-300 dark:bg-darkCard text-black dark:text-white">
+                    <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
+                    <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
+                </button>
             </nav>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- ABA CONFERÊNCIA -->
         <section id="tab-conferencia" class="page-section">
             <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-2xl font-bold mb-6">Nova Conferência ICQA</h2>
-                <form id="form-conf" class="space-y-4">
-                    <input type="text" id="mz" placeholder="MZ" class="w-full p-2 border rounded dark:bg-black/20">
-                    <input type="text" id="meli" placeholder="MELI" class="w-full p-2 border rounded dark:bg-black/20">
-                    <input type="number" id="qtd" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-black/20">
+                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
+                <form class="space-y-4">
+                    <input type="text" id="mz" placeholder="MZ" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
+                    <input type="text" id="meli" placeholder="MELI" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
+                    <input type="number" id="qtd" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
                     
                     <div class="bg-gray-100 dark:bg-black/20 p-3 rounded border">
-                        <label>Físico de acordo com o sistêmico?</label>
-                        <select id="fisico_ok" onchange="toggleFound(this.value === 'Não')" class="w-full p-2 mt-1 rounded dark:bg-black/20">
-                            <option value="Sim">Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
+                        <label class="block text-sm font-bold text-black dark:text-darkText mb-2">Físico está de acordo com o sistêmico?</label>
+                        <div class="flex space-x-6 text-sm dark:text-darkText">
+                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="Sim" onclick="toggleFound(false)"> <span>Sim</span></label>
+                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="Não" onclick="toggleFound(true)"> <span>Não</span></label>
+                        </div>
                     </div>
 
                     <div id="found-section" class="hidden p-3 border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 rounded">
-                        <label>Foi realizado Found?</label>
-                        <select id="realizou_found" onchange="document.getElementById('data-found-div').classList.toggle('hidden', this.value === 'Não')" class="w-full p-2 mt-1 rounded dark:bg-black/20">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                        </select>
-                        <div id="data-found-div" class="hidden mt-2">
-                            <label>Data e Hora:</label>
-                            <input type="datetime-local" id="data_found" class="w-full p-2 border rounded dark:bg-black/20">
+                        <label class="block text-sm font-bold text-black dark:text-darkText mb-2">Foi realizado Found?</label>
+                        <div class="flex space-x-6 text-sm dark:text-darkText mb-4">
+                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="Sim" onclick="toggleDataFields(true)"> <span>Sim</span></label>
+                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="Não" onclick="toggleDataFields(false)"> <span>Não</span></label>
+                        </div>
+                        <div id="data-fields" class="hidden grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-black dark:text-darkText">DATA</label>
+                                <input type="date" id="data_found" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-black dark:text-darkText">HORÁRIO</label>
+                                <input type="time" id="hora_found" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
+                            </div>
                         </div>
                     </div>
                     <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-3 rounded font-bold">Salvar e Enviar Task</button>
@@ -61,18 +72,18 @@
             </div>
         </section>
 
+        <!-- ABA AUDITORIA -->
         <section id="tab-auditoria" class="page-section hidden">
-            <div class="max-w-5xl mx-auto">
-                <h2 class="text-xl font-bold mb-4">Casos para Auditar</h2>
-                <div id="lista-auditoria" class="grid gap-3"></div>
-            </div>
+            <div class="max-w-5xl mx-auto"><h2 class="text-xl font-bold dark:text-darkText mb-4">Casos para Auditar</h2>
+            <div id="lista-auditoria" class="grid gap-3"></div></div>
         </section>
 
+        <!-- ABA DASHBOARD -->
         <section id="tab-dashboard" class="page-section hidden">
             <div class="grid grid-cols-4 gap-4 mb-8 text-center" id="cards-stats"></div>
             <div class="bg-white dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30">
-                <h2 class="font-bold mb-4">Monitoramento Geral de Tasks</h2>
-                <table class="w-full text-left">
+                <h2 class="font-bold dark:text-darkText mb-4">Monitoramento Geral de Tasks</h2>
+                <table class="w-full text-left dark:text-white">
                     <thead><tr class="border-b text-xs uppercase"><th>MZ</th><th>Meli</th><th>Qtd</th><th>Status Físico</th><th>Found?</th><th>Resultado Auditoria</th></tr></thead>
                     <tbody id="tabela-body"></tbody>
                 </table>
@@ -80,8 +91,9 @@
         </section>
     </main>
 
+    <!-- MODAL -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-md w-full">
+        <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white">
             <h2 class="text-xl font-bold mb-4">Auditoria da Tratativa</h2>
             <div id="modal-content" class="mb-4"></div>
             <div class="flex gap-2">
@@ -99,47 +111,51 @@
 
         let currentId = null;
 
+        // Lógica de Renderização e Stats
         onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
             const lista = document.getElementById('lista-auditoria');
             const tabela = document.getElementById('tabela-body');
             lista.innerHTML = ""; tabela.innerHTML = "";
-            let stats = { total: 0, ok: 0, div: 0, foundSim: 0, foundNao: 0, conf: 0, naoConf: 0 };
+            let stats = { total: 0, ok: 0, div: 0, foundSim: 0, conf: 0, naoConf: 0 };
 
             snapshot.forEach((docRef) => {
                 const d = docRef.data();
                 stats.total++;
                 if(d.fisico_ok === 'Sim') stats.ok++; else stats.div++;
-                if(d.realizou_found === 'Sim') stats.foundSim++; else stats.foundNao++;
+                if(d.realizou_found === 'Sim') stats.foundSim++;
                 if(d.auditoria === 'Conforme') stats.conf++;
                 if(d.auditoria === 'Necessita de Correção') stats.naoConf++;
 
-                // Render lista auditoria
                 const div = document.createElement('div');
-                div.className = "bg-white dark:bg-darkCard p-4 rounded border cursor-pointer";
+                div.className = "bg-white dark:bg-darkCard p-4 rounded border cursor-pointer dark:text-white";
                 div.innerHTML = `<p><b>MELI:</b> ${d.meli}</p><p><b>MZ:</b> ${d.mz}</p>`;
                 div.onclick = () => { currentId = docRef.id; document.getElementById('modal-content').innerHTML = `Meli: ${d.meli} | MZ: ${d.mz}`; document.getElementById('modal-auditoria').classList.remove('hidden'); };
                 lista.appendChild(div);
 
-                // Render tabela
-                tabela.innerHTML += `<tr><td>${d.mz}</td><td>${d.meli}</td><td>${d.qtd}</td><td>${d.fisico_ok === 'Sim' ? 'OK' : 'Divergência'}</td><td>${d.realizou_found === 'Sim' ? 'Sim ('+d.data_found+')' : 'Não'}</td><td>${d.auditoria || 'Aguardando...'}</td></tr>`;
+                tabela.innerHTML += `<tr><td>${d.mz}</td><td>${d.meli}</td><td>${d.qtd}</td><td>${d.fisico_ok === 'Sim' ? 'OK' : 'Divergência'}</td><td>${d.realizou_found === 'Sim' ? 'Sim ('+d.data_found+' '+d.hora_found+')' : 'Não'}</td><td>${d.auditoria || 'Aguardando...'}</td></tr>`;
             });
 
             document.getElementById('cards-stats').innerHTML = `
-                <div class="bg-white p-4 rounded shadow">Vol. Total: ${stats.total}</div>
-                <div class="bg-white p-4 rounded shadow">OK: ${stats.ok} / Div: ${stats.div}</div>
-                <div class="bg-white p-4 rounded shadow">Found Realizado: ${stats.foundSim}</div>
-                <div class="bg-white p-4 rounded shadow">Conforme: ${stats.conf} / Não Conf: ${stats.naoConf}</div>
+                <div class="bg-white dark:bg-darkCard p-4 rounded shadow dark:text-white">Total: ${stats.total}</div>
+                <div class="bg-white dark:bg-darkCard p-4 rounded shadow dark:text-white">OK: ${stats.ok} / Div: ${stats.div}</div>
+                <div class="bg-white dark:bg-darkCard p-4 rounded shadow dark:text-white">Found: ${stats.foundSim}</div>
+                <div class="bg-white dark:bg-darkCard p-4 rounded shadow dark:text-white">Conf: ${stats.conf} / Não Conf: ${stats.naoConf}</div>
             `;
         });
 
+        // Funções Globais
         window.salvarTarefa = async () => {
+            const radioAcordo = document.querySelector('input[name="acordo"]:checked');
+            const radioFound = document.querySelector('input[name="found"]:checked');
+            
             await addDoc(collection(db, "tarefas"), { 
                 mz: document.getElementById('mz').value, 
                 meli: document.getElementById('meli').value, 
                 qtd: document.getElementById('qtd').value, 
-                fisico_ok: document.getElementById('fisico_ok').value,
-                realizou_found: document.getElementById('realizou_found').value,
+                fisico_ok: radioAcordo ? radioAcordo.value : 'Não',
+                realizou_found: radioFound ? radioFound.value : 'Não',
                 data_found: document.getElementById('data_found').value,
+                hora_found: document.getElementById('hora_found').value,
                 auditoria: 'Aguardando...',
                 criadoEm: new Date() 
             });
@@ -149,17 +165,22 @@
         window.finalizarAuditoria = async (resultado) => {
             await updateDoc(doc(db, "tarefas", currentId), { auditoria: resultado });
             document.getElementById('modal-auditoria').classList.add('hidden');
-            // Mudar aba para Dashboard
             document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
             document.getElementById('tab-dashboard').classList.remove('hidden');
         };
 
         window.toggleFound = (show) => document.getElementById('found-section').classList.toggle('hidden', !show);
+        window.toggleDataFields = (show) => document.getElementById('data-fields').classList.toggle('hidden', !show);
         
+        // Controle de Tema e Abas
+        document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
         document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
             document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`tab-${e.target.getAttribute('data-tab')}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
+            e.target.classList.add('bg-primaryBtn', 'text-white');
         }));
+        lucide.createIcons();
     </script>
 </body>
 </html>
