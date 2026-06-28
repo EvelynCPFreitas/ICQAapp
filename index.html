@@ -95,6 +95,7 @@
     </main>
 
     <script>
+       <script>
         // Lógica para mostrar/esconder o Found
         function toggleFound(mostrar) {
             const section = document.getElementById('found-section');
@@ -115,6 +116,10 @@
             button.addEventListener('click', () => {
                 document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
                 document.getElementById(`tab-${button.getAttribute('data-tab')}`).classList.remove('hidden');
+                
+                // Ajuste de cor ativa
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-primaryBtn', 'text-white'));
+                button.classList.add('bg-primaryBtn', 'text-white');
             });
         });
         lucide.createIcons();
