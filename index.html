@@ -47,29 +47,34 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8">
         <section id="tab-conferencia" class="page-section">
-            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
-                <form class="space-y-4">
+            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
+                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-1">Nova Conferência ICQA</h2>
+                <p class="text-sm text-gray-600 dark:text-darkText/70 mb-8">Insira os dados coletados diretamente no endereço</p>
+                
+                <form class="space-y-6">
                     <div>
-                        <label class="block text-sm text-black dark:text-darkText mb-1">MZ</label>
-                        <input type="text" placeholder="Ex: MZ-04" class="w-full p-2 bg-transparent border border-borderGray rounded text-black dark:text-white outline-none">
+                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">MZ</label>
+                        <input type="text" placeholder="Ex: MZ-04" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none focus:border-primaryBtn">
                     </div>
                     <div>
-                        <label class="block text-sm text-black dark:text-darkText mb-1">MELI</label>
-                        <input type="text" placeholder="Ex: MELI-12345" class="w-full p-2 bg-transparent border border-borderGray rounded text-black dark:text-white outline-none">
+                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">MELI</label>
+                        <input type="text" placeholder="Ex: MELI-12345" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none focus:border-primaryBtn">
                     </div>
                     <div>
-                        <label class="block text-sm text-black dark:text-darkText mb-1">QUANTIDADE</label>
-                        <input type="number" placeholder="Ex: 15" class="w-full p-2 bg-transparent border border-borderGray rounded text-black dark:text-white outline-none">
+                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">QUANTIDADE</label>
+                        <input type="number" placeholder="Ex: 15" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none focus:border-primaryBtn">
                     </div>
-                    <div>
-                        <label class="block text-sm text-black dark:text-darkText mb-2">Físico está de acordo com o sistêmico?</label>
-                        <div class="flex space-x-4 text-black dark:text-darkText">
-                            <label><input type="radio" name="acordo" checked> Sim</label>
-                            <label><input type="radio" name="acordo"> Não</label>
+                    <div class="bg-gray-100 dark:bg-black/20 p-4 rounded-lg border border-borderGray/20">
+                        <label class="block text-sm font-bold text-black dark:text-darkText mb-3">Físico está de acordo com o sistêmico?</label>
+                        <div class="flex space-x-6 text-black dark:text-darkText">
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="acordo" checked class="w-4 h-4"> <span>Sim</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="acordo" class="w-4 h-4"> <span>Não</span></label>
                         </div>
                     </div>
-                    <button type="button" class="w-full bg-primaryBtn text-white py-3 rounded-lg font-bold mt-4">Salvar e Enviar Task</button>
+                    <button type="button" class="w-full bg-primaryBtn text-white py-4 rounded-lg font-bold text-lg shadow-lg hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                        <span>Salvar e Enviar Task</span>
+                    </button>
                 </form>
             </div>
         </section>
@@ -77,14 +82,12 @@
         <section id="tab-auditoria" class="page-section hidden">
             <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-black dark:text-darkText">
                 <h2 class="text-xl font-bold mb-4">Auditoria</h2>
-                <p>Lista de casos para auditar...</p>
             </div>
         </section>
 
         <section id="tab-dashboard" class="page-section hidden">
             <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-black dark:text-darkText">
                 <h2 class="text-xl font-bold mb-4">Dashboard</h2>
-                <p>Monitoramento geral das tasks...</p>
             </div>
         </section>
     </main>
