@@ -5,123 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal ICQA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#090F15',
-                        darkCard: '#444E54',
-                        darkText: '#B3B7BA',
-                        lightBg: '#D3D1CE',
-                        lightCard: '#FFFFFF',
-                        primaryBtn: '#002147',
-                        borderGray: '#6C6D74'
-                    }
-                }
-            }
         }
     </script>
 </head>
-<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300">
+<body class="bg-gray-200 dark:bg-gray-900 min-h-screen transition-colors duration-300">
 
-    <header class="bg-lightBg dark:bg-darkBg border-b border-borderGray/30 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-            <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
-            <nav class="flex items-center space-x-4">
-                <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
-                    <button data-tab="conferencia" class="nav-btn px-4 py-2 rounded-md text-sm font-bold bg-primaryBtn text-white shadow">Conferência</button>
-                    <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText hover:bg-gray-400 dark:hover:bg-gray-700">Auditoria</button>
-                    <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText hover:bg-gray-400 dark:hover:bg-gray-700">Dashboard</button>
-                </div>
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-300 dark:bg-darkCard text-black dark:text-white">
-                    <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
-                    <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
-                </button>
-            </nav>
-        </div>
+    <header class="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold dark:text-white">Portal ICQA</h1>
+        <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 bg-gray-300 dark:bg-gray-700 rounded text-sm font-bold dark:text-white">
+            🌓 Mudar Tema
+        </button>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <section id="tab-conferencia" class="page-section">
-            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-1">Nova Conferência ICQA</h2>
-                <p class="text-sm text-gray-600 dark:text-darkText/70 mb-8">Insira os dados coletados diretamente no endereço</p>
-                
-                <form class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">MZ</label>
-                        <input type="text" placeholder="Ex: MZ-04" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">MELI</label>
-                        <input type="text" placeholder="Ex: MELI-12345" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-black dark:text-darkText mb-2">QUANTIDADE</label>
-                        <input type="number" placeholder="Ex: 15" class="w-full p-3 bg-transparent border border-borderGray rounded-lg text-black dark:text-white outline-none">
-                    </div>
-                    
-                    <!-- Pergunta principal -->
-                    <div class="bg-gray-100 dark:bg-black/20 p-4 rounded-lg border border-borderGray/20">
-                        <label class="block text-sm font-bold text-black dark:text-darkText mb-3">Físico está de acordo com o sistêmico?</label>
-                        <div class="flex space-x-6 text-black dark:text-darkText">
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="radio" name="acordo" value="sim" checked onchange="toggleFound(false)" class="w-4 h-4"> <span>Sim</span>
-                            </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="radio" name="acordo" value="nao" onchange="toggleFound(true)" class="w-4 h-4"> <span>Não</span>
-                            </label>
-                        </div>
-                    </div>
+    <main class="p-8">
+        <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-1 dark:text-white">Nova Conferência ICQA</h2>
+            <p class="text-gray-500 mb-6 dark:text-gray-400">Insira os dados coletados diretamente no endereço</p>
 
-                    <!-- Pergunta oculta (Found) -->
-                    <div id="found-section" class="hidden border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 p-4 rounded-r-lg">
-                        <label class="block text-sm font-bold text-black dark:text-darkText mb-3">Foi realizado Found?</label>
-                        <div class="flex space-x-6 text-black dark:text-darkText">
-                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="found" class="w-4 h-4"> <span>Sim</span></label>
-                            <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="found" checked class="w-4 h-4"> <span>Não</span></label>
-                        </div>
-                    </div>
+            <form class="space-y-4">
+                <input type="text" placeholder="MZ" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="text" placeholder="MELI" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="number" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
 
-                    <button type="button" class="w-full bg-primaryBtn text-white py-4 rounded-lg font-bold text-lg shadow-lg hover:opacity-90">
-                        Salvar e Enviar Task
-                    </button>
-                </form>
-            </div>
-        </section>
+                <div class="p-4 border rounded dark:border-gray-600">
+                    <p class="mb-2 dark:text-white">Físico está de acordo com o sistêmico?</p>
+                    <input type="radio" name="acordo" value="sim" onchange="document.getElementById('found-box').classList.add('hidden')"> Sim
+                    <input type="radio" name="acordo" value="nao" onchange="document.getElementById('found-box').classList.remove('hidden')"> Não
+                </div>
+
+                <div id="found-box" class="hidden p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 rounded">
+                    <p class="mb-2 dark:text-white">Foi realizado Found?</p>
+                    <input type="radio" name="found" value="sim"> Sim
+                    <input type="radio" name="found" value="nao"> Não
+                </div>
+
+                <button type="button" class="w-full bg-blue-900 text-white p-3 rounded font-bold">Salvar e Enviar Task</button>
+            </form>
+        </div>
     </main>
-
-       <script>
-        // Lógica para mostrar/esconder o Found
-        function toggleFound(mostrar) {
-            const section = document.getElementById('found-section');
-            if (mostrar) {
-                section.classList.remove('hidden');
-            } else {
-                section.classList.add('hidden');
-            }
-        }
-
-        // Lógica de Tema e Navegação
-        const toggleBtn = document.getElementById('theme-toggle');
-        toggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-        });
-
-        document.querySelectorAll('.nav-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(`tab-${button.getAttribute('data-tab')}`).classList.remove('hidden');
-                
-                // Ajuste de cor ativa
-                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-primaryBtn', 'text-white'));
-                button.classList.add('bg-primaryBtn', 'text-white');
-            });
-        });
-        lucide.createIcons();
-    </script>
 </body>
 </html>
