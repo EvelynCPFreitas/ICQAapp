@@ -103,8 +103,8 @@
             <label class="block font-bold text-sm mb-2">Team Leader (Gestor)</label>
             <input type="text" placeholder="Nome do gestor (opcional)" class="w-full p-2 border mb-6 rounded dark:bg-black/20">
             <div class="flex gap-2">
-                <button class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Conforme</button>
-                <button class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Necessita Correção</button>
+                <button onclick="navegarParaDashboard()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Conforme</button>
+                <button onclick="navegarParaDashboard()" class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Necessita Correção</button>
             </div>
             <button onclick="document.getElementById('modal-auditoria').classList.add('hidden')" class="w-full mt-3 text-sm text-gray-500">Fechar</button>
         </div>
@@ -150,6 +150,17 @@
         };
     </script>
     <script>
+        // Nova função para navegação
+        window.navegarParaDashboard = () => {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('tab-dashboard').classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-primaryBtn', 'text-white');
+                if(btn.getAttribute('data-tab') === 'dashboard') btn.classList.add('bg-primaryBtn', 'text-white');
+            });
+            document.getElementById('modal-auditoria').classList.add('hidden');
+        };
+
         function toggleFound(mostrar) { document.getElementById('found-section').classList.toggle('hidden', !mostrar); }
         document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
         document.querySelectorAll('.nav-btn').forEach(button => {
