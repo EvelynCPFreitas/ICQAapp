@@ -2,146 +2,164 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Portal ICQA - Sistema Integrado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal ICQA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 
+            darkBg: '#090F15', darkCard: '#444E54', darkText: '#B3B7BA', 
+            lightBg: '#D3D1CE', lightCard: '#FFFFFF', primaryBtn: '#002147', borderGray: '#6C6D74' 
+        }}}}
+    </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300">
 
-    <nav class="bg-blue-900 p-4 text-white flex justify-between">
-        <h1 class="font-bold text-xl">Meli ICQA Portal</h1>
-        <div class="space-x-4">
-            <button onclick="mudarAba('conferencia')" class="hover:underline">Conferência</button>
-            <button onclick="mudarAba('auditoria')" class="hover:underline">Auditoria</button>
-            <button onclick="mudarAba('dashboard')" class="hover:underline font-bold bg-blue-700 px-3 py-1 rounded">Dashboard</button>
+    <header class="bg-lightBg dark:bg-darkBg border-b border-borderGray/30 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
+            <nav class="flex items-center space-x-4">
+                <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
+                    <button data-tab="conferencia" class="nav-btn px-4 py-2 rounded-md text-sm font-bold bg-primaryBtn text-white shadow">Conferência</button>
+                    <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Auditoria</button>
+                    <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Dashboard</button>
+                </div>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <main class="p-6">
-        <section id="conferencia" class="max-w-md mx-auto bg-white p-6 rounded shadow">
-            <h2 class="text-xl font-bold mb-4">Nova Conferência</h2>
-            <form id="form-conferencia" class="space-y-3">
-                <input type="text" id="mz" placeholder="MZ" class="w-full border p-2">
-                <input type="text" id="meli" placeholder="Meli" class="w-full border p-2">
-                <input type="number" id="qtd" placeholder="Quantidade" class="w-full border p-2">
-                
-                <div>
-                    <label>Físico de acordo com sistêmico?</label>
-                    <select id="fisico_ok" class="w-full border p-2" onchange="toggleFound()">
-                        <option value="Sim">Sim</option>
-                        <option value="Não">Não</option>
-                    </select>
-                </div>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <section id="tab-conferencia" class="page-section">
+            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
+                <h2 class="text-2xl font-bold mb-6">Nova Conferência ICQA</h2>
+                <form id="form-conf" class="space-y-4">
+                    <input type="text" id="mz" placeholder="MZ" class="w-full p-2 border rounded dark:bg-black/20">
+                    <input type="text" id="meli" placeholder="MELI" class="w-full p-2 border rounded dark:bg-black/20">
+                    <input type="number" id="qtd" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-black/20">
+                    
+                    <div class="bg-gray-100 dark:bg-black/20 p-3 rounded border">
+                        <label>Físico de acordo com o sistêmico?</label>
+                        <select id="fisico_ok" onchange="toggleFound(this.value === 'Não')" class="w-full p-2 mt-1 rounded dark:bg-black/20">
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
 
-                <div id="div-found" class="hidden">
-                    <label>Foi realizado Found?</label>
-                    <select id="realizou_found" class="w-full border p-2" onchange="toggleData()">
-                        <option value="Não">Não</option>
-                        <option value="Sim">Sim</option>
-                    </select>
-                </div>
-
-                <div id="div-data" class="hidden">
-                    <input type="datetime-local" id="data_found" class="w-full border p-2">
-                </div>
-
-                <button type="button" onclick="salvarConferencia()" class="w-full bg-green-600 text-white p-2 rounded">Enviar</button>
-            </form>
+                    <div id="found-section" class="hidden p-3 border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 rounded">
+                        <label>Foi realizado Found?</label>
+                        <select id="realizou_found" onchange="document.getElementById('data-found-div').classList.toggle('hidden', this.value === 'Não')" class="w-full p-2 mt-1 rounded dark:bg-black/20">
+                            <option value="Não">Não</option>
+                            <option value="Sim">Sim</option>
+                        </select>
+                        <div id="data-found-div" class="hidden mt-2">
+                            <label>Data e Hora:</label>
+                            <input type="datetime-local" id="data_found" class="w-full p-2 border rounded dark:bg-black/20">
+                        </div>
+                    </div>
+                    <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-3 rounded font-bold">Salvar e Enviar Task</button>
+                </form>
+            </div>
         </section>
 
-        <section id="auditoria" class="hidden">
-            <div id="lista-auditoria" class="grid gap-4"></div>
+        <section id="tab-auditoria" class="page-section hidden">
+            <div class="max-w-5xl mx-auto">
+                <h2 class="text-xl font-bold mb-4">Casos para Auditar</h2>
+                <div id="lista-auditoria" class="grid gap-3"></div>
+            </div>
         </section>
 
-        <section id="dashboard" class="hidden">
-            <div class="grid grid-cols-4 gap-4 mb-6" id="dashboard-stats"></div>
-            <table class="w-full bg-white shadow rounded">
-                <thead class="bg-gray-200">
-                    <tr><th>MZ</th><th>Meli</th><th>Qtd</th><th>Status Físico</th><th>Found?</th><th>Resultado</th></tr>
-                </thead>
-                <tbody id="tabela-monitoramento"></tbody>
-            </table>
+        <section id="tab-dashboard" class="page-section hidden">
+            <div class="grid grid-cols-4 gap-4 mb-8 text-center" id="cards-stats"></div>
+            <div class="bg-white dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30">
+                <h2 class="font-bold mb-4">Monitoramento Geral de Tasks</h2>
+                <table class="w-full text-left">
+                    <thead><tr class="border-b text-xs uppercase"><th>MZ</th><th>Meli</th><th>Qtd</th><th>Status Físico</th><th>Found?</th><th>Resultado Auditoria</th></tr></thead>
+                    <tbody id="tabela-body"></tbody>
+                </table>
+            </div>
         </section>
     </main>
 
-    <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded w-96">
-            <h2 class="font-bold mb-4">Auditoria da Tratativa</h2>
-            <div id="modal-content"></div>
-            <div class="flex gap-2 mt-4">
-                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 text-white p-2">Conforme</button>
-                <button onclick="finalizarAuditoria('Necessita Correção')" class="flex-1 bg-red-600 text-white p-2">Necessita Correção</button>
+    <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-md w-full">
+            <h2 class="text-xl font-bold mb-4">Auditoria da Tratativa</h2>
+            <div id="modal-content" class="mb-4"></div>
+            <div class="flex gap-2">
+                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 text-white py-2 rounded">Conforme</button>
+                <button onclick="finalizarAuditoria('Necessita de Correção')" class="flex-1 bg-red-600 text-white py-2 rounded">Necessita Correção</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
-        // CONFIGURAÇÃO FIREBASE (Use suas credenciais)
-        const db = getFirestore(initializeApp({ /* SEU CONFIG AQUI */ }));
+        let currentId = null;
 
-        // Funções de UI
-        window.mudarAba = (id) => {
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
+        onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
+            const lista = document.getElementById('lista-auditoria');
+            const tabela = document.getElementById('tabela-body');
+            lista.innerHTML = ""; tabela.innerHTML = "";
+            let stats = { total: 0, ok: 0, div: 0, foundSim: 0, foundNao: 0, conf: 0, naoConf: 0 };
 
-        window.toggleFound = () => {
-            document.getElementById('div-found').classList.toggle('hidden', document.getElementById('fisico_ok').value === 'Sim');
-        };
+            snapshot.forEach((docRef) => {
+                const d = docRef.data();
+                stats.total++;
+                if(d.fisico_ok === 'Sim') stats.ok++; else stats.div++;
+                if(d.realizou_found === 'Sim') stats.foundSim++; else stats.foundNao++;
+                if(d.auditoria === 'Conforme') stats.conf++;
+                if(d.auditoria === 'Necessita de Correção') stats.naoConf++;
 
-        window.toggleData = () => {
-            document.getElementById('div-data').classList.toggle('hidden', document.getElementById('realizou_found').value === 'Não');
-        };
+                // Render lista auditoria
+                const div = document.createElement('div');
+                div.className = "bg-white dark:bg-darkCard p-4 rounded border cursor-pointer";
+                div.innerHTML = `<p><b>MELI:</b> ${d.meli}</p><p><b>MZ:</b> ${d.mz}</p>`;
+                div.onclick = () => { currentId = docRef.id; document.getElementById('modal-content').innerHTML = `Meli: ${d.meli} | MZ: ${d.mz}`; document.getElementById('modal-auditoria').classList.remove('hidden'); };
+                lista.appendChild(div);
 
-        // Salvar Conferência
-        window.salvarConferencia = async () => {
-            const data = {
-                mz: document.getElementById('mz').value,
-                meli: document.getElementById('meli').value,
-                qtd: document.getElementById('qtd').value,
+                // Render tabela
+                tabela.innerHTML += `<tr><td>${d.mz}</td><td>${d.meli}</td><td>${d.qtd}</td><td>${d.fisico_ok === 'Sim' ? 'OK' : 'Divergência'}</td><td>${d.realizou_found === 'Sim' ? 'Sim ('+d.data_found+')' : 'Não'}</td><td>${d.auditoria || 'Aguardando...'}</td></tr>`;
+            });
+
+            document.getElementById('cards-stats').innerHTML = `
+                <div class="bg-white p-4 rounded shadow">Vol. Total: ${stats.total}</div>
+                <div class="bg-white p-4 rounded shadow">OK: ${stats.ok} / Div: ${stats.div}</div>
+                <div class="bg-white p-4 rounded shadow">Found Realizado: ${stats.foundSim}</div>
+                <div class="bg-white p-4 rounded shadow">Conforme: ${stats.conf} / Não Conf: ${stats.naoConf}</div>
+            `;
+        });
+
+        window.salvarTarefa = async () => {
+            await addDoc(collection(db, "tarefas"), { 
+                mz: document.getElementById('mz').value, 
+                meli: document.getElementById('meli').value, 
+                qtd: document.getElementById('qtd').value, 
                 fisico_ok: document.getElementById('fisico_ok').value,
                 realizou_found: document.getElementById('realizou_found').value,
                 data_found: document.getElementById('data_found').value,
-                auditoria: 'Aguardando',
-                criadoEm: new Date()
-            };
-            await addDoc(collection(db, "tasks"), data);
-            alert("Conferência registrada!");
-        };
-
-        // Escuta de dados e atualização do Dashboard
-        onSnapshot(collection(db, "tasks"), (snapshot) => {
-            const tasks = [];
-            snapshot.forEach(d => tasks.push({id: d.id, ...d.data()}));
-            
-            // Lógica do Dashboard
-            atualizarDashboard(tasks);
-        });
-
-        function atualizarDashboard(tasks) {
-            const tbody = document.getElementById('tabela-monitoramento');
-            tbody.innerHTML = '';
-            
-            tasks.forEach(t => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${t.mz}</td><td>${t.meli}</td><td>${t.qtd}</td>
-                    <td>${t.fisico_ok === 'Sim' ? 'OK' : 'Divergência'}</td>
-                    <td>${t.realizou_found === 'Sim' ? 'Sim (' + t.data_found + ')' : 'Não'}</td>
-                    <td>${t.auditoria}</td>
-                `;
-                tbody.appendChild(tr);
+                auditoria: 'Aguardando...',
+                criadoEm: new Date() 
             });
-        }
+            alert("Enviado!");
+        };
 
         window.finalizarAuditoria = async (resultado) => {
-            const id = window.currentTaskId;
-            await updateDoc(doc(db, "tasks", id), { auditoria: resultado });
+            await updateDoc(doc(db, "tarefas", currentId), { auditoria: resultado });
             document.getElementById('modal-auditoria').classList.add('hidden');
-            mudarAba('dashboard');
+            // Mudar aba para Dashboard
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('tab-dashboard').classList.remove('hidden');
         };
+
+        window.toggleFound = (show) => document.getElementById('found-section').classList.toggle('hidden', !show);
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`tab-${e.target.getAttribute('data-tab')}`).classList.remove('hidden');
+        }));
     </script>
 </body>
 </html>
