@@ -35,15 +35,32 @@
     <main class="max-w-7xl mx-auto px-4 py-8">
         <section id="tab-conferencia" class="page-section">
             <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-1">Nova Conferência ICQA</h2>
-                <form class="space-y-3">
+                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
+                <form class="space-y-4">
                     <div><label class="block text-xs font-bold text-black dark:text-darkText">MZ</label>
-                    <input type="text" id="mz" class="w-full p-2 bg-transparent border border-borderGray rounded-md dark:text-white"></div>
+                    <input type="text" id="mz" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
                     <div><label class="block text-xs font-bold text-black dark:text-darkText">MELI</label>
-                    <input type="text" id="meli" class="w-full p-2 bg-transparent border border-borderGray rounded-md dark:text-white"></div>
+                    <input type="text" id="meli" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
                     <div><label class="block text-xs font-bold text-black dark:text-darkText">QUANTIDADE</label>
-                    <input type="number" id="qtd" class="w-full p-2 bg-transparent border border-borderGray rounded-md dark:text-white"></div>
-                    <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-2.5 rounded-md font-bold text-sm">Salvar e Enviar Task</button>
+                    <input type="number" id="qtd" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
+                    
+                    <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-md border">
+                        <label class="block text-xs font-bold text-black dark:text-darkText mb-1">Físico está de acordo com o sistêmico?</label>
+                        <div class="flex space-x-6 text-sm dark:text-darkText">
+                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="sim" checked onchange="toggleFound(false)"> <span>Sim</span></label>
+                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="nao" onchange="toggleFound(true)"> <span>Não</span></label>
+                        </div>
+                    </div>
+
+                    <div id="found-section" class="hidden p-3 border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 rounded-md">
+                        <label class="block text-xs font-bold text-black dark:text-darkText mb-1">Foi realizado Found?</label>
+                        <div class="flex space-x-6 text-sm dark:text-darkText">
+                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="sim"> <span>Sim</span></label>
+                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="nao" checked> <span>Não</span></label>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-3 rounded-md font-bold">Salvar e Enviar Task</button>
                 </form>
             </div>
         </section>
@@ -81,10 +98,10 @@
                 <label class="block"><input type="checkbox" value="packing"> Erro de packing</label>
                 <label class="block"><input type="checkbox" value="inconclusivo"> Inconclusivo</label>
                 <label class="block"><input type="checkbox" value="outros" onchange="document.getElementById('campo-outros').classList.toggle('hidden')"> Outros</label>
-                <input type="text" id="campo-outros" placeholder="Especifique aqui..." class="hidden w-full p-2 border mt-1 dark:bg-black/20 dark:border-borderGray">
+                <input type="text" id="campo-outros" placeholder="Especifique aqui..." class="hidden w-full p-2 border mt-1 dark:bg-black/20">
             </div>
             <label class="block font-bold text-sm mb-2">Team Leader (Gestor)</label>
-            <input type="text" placeholder="Nome do gestor (opcional)" class="w-full p-2 border mb-6 rounded dark:bg-black/20 dark:border-borderGray">
+            <input type="text" placeholder="Nome do gestor (opcional)" class="w-full p-2 border mb-6 rounded dark:bg-black/20">
             <div class="flex gap-2">
                 <button class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Conforme</button>
                 <button class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Necessita Correção</button>
@@ -96,16 +113,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
+        
+        const db = getFirestore(initializeApp({
             apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY",
             authDomain: "portalicqa.firebaseapp.com",
             projectId: "portalicqa",
             storageBucket: "portalicqa.firebasestorage.app",
             messagingSenderId: "894316718460",
             appId: "1:894316718460:web:d07e8bc5646e982fe19cf9"
-        };
-        const db = getFirestore(initializeApp(firebaseConfig));
+        }));
 
         onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
             const lista = document.getElementById('lista-auditoria');
@@ -113,8 +129,8 @@
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const div = document.createElement('div');
-                div.className = "cursor-pointer bg-white dark:bg-darkCard p-4 rounded-lg border border-borderGray/30 shadow-sm flex justify-between items-center hover:border-blue-500";
-                div.innerHTML = `<div><p class="font-bold text-black dark:text-white">MELI: ${data.meli}</p><p class="text-sm dark:text-darkText">MZ: ${data.mz}</p></div><span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pendente</span>`;
+                div.className = "cursor-pointer bg-white dark:bg-darkCard p-4 rounded-lg border border-borderGray/30 flex justify-between items-center hover:border-blue-500";
+                div.innerHTML = `<div><p class="font-bold dark:text-white">MELI: ${data.meli}</p><p class="text-sm dark:text-darkText">MZ: ${data.mz}</p></div>`;
                 div.onclick = () => {
                     document.getElementById('modal-meli').innerText = data.meli;
                     document.getElementById('modal-mz').innerText = data.mz;
@@ -130,10 +146,11 @@
             const qtd = document.getElementById('qtd').value;
             if(!mz || !meli || !qtd) return alert("Preencha tudo!");
             await addDoc(collection(db, "tarefas"), { mz, meli, qtd, criadoEm: new Date() });
-            alert("Task enviada!");
+            alert("Enviado!");
         };
     </script>
     <script>
+        function toggleFound(mostrar) { document.getElementById('found-section').classList.toggle('hidden', !mostrar); }
         document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
         document.querySelectorAll('.nav-btn').forEach(button => {
             button.addEventListener('click', () => {
