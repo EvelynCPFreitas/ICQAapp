@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal ICQA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Configuração de temas via Tailwind
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090F15',
+                        darkCard: '#444E54',
+                        darkText: '#B3B7BA',
+                        lightBg: '#D3D1CE',
+                        lightCard: '#FFFFFF',
+                        primaryBtn: '#002147',
+                        borderGray: '#6C6D74'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300">
+
+    <!-- CABEÇALHO -->
+    <header class="bg-lightBg dark:bg-darkBg border-b border-borderGray/30 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
+            
+            <nav class="flex items-center space-x-4">
+                <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
+                    <button data-tab="conferencia" class="nav-btn px-4 py-2 rounded-md text-sm font-bold bg-primaryBtn text-white shadow">Conferência</button>
+                    <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText hover:bg-gray-400 dark:hover:bg-gray-700">Auditoria</button>
+                    <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText hover:bg-gray-400 dark:hover:bg-gray-700">Dashboard</button>
+                </div>
+                <!-- Botão de Tema -->
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-300 dark:bg-darkCard text-black dark:text-white">
+                    <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
+                    <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- SEÇÕES -->
+        <section id="tab-conferencia" class="page-section">
+            <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30">
+                <h2 class="text-xl font-bold text-black dark:text-darkText mb-4">Nova Conferência ICQA</h2>
+                <button class="bg-primaryBtn text-white px-6 py-3 rounded-lg font-bold">Salvar e Enviar Task</button>
+            </div>
+        </section>
+
+        <section id="tab-auditoria" class="page-section hidden">
+            <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-black dark:text-darkText">
+                <h2 class="text-xl font-bold mb-4">Auditoria</h2>
+            </div>
+        </section>
+
+        <section id="tab-dashboard" class="page-section hidden">
+            <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-black dark:text-darkText">
+                <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Lógica de Tema
+        const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Lógica de Navegação
+        document.addEventListener('DOMContentLoaded', () => {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const sections = document.querySelectorAll('.page-section');
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    sections.forEach(s => s.classList.add('hidden'));
+                    document.getElementById(`tab-${button.getAttribute('data-tab')}`).classList.remove('hidden');
+
+                    navButtons.forEach(btn => {
+                        btn.classList.remove('bg-primaryBtn', 'text-white');
+                        btn.classList.add('text-black', 'dark:text-darkText');
+                    });
+                    button.classList.add('bg-primaryBtn', 'text-white');
+                    button.classList.remove('text-black', 'dark:text-darkText');
+                });
+            });
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
