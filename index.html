@@ -2,176 +2,146 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal ICQA</title>
+    <title>Portal ICQA - Sistema Integrado</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 
-            darkBg: '#090F15', darkCard: '#444E54', darkText: '#B3B7BA', 
-            lightBg: '#D3D1CE', lightCard: '#FFFFFF', primaryBtn: '#002147', borderGray: '#6C6D74' 
-        }}}}
-    </script>
 </head>
-<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300">
+<body class="bg-gray-100">
 
-    <header class="bg-lightBg dark:bg-darkBg border-b border-borderGray/30 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-            <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
-            <nav class="flex items-center space-x-4">
-                <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
-                    <button data-tab="conferencia" class="nav-btn px-4 py-2 rounded-md text-sm font-bold bg-primaryBtn text-white shadow">Conferência</button>
-                    <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Auditoria</button>
-                    <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Dashboard</button>
-                </div>
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-300 dark:bg-darkCard text-black dark:text-white">
-                    <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
-                    <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
-                </button>
-            </nav>
+    <nav class="bg-blue-900 p-4 text-white flex justify-between">
+        <h1 class="font-bold text-xl">Meli ICQA Portal</h1>
+        <div class="space-x-4">
+            <button onclick="mudarAba('conferencia')" class="hover:underline">Conferência</button>
+            <button onclick="mudarAba('auditoria')" class="hover:underline">Auditoria</button>
+            <button onclick="mudarAba('dashboard')" class="hover:underline font-bold bg-blue-700 px-3 py-1 rounded">Dashboard</button>
         </div>
-    </header>
+    </nav>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <section id="tab-conferencia" class="page-section">
-            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
-                <form class="space-y-4">
-                    <div><label class="block text-xs font-bold text-black dark:text-darkText">MZ</label>
-                    <input type="text" id="mz" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
-                    <div><label class="block text-xs font-bold text-black dark:text-darkText">MELI</label>
-                    <input type="text" id="meli" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
-                    <div><label class="block text-xs font-bold text-black dark:text-darkText">QUANTIDADE</label>
-                    <input type="number" id="qtd" class="w-full p-2 border rounded-md dark:bg-black/20 dark:text-white"></div>
-                    
-                    <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-md border">
-                        <label class="block text-xs font-bold text-black dark:text-darkText mb-1">Físico está de acordo com o sistêmico?</label>
-                        <div class="flex space-x-6 text-sm dark:text-darkText">
-                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="sim" checked onchange="toggleFound(false)"> <span>Sim</span></label>
-                            <label class="flex items-center space-x-1"><input type="radio" name="acordo" value="nao" onchange="toggleFound(true)"> <span>Não</span></label>
-                        </div>
-                    </div>
+    <main class="p-6">
+        <section id="conferencia" class="max-w-md mx-auto bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Nova Conferência</h2>
+            <form id="form-conferencia" class="space-y-3">
+                <input type="text" id="mz" placeholder="MZ" class="w-full border p-2">
+                <input type="text" id="meli" placeholder="Meli" class="w-full border p-2">
+                <input type="number" id="qtd" placeholder="Quantidade" class="w-full border p-2">
+                
+                <div>
+                    <label>Físico de acordo com sistêmico?</label>
+                    <select id="fisico_ok" class="w-full border p-2" onchange="toggleFound()">
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
 
-                    <div id="found-section" class="hidden p-3 border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 rounded-md">
-                        <label class="block text-xs font-bold text-black dark:text-darkText mb-1">Foi realizado Found?</label>
-                        <div class="flex space-x-6 text-sm dark:text-darkText">
-                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="sim"> <span>Sim</span></label>
-                            <label class="flex items-center space-x-1"><input type="radio" name="found" value="nao" checked> <span>Não</span></label>
-                        </div>
-                    </div>
+                <div id="div-found" class="hidden">
+                    <label>Foi realizado Found?</label>
+                    <select id="realizou_found" class="w-full border p-2" onchange="toggleData()">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                </div>
 
-                    <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-3 rounded-md font-bold">Salvar e Enviar Task</button>
-                </form>
-            </div>
+                <div id="div-data" class="hidden">
+                    <input type="datetime-local" id="data_found" class="w-full border p-2">
+                </div>
+
+                <button type="button" onclick="salvarConferencia()" class="w-full bg-green-600 text-white p-2 rounded">Enviar</button>
+            </form>
         </section>
 
-        <section id="tab-auditoria" class="page-section hidden">
-            <div class="max-w-4xl mx-auto p-4">
-                <h2 class="text-xl font-bold dark:text-darkText mb-4">Casos para Auditar</h2>
-                <div id="lista-auditoria" class="grid gap-3"></div>
-            </div>
+        <section id="auditoria" class="hidden">
+            <div id="lista-auditoria" class="grid gap-4"></div>
         </section>
 
-        <section id="tab-dashboard" class="page-section hidden">
-            <div class="max-w-4xl mx-auto text-center dark:text-darkText">
-                <h2 class="text-xl font-bold">Dashboard de Performance</h2>
-            </div>
+        <section id="dashboard" class="hidden">
+            <div class="grid grid-cols-4 gap-4 mb-6" id="dashboard-stats"></div>
+            <table class="w-full bg-white shadow rounded">
+                <thead class="bg-gray-200">
+                    <tr><th>MZ</th><th>Meli</th><th>Qtd</th><th>Status Físico</th><th>Found?</th><th>Resultado</th></tr>
+                </thead>
+                <tbody id="tabela-monitoramento"></tbody>
+            </table>
         </section>
     </main>
 
-    <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-lg w-full shadow-2xl dark:text-white">
-            <h2 class="text-xl font-bold">Auditoria da Tratativa</h2>
-            <p class="text-sm text-gray-500 mb-4">Validação final do processo de investigação pelo ICQA</p>
-            <div class="flex gap-4 mb-4 bg-gray-100 dark:bg-black/20 p-3 rounded-md">
-                <p><strong>Meli:</strong> <span id="modal-meli"></span></p>
-                <p><strong>MZ:</strong> <span id="modal-mz"></span></p>
+    <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded w-96">
+            <h2 class="font-bold mb-4">Auditoria da Tratativa</h2>
+            <div id="modal-content"></div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 text-white p-2">Conforme</button>
+                <button onclick="finalizarAuditoria('Necessita Correção')" class="flex-1 bg-red-600 text-white p-2">Necessita Correção</button>
             </div>
-            <label class="block font-bold text-sm mb-2">Packing realizou a investigação conforme fluxo?</label>
-            <div class="flex gap-4 mb-4">
-                <label><input type="radio" name="investigacao" value="sim"> Sim</label>
-                <label><input type="radio" name="investigacao" value="nao"> Não</label>
-            </div>
-            <label class="block font-bold text-sm mb-2">Preenchido como:</label>
-            <div class="space-y-1 mb-4">
-                <label class="block"><input type="checkbox" value="picking"> Erro de picking</label>
-                <label class="block"><input type="checkbox" value="packing"> Erro de packing</label>
-                <label class="block"><input type="checkbox" value="inconclusivo"> Inconclusivo</label>
-                <label class="block"><input type="checkbox" value="outros" onchange="document.getElementById('campo-outros').classList.toggle('hidden')"> Outros</label>
-                <input type="text" id="campo-outros" placeholder="Especifique aqui..." class="hidden w-full p-2 border mt-1 dark:bg-black/20">
-            </div>
-            <label class="block font-bold text-sm mb-2">Team Leader (Gestor)</label>
-            <input type="text" placeholder="Nome do gestor (opcional)" class="w-full p-2 border mb-6 rounded dark:bg-black/20">
-            <div class="flex gap-2">
-                <button onclick="navegarParaDashboard()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Conforme</button>
-                <button onclick="navegarParaDashboard()" class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Necessita Correção</button>
-            </div>
-            <button onclick="document.getElementById('modal-auditoria').classList.add('hidden')" class="w-full mt-3 text-sm text-gray-500">Fechar</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
-        const db = getFirestore(initializeApp({
-            apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY",
-            authDomain: "portalicqa.firebaseapp.com",
-            projectId: "portalicqa",
-            storageBucket: "portalicqa.firebasestorage.app",
-            messagingSenderId: "894316718460",
-            appId: "1:894316718460:web:d07e8bc5646e982fe19cf9"
-        }));
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
-            const lista = document.getElementById('lista-auditoria');
-            lista.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = "cursor-pointer bg-white dark:bg-darkCard p-4 rounded-lg border border-borderGray/30 flex justify-between items-center hover:border-blue-500";
-                div.innerHTML = `<div><p class="font-bold dark:text-white">MELI: ${data.meli}</p><p class="text-sm dark:text-darkText">MZ: ${data.mz}</p></div>`;
-                div.onclick = () => {
-                    document.getElementById('modal-meli').innerText = data.meli;
-                    document.getElementById('modal-mz').innerText = data.mz;
-                    document.getElementById('modal-auditoria').classList.remove('hidden');
-                };
-                lista.appendChild(div);
-            });
+        // CONFIGURAÇÃO FIREBASE (Use suas credenciais)
+        const db = getFirestore(initializeApp({ /* SEU CONFIG AQUI */ }));
+
+        // Funções de UI
+        window.mudarAba = (id) => {
+            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        };
+
+        window.toggleFound = () => {
+            document.getElementById('div-found').classList.toggle('hidden', document.getElementById('fisico_ok').value === 'Sim');
+        };
+
+        window.toggleData = () => {
+            document.getElementById('div-data').classList.toggle('hidden', document.getElementById('realizou_found').value === 'Não');
+        };
+
+        // Salvar Conferência
+        window.salvarConferencia = async () => {
+            const data = {
+                mz: document.getElementById('mz').value,
+                meli: document.getElementById('meli').value,
+                qtd: document.getElementById('qtd').value,
+                fisico_ok: document.getElementById('fisico_ok').value,
+                realizou_found: document.getElementById('realizou_found').value,
+                data_found: document.getElementById('data_found').value,
+                auditoria: 'Aguardando',
+                criadoEm: new Date()
+            };
+            await addDoc(collection(db, "tasks"), data);
+            alert("Conferência registrada!");
+        };
+
+        // Escuta de dados e atualização do Dashboard
+        onSnapshot(collection(db, "tasks"), (snapshot) => {
+            const tasks = [];
+            snapshot.forEach(d => tasks.push({id: d.id, ...d.data()}));
+            
+            // Lógica do Dashboard
+            atualizarDashboard(tasks);
         });
 
-        window.salvarTarefa = async () => {
-            const mz = document.getElementById('mz').value;
-            const meli = document.getElementById('meli').value;
-            const qtd = document.getElementById('qtd').value;
-            if(!mz || !meli || !qtd) return alert("Preencha tudo!");
-            await addDoc(collection(db, "tarefas"), { mz, meli, qtd, criadoEm: new Date() });
-            alert("Enviado!");
-        };
-    </script>
-    <script>
-        // Nova função para navegação
-        window.navegarParaDashboard = () => {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('tab-dashboard').classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-primaryBtn', 'text-white');
-                if(btn.getAttribute('data-tab') === 'dashboard') btn.classList.add('bg-primaryBtn', 'text-white');
+        function atualizarDashboard(tasks) {
+            const tbody = document.getElementById('tabela-monitoramento');
+            tbody.innerHTML = '';
+            
+            tasks.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.mz}</td><td>${t.meli}</td><td>${t.qtd}</td>
+                    <td>${t.fisico_ok === 'Sim' ? 'OK' : 'Divergência'}</td>
+                    <td>${t.realizou_found === 'Sim' ? 'Sim (' + t.data_found + ')' : 'Não'}</td>
+                    <td>${t.auditoria}</td>
+                `;
+                tbody.appendChild(tr);
             });
+        }
+
+        window.finalizarAuditoria = async (resultado) => {
+            const id = window.currentTaskId;
+            await updateDoc(doc(db, "tasks", id), { auditoria: resultado });
             document.getElementById('modal-auditoria').classList.add('hidden');
+            mudarAba('dashboard');
         };
-
-        function toggleFound(mostrar) { document.getElementById('found-section').classList.toggle('hidden', !mostrar); }
-        document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
-        document.querySelectorAll('.nav-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(`tab-${button.getAttribute('data-tab')}`).classList.remove('hidden');
-                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-primaryBtn', 'text-white'));
-                button.classList.add('bg-primaryBtn', 'text-white');
-            });
-        });
-        lucide.createIcons();
     </script>
 </body>
 </html>
