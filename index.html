@@ -33,11 +33,10 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- ABA CONFERÊNCIA -->
         <section id="tab-conferencia" class="page-section">
             <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                 <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
-                <form class="space-y-4">
+                <form id="form-conferencia" class="space-y-4">
                     <input type="text" id="mz" placeholder="MZ" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
                     <input type="text" id="meli" placeholder="MELI" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
                     <input type="number" id="qtd" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
@@ -74,13 +73,11 @@
             </div>
         </section>
 
-        <!-- ABA AUDITORIA -->
         <section id="tab-auditoria" class="page-section hidden">
             <div class="max-w-5xl mx-auto"><h2 class="text-xl font-bold dark:text-darkText mb-4">Casos para Auditar</h2>
             <div id="lista-auditoria" class="grid gap-3"></div></div>
         </section>
 
-        <!-- ABA DASHBOARD -->
         <section id="tab-dashboard" class="page-section hidden">
             <div class="grid grid-cols-4 gap-4 mb-8 text-center" id="cards-stats"></div>
             <div class="bg-white dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30">
@@ -93,46 +90,85 @@
         </section>
     </main>
 
-    <!-- MODAL AUDITORIA (Corrigido conforme Captura de tela 2026-06-28 183917.png) -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl">
             <h2 class="text-xl font-bold mb-1">Auditoria da Tratativa</h2>
             <p class="text-sm text-gray-500 mb-4">Validação final do processo de investigação pelo ICQA</p>
-            
             <div id="modal-content" class="bg-gray-50 dark:bg-black/20 p-3 rounded mb-4 font-bold text-sm"></div>
-
             <div class="mb-4">
                 <label class="block font-bold mb-2">Packing realizou a investigação conforme fluxo?</label>
                 <div class="flex gap-4"><label><input type="radio" name="investigacao" value="Sim"> Sim</label><label><input type="radio" name="investigacao" value="Não"> Não</label></div>
             </div>
-
             <div class="mb-4">
                 <label class="block font-bold mb-2">Preenchido como:</label>
-                <div class="space-y-1">
+                <div class="space-y-1 text-sm">
                     <label class="flex items-center gap-2"><input type="checkbox" value="Erro de picking"> Erro de picking</label>
                     <label class="flex items-center gap-2"><input type="checkbox" value="Erro de packing"> Erro de packing</label>
                     <label class="flex items-center gap-2"><input type="checkbox" value="Inconclusivo"> Inconclusivo</label>
                     <label class="flex items-center gap-2"><input type="checkbox" value="Outros"> Outros</label>
                 </div>
             </div>
-
-            <label class="block font-bold mb-1">Team Leader (Gestor)</label>
+            <label class="block font-bold mb-1 text-sm">Team Leader (Gestor)</label>
             <input type="text" id="gestor" class="w-full p-2 border rounded mb-6 dark:bg-black/20" placeholder="Nome do Gestor">
-
             <div class="flex gap-2">
-                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded font-bold">Conforme</button>
-                <button onclick="finalizarAuditoria('Necessita de Correção')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded font-bold">Necessita Correção</button>
+                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 text-white py-3 rounded font-bold">Conforme</button>
+                <button onclick="finalizarAuditoria('Necessita de Correção')" class="flex-1 bg-red-600 text-white py-3 rounded font-bold">Necessita Correção</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT (Mantido com a lógica funcional) -->
     <script type="module">
-        // ... (Seu script continua o mesmo, apenas certifique-se de que a função finalizarAuditoria capture os novos inputs do modal se desejar salvar esses dados no Firebase)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
+
+        let currentId = null;
+
+        onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
+            const lista = document.getElementById('lista-auditoria');
+            const tabela = document.getElementById('tabela-body');
+            lista.innerHTML = ""; tabela.innerHTML = "";
+            snapshot.forEach((docRef) => {
+                const d = docRef.data();
+                const div = document.createElement('div');
+                div.className = "bg-white dark:bg-darkCard p-4 rounded border cursor-pointer dark:text-white";
+                div.innerHTML = `<p><b>MELI:</b> ${d.meli}</p><p><b>MZ:</b> ${d.mz}</p>`;
+                div.onclick = () => { currentId = docRef.id; document.getElementById('modal-content').innerHTML = `Meli: ${d.meli} | MZ: ${d.mz}`; document.getElementById('modal-auditoria').classList.remove('hidden'); };
+                lista.appendChild(div);
+                tabela.innerHTML += `<tr><td>${d.mz}</td><td>${d.meli}</td><td>${d.qtd}</td><td>${d.fisico_ok}</td><td>${d.realizou_found === 'Sim' ? 'Sim ('+d.data_found+' '+d.hora_found+')' : 'Não'}</td><td>${d.auditoria || 'Aguardando...'}</td></tr>`;
+            });
+        });
+
+        window.salvarTarefa = async () => {
+            const radioAcordo = document.querySelector('input[name="acordo"]:checked');
+            const radioFound = document.querySelector('input[name="found"]:checked');
+            
+            await addDoc(collection(db, "tarefas"), { 
+                mz: document.getElementById('mz').value, 
+                meli: document.getElementById('meli').value, 
+                qtd: document.getElementById('qtd').value, 
+                fisico_ok: radioAcordo ? radioAcordo.value : 'Não informado',
+                realizou_found: radioFound ? radioFound.value : 'Não',
+                data_found: document.getElementById('data_found').value,
+                hora_found: document.getElementById('hora_found').value,
+                auditoria: 'Aguardando...',
+                criadoEm: new Date() 
+            });
+            alert("Enviado com sucesso!");
+            document.getElementById('form-conferencia').reset();
+            window.toggleFound(false);
+            window.toggleDataFields(false);
+        };
+
+        window.finalizarAuditoria = async (resultado) => {
+            await updateDoc(doc(db, "tarefas", currentId), { auditoria: resultado });
+            document.getElementById('modal-auditoria').classList.add('hidden');
+        };
+
         window.toggleFound = (show) => document.getElementById('found-section').classList.toggle('hidden', !show);
         window.toggleDataFields = (show) => document.getElementById('data-fields').classList.toggle('hidden', !show);
         
-        // Mantendo o resto do seu script de navegação e Firebase
         document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
         document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
             document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
