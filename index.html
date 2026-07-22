@@ -240,7 +240,7 @@
                 </div>
             </div>
 
-            <!-- CONTEÚDO ORIGINAL PARA PACKING (Mantido) -->
+            <!-- CONTEÚDO ORIGINAL PARA PACKING -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
                 <div id="modal-opcoes-culpabilidade" class="space-y-3">
                     <label class="text-xs font-bold block">Selecione a Culpabilidade / Resultado:</label>
@@ -341,7 +341,7 @@
 
         let tarefasCache = [];
         let currentModalId = null;
-        let currentModalTipo = null; // 'picking' ou 'packing'
+        let currentModalTipo = null;
         let filtroStatusAtivo = null;
         let chartsInstance = {};
 
@@ -427,7 +427,7 @@
         window.renderizarAuditoriaPacking = () => {
             const container = document.getElementById('lista-auditoria-packing');
             container.innerHTML = "";
-            const pendentes = tarefasCache.filter(t => t.status === 'Pendente');
+            const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
                 return;
@@ -436,70 +436,132 @@
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
-                    <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data} | ETD: ${d.etd}</p>
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Colab: ${d.colaborador || '-'}</p>
                     </div>
-                    <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Packing</button>
+                    <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
                 `;
                 container.appendChild(card);
             });
         };
 
-        // --- CONTROLE DO MODAL DE AUDITORIA ---
+        window.renderizarLostSalvo = () => {
+            const container = document.getElementById('lista-lost-salvo');
+            container.innerHTML = "";
+            const salvos = tarefasCache.filter(t => t.status === 'Lost Salvo');
+            if(salvos.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro em Lost Salvo.</p>`;
+                return;
+            }
+            salvos.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>Qtd:</b> ${d.qtd}</p>
+                        <p class="text-xs text-gray-400">Alternativa: ${d.alternativa || '-'}</p>
+                    </div>
+                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 font-bold text-xs">Excluir</button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.renderizarLostNaoLocalizado = () => {
+            const container = document.getElementById('lista-lost-nao-localizado');
+            container.innerHTML = "";
+            const naoLoc = tarefasCache.filter(t => t.status === 'Lost não localizado');
+            if(naoLoc.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro em Lost não localizado.</p>`;
+                return;
+            }
+            naoLoc.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>Qtd:</b> ${d.qtd}</p>
+                        <p class="text-xs text-gray-400">Alternativa: ${d.alternativa || '-'}</p>
+                    </div>
+                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 font-bold text-xs">Excluir</button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.renderizarDashboard = () => {
+            const tbody = document.getElementById('tabela-body');
+            tbody.innerHTML = "";
+            
+            const filtroData = document.getElementById('filtro-data').value;
+            const filtroEtd = document.getElementById('filtro-etd').value.toLowerCase();
+
+            let dadosFiltrados = tarefasCache.filter(t => {
+                if (filtroStatusAtivo && t.status !== filtroStatusAtivo) return false;
+                if (filtroData && t.data !== filtroData) return false;
+                if (filtroEtd && !(t.etd && t.etd.toLowerCase().includes(filtroEtd))) return false;
+                return true;
+            });
+
+            dadosFiltrados.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-borderGray/20 text-xs";
+                tr.innerHTML = `
+                    <td class="p-2">${d.tote || '-'}</td>
+                    <td class="p-2">${d.mz || '-'}</td>
+                    <td class="p-2">${d.meli || '-'}</td>
+                    <td class="p-2">${d.qtd || '-'}</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">${d.status}</span></td>
+                    <td class="p-2">${d.etd || '-'}</td>
+                    <td class="p-2">${d.resultado_auditoria || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
         window.abrirModalAuditoria = (id, tipo) => {
             currentModalId = id;
             currentModalTipo = tipo;
-            const d = tarefasCache.find(t => t.id === id);
-            document.getElementById('modal-titulo').innerText = `Auditoria ${tipo === 'picking' ? 'Picking' : 'Packing'}`;
-            document.getElementById('modal-content').innerHTML = `TOTE: ${d.tote} | Meli: ${d.meli} | MZ: ${d.mz}`;
-            
-            const divPicking = document.getElementById('container-picking-fluxo');
-            const divPacking = document.getElementById('container-packing-fluxo');
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if(!tarefa) return;
+
+            document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
+            document.getElementById('modal-content').innerHTML = `
+                <p><b>TOTE:</b> ${tarefa.tote}</p>
+                <p><b>MELI:</b> ${tarefa.meli}</p>
+                <p><b>MZ:</b> ${tarefa.mz}</p>
+                <p><b>Qtd:</b> ${tarefa.qtd}</p>
+            `;
 
             if(tipo === 'picking') {
-                divPicking.classList.remove('hidden');
-                divPacking.classList.add('hidden');
-                // Resetar inputs do picking
+                document.getElementById('container-picking-fluxo').classList.remove('hidden');
+                document.getElementById('container-packing-fluxo').classList.add('hidden');
                 document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
                 document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
                 document.getElementById('div-campos-divergencia').classList.add('hidden');
-                document.getElementById('picking_colaborador').value = '';
-                document.getElementById('picking_tl').value = '';
-                document.getElementById('picking_observacao').value = '';
-                document.getElementById('picking_outro_texto').value = '';
-                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
             } else {
-                divPicking.classList.add('hidden');
-                divPacking.classList.remove('hidden');
-                const divLost = document.getElementById('div-opcao-enviar-lost-salvo');
-                divLost.classList.remove('hidden');
-                divLost.classList.add('flex');
-                document.getElementById('check-enviar-lost-salvo').checked = false;
+                document.getElementById('container-picking-fluxo').classList.add('hidden');
+                document.getElementById('container-packing-fluxo').classList.remove('hidden');
             }
+
             document.getElementById('modal-auditoria').classList.remove('hidden');
         };
 
         window.fecharModalAuditoria = () => {
             document.getElementById('modal-auditoria').classList.add('hidden');
-            currentModalId = null;
         };
 
-        // Lógica de Físico X Sistêmico (Picking)
         window.tratarFisicoSistemico = (valor) => {
-            const btnSemDiv = document.getElementById('div-btn-sem-divergencia');
-            const divDivergencia = document.getElementById('div-campos-divergencia');
-
             if(valor === 'Sim') {
-                btnSemDiv.classList.remove('hidden');
-                divDivergencia.classList.add('hidden');
+                document.getElementById('div-btn-sem-divergencia').classList.remove('hidden');
+                document.getElementById('div-campos-divergencia').classList.add('hidden');
             } else {
-                btnSemDiv.classList.add('hidden');
-                divDivergencia.classList.remove('hidden');
+                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
+                document.getElementById('div-campos-divergencia').classList.remove('hidden');
             }
         };
 
-        // Mensagem flutuante "Tem certeza?" para Sem Divergência
         window.abrirConfirmacaoSemDivergencia = () => {
             document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
         };
@@ -511,228 +573,68 @@
         window.confirmarSemDivergenciaEnvio = async () => {
             fecharConfirmacaoSemDivergencia();
             fecharModalAuditoria();
-            // Muda para a aba de Auditoria Packing conforme solicitado
-            document.querySelector('[data-tab="auditoria-packing"]').click();
-            alert("Aprovado sem divergência! Task redirecionada para Auditoria Packing.");
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Auditado',
+                    status_fisico: 'Sim',
+                    resultado_auditoria: 'Sem divergência'
+                });
+                alert("Auditado com sucesso!");
+            }
         };
 
-        // Salvar Picking com Não (Divergência)
         window.salvarAuditoriaPickingNao = async () => {
-            const radioCulp = document.querySelector('input[name="culpabilidade_picking"]:checked');
-            let culpabilidade = radioCulp ? radioCulp.value : 'Outros';
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
             if(culpabilidade === 'Outros') {
-                const outroVal = document.getElementById('picking_outro_texto').value;
-                if(outroVal) culpabilidade = `Outros: ${outroVal}`;
+                culpabilidade = document.getElementById('picking_outro_texto').value;
             }
-
             const colaborador = document.getElementById('picking_colaborador').value;
             const tl = document.getElementById('picking_tl').value;
             const observacao = document.getElementById('picking_observacao').value;
 
-            await updateDoc(doc(db, "tarefas", currentModalId), {
-                status: 'Auditado',
-                status_fisico: 'Auditado',
-                resultado_auditoria: culpabilidade,
-                colaborador: colaborador,
-                tl: tl,
-                observacao: observacao
-            });
-
-            fecharModalAuditoria();
-            alert("Auditoria salva e task enviada com sucesso!");
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Auditado',
+                    status_fisico: 'Nao',
+                    culpabilidade,
+                    colaborador,
+                    tl,
+                    observacao,
+                    resultado_auditoria: 'Com divergência'
+                });
+                fecharModalAuditoria();
+                alert("Divergência salva com sucesso!");
+            }
         };
 
-        // Salvar Auditoria Packing (Original)
         window.salvarAuditoriaModal = async () => {
-            const resultado = document.getElementById('select-culpabilidade').value;
-            const enviarLost = document.getElementById('check-enviar-lost-salvo').checked;
-
-            let updateData = {
-                status: 'Auditado',
-                status_fisico: 'Auditado',
-                resultado_auditoria: resultado
-            };
-
-            if(enviarLost && currentModalTipo === 'packing') {
-                updateData.resultado_auditoria = 'Lost Salvo';
+            const culpabilidade = document.getElementById('select-culpabilidade').value;
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Auditado',
+                    resultado_auditoria: culpabilidade
+                });
+                fecharModalAuditoria();
+                alert("Auditoria Packing salva!");
             }
-
-            await updateDoc(doc(db, "tarefas", currentModalId), updateData);
-            fecharModalAuditoria();
-            alert("Auditoria salva com sucesso!");
         };
 
-        window.renderizarLostSalvo = () => {
-            const container = document.getElementById('lista-lost-salvo');
-            container.innerHTML = "";
-            const itens = tarefasCache.filter(t => t.resultado_auditoria === 'Lost Salvo');
-            if(itens.length === 0) {
-                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro de Lost Salvo.</p>`;
-                return;
+        window.deletarTarefa = async (id) => {
+            if(confirm("Deseja realmente excluir este registro?")) {
+                await deleteDoc(doc(db, "tarefas", id));
             }
-            itens.forEach(d => {
-                const card = document.createElement('div');
-                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm dark:text-white flex justify-between items-center";
-                card.innerHTML = `
-                    <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | ETD: ${d.etd} (${d.data_etd || d.data}) | Detalhe: ${d.alternativa || '-'}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        };
-
-        window.abrirModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.remove('hidden');
-        window.fecharModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.add('hidden');
-
-        window.salvarLostSalvoManual = async () => {
-            const altSelecionada = document.querySelector('input[name="ls_alt"]:checked').value;
-            const outroTexto = document.getElementById('ls_outro_texto').value;
-            const detalhe = altSelecionada === 'Outro' ? `Outro: ${outroTexto}` : altSelecionada;
-
-            await addDoc(collection(db, "tarefas"), {
-                mz: 'MZ-MANUAL',
-                meli: document.getElementById('ls_meli').value,
-                qtd: document.getElementById('ls_qtd').value,
-                tote: document.getElementById('ls_tote').value,
-                etd: document.getElementById('ls_etd').value,
-                data: document.getElementById('ls_data_etd').value,
-                data_etd: document.getElementById('ls_data_etd').value,
-                status: '-',
-                status_fisico: '-',
-                resultado_auditoria: 'Lost Salvo',
-                alternativa: detalhe,
-                criadoEm: new Date()
-            });
-            fecharModalLostSalvo();
-            alert("Lost Salvo cadastrado com sucesso!");
-        };
-
-        window.renderizarLostNaoLocalizado = () => {
-            const container = document.getElementById('lista-lost-nao-localizado');
-            container.innerHTML = "";
-            const itens = tarefasCache.filter(t => t.resultado_auditoria === 'Lost não localizado');
-            if(itens.length === 0) {
-                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro de Lost não localizado.</p>`;
-                return;
-            }
-            itens.forEach(d => {
-                const card = document.createElement('div');
-                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm dark:text-white flex justify-between items-center";
-                card.innerHTML = `
-                    <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | ETD: ${d.etd} (${d.data_etd || d.data}) | Detalhe: ${d.alternativa || '-'}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        };
-
-        window.abrirModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.remove('hidden');
-        window.fecharModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.add('hidden');
-
-        window.salvarLostNaoLocalizadoManual = async () => {
-            const altSelecionada = document.querySelector('input[name="lnl_alt"]:checked').value;
-            const outroTexto = document.getElementById('lnl_outro_texto').value;
-            const detalhe = altSelecionada === 'Outro' ? `Outro: ${outroTexto}` : altSelecionada;
-
-            await addDoc(collection(db, "tarefas"), {
-                mz: 'MZ-MANUAL',
-                meli: document.getElementById('lnl_meli').value,
-                qtd: document.getElementById('lnl_qtd').value,
-                tote: document.getElementById('lnl_tote').value,
-                etd: document.getElementById('lnl_etd').value,
-                data: document.getElementById('lnl_data_etd').value,
-                data_etd: document.getElementById('lnl_data_etd').value,
-                status: '-',
-                status_fisico: '-',
-                resultado_auditoria: 'Lost não localizado',
-                alternativa: detalhe,
-                criadoEm: new Date()
-            });
-            fecharModalLostNaoLocalizado();
-            alert("Lost não localizado cadastrado com sucesso!");
-        };
-
-        window.renderizarDashboard = () => {
-            const total = tarefasCache.length;
-            const lostSalvosCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost Salvo').length;
-            const lostNaoLocalizadoCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost não localizado').length;
-
-            document.getElementById('cards-stats').innerHTML = `
-                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
-                    <span class="text-xs uppercase font-bold text-gray-500">Volume Total</span>
-                    <h2 class="text-2xl font-bold">${total}</h2>
-                </div>
-                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center col-span-2">
-                    <span class="text-xs uppercase font-bold text-gray-500">Volume de Lost Salvos</span>
-                    <h2 class="text-2xl font-bold text-green-600">${lostSalvosCount}</h2>
-                </div>
-                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
-                    <span class="text-xs uppercase font-bold text-gray-500">Volume Lost não localizado</span>
-                    <h2 class="text-2xl font-bold text-amber-500">${lostNaoLocalizadoCount}</h2>
-                </div>
-            `;
-
-            const fData = document.getElementById('filtro-data').value;
-            const fEtd = document.getElementById('filtro-etd').value.toLowerCase();
-
-            let dadosFiltrados = tarefasCache.filter(t => {
-                let match = true;
-                if(fData && t.data !== fData) match = false;
-                if(fEtd && !(t.etd && t.etd.toLowerCase().includes(fEtd))) match = false;
-                if(filtroStatusAtivo) {
-                    if(filtroStatusAtivo === 'Pendente' && t.status !== 'Pendente') match = false;
-                    if(filtroStatusAtivo === 'Auditado' && t.status !== 'Auditado') match = false;
-                    if(filtroStatusAtivo === 'Lost Salvo' && t.resultado_auditoria !== 'Lost Salvo') match = false;
-                    if(filtroStatusAtivo === 'Lost não localizado' && t.resultado_auditoria !== 'Lost não localizado') match = false;
-                }
-                return match;
-            });
-
-            const tabelaBody = document.getElementById('tabela-body');
-            tabelaBody.innerHTML = "";
-            if(dadosFiltrados.length === 0) {
-                tabelaBody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">Nenhum registro encontrado.</td></tr>`;
-                return;
-            }
-
-            dadosFiltrados.forEach(d => {
-                let statusHtml = '';
-                if(d.status === 'Auditado') statusHtml = `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Auditado</span>`;
-                else if(d.status === 'Pendente') statusHtml = `<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold">Pendente</span>`;
-                else statusHtml = `-`;
-
-                tabelaBody.innerHTML += `
-                    <tr class="border-b border-borderGray/20">
-                        <td class="p-2 font-mono">${d.tote || '-'}</td>
-                        <td class="p-2">${d.mz}</td>
-                        <td class="p-2">${d.meli}</td>
-                        <td class="p-2">${d.qtd}</td>
-                        <td class="p-2">${statusHtml}</td>
-                        <td class="p-2">${d.etd || '-'}</td>
-                        <td class="p-2">${d.resultado_auditoria || '-'}</td>
-                    </tr>
-                `;
-            });
         };
 
         window.setFiltroStatus = (status) => {
-            filtroStatusAtivo = (filtroStatusAtivo === status) ? null : status;
-            document.querySelectorAll('.btn-filtro').forEach(b => {
-                if(b.getAttribute('data-status') === filtroStatusAtivo) b.classList.add('bg-primaryBtn', 'text-white');
-                else b.classList.remove('bg-primaryBtn', 'text-white');
-            });
+            filtroStatusAtivo = status;
             renderizarDashboard();
         };
 
         window.limparFiltros = () => {
+            filtroStatusAtivo = null;
             document.getElementById('filtro-data').value = '';
             document.getElementById('filtro-etd').value = '';
-            filtroStatusAtivo = null;
-            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
             renderizarDashboard();
         };
 
@@ -745,83 +647,89 @@
         };
 
         window.atualizarGraficos = () => {
-            let dados = tarefasCache;
-            let culpCounts = {};
-            let lostSalvosCounts = {};
-            let lostNaoLocCounts = {};
-            let etdCounts = {};
-            let tlsCounts = {};
-
-            dados.forEach(t => {
-                let c = t.resultado_auditoria || 'Outros';
-                culpCounts[c] = (culpCounts[c] || 0) + 1;
-
-                if(t.resultado_auditoria === 'Lost Salvo') {
-                    let alt = t.alternativa || 'Outros';
-                    lostSalvosCounts[alt] = (lostSalvosCounts[alt] || 0) + 1;
-                }
-                if(t.resultado_auditoria === 'Lost não localizado') {
-                    let alt = t.alternativa || 'Outros';
-                    lostNaoLocCounts[alt] = (lostNaoLocCounts[alt] || 0) + 1;
-                }
-                let etdKey = t.etd || 'N/D';
-                etdCounts[etdKey] = (etdCounts[etdKey] || 0) + 1;
-
-                let tl = t.tl || 'Não informado';
-                tlsCounts[tl] = (tlsCounts[tl] || 0) + 1;
-            });
-
-            renderChart('chartCulpabilidade', 'pie', Object.keys(culpCounts), Object.values(culpCounts));
-            renderChart('chartLostSalvos', 'pie', Object.keys(lostSalvosCounts).length ? Object.keys(lostSalvosCounts) : ['Nenhum'], Object.keys(lostSalvosCounts).length ? Object.values(lostSalvosCounts) : [1]);
-            renderChart('chartLostNaoLocalizado', 'pie', Object.keys(lostNaoLocCounts).length ? Object.keys(lostNaoLocCounts) : ['Nenhum'], Object.keys(lostNaoLocCounts).length ? Object.values(lostNaoLocCounts) : [1]);
-            renderChart('chartEtd', 'pie', Object.keys(etdCounts), Object.values(etdCounts));
-            renderChart('chartTls', 'bar', Object.keys(tlsCounts), Object.values(tlsCounts));
-        };
-
-        window.renderChart = (canvasId, type, labels, data) => {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            if(chartsInstance[canvasId]) {
-                chartsInstance[canvasId].destroy();
-            }
-            chartsInstance[canvasId] = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['#002147', '#444E54', '#6C6D74', '#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+            // Instanciação básica preventiva dos gráficos via Chart.js
+            ['chartCulpabilidade', 'chartLostSalvos', 'chartLostNaoLocalizado', 'chartEtd', 'chartTls'].forEach(id => {
+                const canvas = document.getElementById(id);
+                if(canvas) {
+                    if(chartsInstance[id]) chartsInstance[id].destroy();
+                    chartsInstance[id] = new Chart(canvas, {
+                        type: 'bar',
+                        data: { labels: ['Exemplo'], datasets: [{ data: [1], backgroundColor: '#002147' }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
                 }
             });
         };
 
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
-            const tabName = e.target.getAttribute('data-tab');
-            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
-            e.target.classList.add('bg-primaryBtn', 'text-white');
+        // Lógica de Troca de Abas
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('bg-primaryBtn', 'text-white', 'shadow');
+                    b.classList.add('text-black', 'dark:text-darkText');
+                });
+                e.target.classList.add('bg-primaryBtn', 'text-white', 'shadow');
+                e.target.classList.remove('text-black', 'dark:text-darkText');
 
-            const btnLostSalvo = document.getElementById('btn-floating-lost-salvo');
-            const btnLostNaoLocalizado = document.getElementById('btn-floating-lost-nao-localizado');
-            
-            btnLostSalvo.classList.add('hidden');
-            btnLostNaoLocalizado.classList.add('hidden');
+                const tab = e.target.getAttribute('data-tab');
+                document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+                document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
-            if(tabName === 'lost-salvo') btnLostSalvo.classList.remove('hidden');
-            if(tabName === 'lost-nao-localizado') btnLostNaoLocalizado.classList.remove('hidden');
-        }));
+                document.getElementById('btn-floating-lost-salvo').classList.add('hidden');
+                document.getElementById('btn-floating-lost-nao-localizado').classList.add('hidden');
 
+                if(tab === 'lost-salvo') document.getElementById('btn-floating-lost-salvo').classList.remove('hidden');
+                if(tab === 'lost-nao-localizado') document.getElementById('btn-floating-lost-nao-localizado').classList.remove('hidden');
+            });
+        });
+
+        // Toggle Dark/Light Mode
         document.getElementById('theme-toggle').addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
         });
 
-        lucide.createIcons();
+        window.abrirModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.remove('hidden');
+        window.fecharModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.add('hidden');
+        window.abrirModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.remove('hidden');
+        window.fecharModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.add('hidden');
+
+        window.salvarLostSalvoManual = async () => {
+            const altEl = document.querySelector('input[name="ls_alt"]:checked');
+            let alternativa = altEl ? altEl.value : '';
+            if(alternativa === 'Outro') alternativa = document.getElementById('ls_outro_texto').value;
+
+            await addDoc(collection(db, "tarefas"), {
+                meli: document.getElementById('ls_meli').value,
+                qtd: document.getElementById('ls_qtd').value,
+                tote: document.getElementById('ls_tote').value,
+                etd: document.getElementById('ls_etd').value,
+                data: document.getElementById('ls_data_etd').value,
+                alternativa,
+                status: 'Lost Salvo',
+                criadoEm: new Date()
+            });
+            fecharModalLostSalvo();
+            alert("Lost Salvo registrado com sucesso!");
+        };
+
+        window.salvarLostNaoLocalizadoManual = async () => {
+            const altEl = document.querySelector('input[name="lnl_alt"]:checked');
+            let alternativa = altEl ? altEl.value : '';
+            if(alternativa === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
+
+            await addDoc(collection(db, "tarefas"), {
+                meli: document.getElementById('lnl_lnl_meli' || 'lnl_meli').value,
+                qtd: document.getElementById('lnl_qtd').value,
+                tote: document.getElementById('lnl_tote').value,
+                etd: document.getElementById('lnl_etd').value,
+                data: document.getElementById('lnl_data_etd').value,
+                alternativa,
+                status: 'Lost não localizado',
+                criadoEm: new Date()
+            });
+            fecharModalLostNaoLocalizado();
+            alert("Lost não localizado registrado com sucesso!");
+        };
     </script>
 </body>
 </html>
