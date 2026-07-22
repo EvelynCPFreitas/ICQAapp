@@ -19,7 +19,7 @@
     <div>
         <header class="bg-lightCard dark:bg-darkCard border-b border-borderGray/30 shadow-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-                <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
+                <h1 class="text-black dark:text-darkText font-bold text-xl">Portal LOST-FOUND</h1>
                 <nav class="flex items-center space-x-4">
                     <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
                         <button data-tab="solicitacao" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold bg-primaryBtn text-white shadow">Solicitação</button>
@@ -41,13 +41,12 @@
             <!-- ABA 1: SOLICITAÇÃO -->
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                    <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação ICQA</h2>
+                    <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
                     <form class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
                         <input type="text" id="sol_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="text" id="sol_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="number" id="sol_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="text" id="sol_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                        <input type="text" id="sol_tl" placeholder="Team Leader (TL)" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -64,13 +63,6 @@
                             </div>
                         </div>
 
-                        <div class="bg-gray-100 dark:bg-black/20 p-3 rounded border dark:border-borderGray">
-                            <label class="text-sm font-bold dark:text-darkText">Físico está de acordo com o sistêmico?</label>
-                            <select id="sol_fisico_ok" class="w-full p-2 mt-1 rounded dark:bg-black/20 dark:text-white border dark:border-borderGray">
-                                <option value="Sim">Sim</option>
-                                <option value="Não">Não</option>
-                            </select>
-                        </div>
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
                     </form>
                 </div>
@@ -318,10 +310,8 @@
                 meli: document.getElementById('sol_meli').value, 
                 qtd: document.getElementById('sol_qtd').value,
                 tote: document.getElementById('sol_tote').value,
-                tl: document.getElementById('sol_tl').value,
                 data: document.getElementById('sol_data').value,
                 etd: document.getElementById('sol_etd').value,
-                fisico_ok: document.getElementById('sol_fisico_ok').value,
                 status: 'Pendente',
                 status_fisico: 'Pendente',
                 resultado_auditoria: 'Aguardando',
@@ -346,7 +336,7 @@
                 card.innerHTML = `
                     <div>
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | TL: ${d.tl} | Data: ${d.data} | ETD: ${d.etd}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data} | ETD: ${d.etd}</p>
                     </div>
                     <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Picking</button>
                 `;
@@ -369,7 +359,7 @@
                 card.innerHTML = `
                     <div>
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | TL: ${d.tl} | Data: ${d.data} | ETD: ${d.etd}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data} | ETD: ${d.etd}</p>
                     </div>
                     <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Packing</button>
                 `;
@@ -463,7 +453,6 @@
                 status_fisico: '-',
                 resultado_auditoria: 'Lost Salvo',
                 alternativa: detalhe,
-                tl: 'Manual',
                 criadoEm: new Date()
             });
             fecharModalLostSalvo();
@@ -512,7 +501,6 @@
                 status_fisico: '-',
                 resultado_auditoria: 'Lost não localizado',
                 alternativa: detalhe,
-                tl: 'Manual',
                 criadoEm: new Date()
             });
             fecharModalLostNaoLocalizado();
@@ -522,8 +510,6 @@
         // --- ABA 6: DASHBOARD & FILTROS & GRÁFICOS ---
         window.renderizarDashboard = () => {
             const total = tarefasCache.length;
-            const ok = tarefasCache.filter(t => t.fisico_ok === 'Sim').length;
-            const divergencia = total - ok;
             const lostSalvosCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost Salvo').length;
             const lostNaoLocalizadoCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost não localizado').length;
 
@@ -532,11 +518,7 @@
                     <span class="text-xs uppercase font-bold text-gray-500">Volume Total</span>
                     <h2 class="text-2xl font-bold">${total}</h2>
                 </div>
-                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
-                    <span class="text-xs uppercase font-bold text-gray-500">Físico x Sistêmico</span>
-                    <p class="text-sm mt-1"><span class="text-green-600 font-bold">OK: ${ok}</span> | <span class="text-red-500 font-bold">Divergência: ${divergencia}</span></p>
-                </div>
-                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center col-span-2">
                     <span class="text-xs uppercase font-bold text-gray-500">Volume de Lost Salvos</span>
                     <h2 class="text-2xl font-bold text-green-600">${lostSalvosCount}</h2>
                 </div>
@@ -617,11 +599,8 @@
         };
 
         window.atualizarGraficos = () => {
-            const periodo = document.getElementById('filtro-periodo-grafico').value;
-            // Filtragem por período simulada para demonstração robusta
             let dados = tarefasCache;
             
-            // Processamento Culpabilidade
             let culpCounts = {};
             let lostSalvosCounts = {};
             let lostNaoLocCounts = {};
@@ -684,7 +663,6 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
             e.target.classList.add('bg-primaryBtn', 'text-white');
 
-            // Controle dos botões flutuantes (+)
             const btnLostSalvo = document.getElementById('btn-floating-lost-salvo');
             const btnLostNaoLocalizado = document.getElementById('btn-floating-lost-nao-localizado');
             
