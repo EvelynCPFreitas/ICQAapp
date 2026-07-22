@@ -104,7 +104,7 @@
             <section id="tab-dashboard" class="page-section hidden">
                 <div class="grid grid-cols-4 gap-4 mb-4" id="cards-stats"></div>
                 
-                <!-- Botão e Painel de Gráficos (Localizado no canto direito, logo acima dos filtros) -->
+                <!-- Botão e Painel de Gráficos -->
                 <div class="flex justify-end mb-4">
                     <button onclick="toggleGraficosPainel()" class="px-4 py-2 bg-primaryBtn text-white rounded text-sm font-bold flex items-center gap-2 shadow">
                         <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Mostrar Gráficos
@@ -286,6 +286,29 @@
         let filtroStatusAtivo = null;
         let chartsInstance = {};
 
+        // Função auxiliar para verificar se o ETD está a 20 minutos ou menos (ou já passou)
+        function verificarEtdProximo(dataEtd, etdHora) {
+            if (!etdHora) return false;
+            try {
+                const agora = new Date();
+                let targetDate;
+                if (dataEtd) {
+                    const [ano, mes, dia] = dataEtd.split('-').map(Number);
+                    const [hora, min] = etdHora.split(':').map(Number);
+                    targetDate = new Date(ano, mes - 1, dia, hora, min, 0);
+                } else {
+                    const [hora, min] = etdHora.split(':').map(Number);
+                    targetDate = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), hora, min, 0);
+                }
+                const diffMs = targetDate - agora;
+                const diffMins = diffMs / (1000 * 60);
+                // Retorna verdadeiro se já passou ou se faltam 20 minutos ou menos
+                return diffMins <= 20;
+            } catch (e) {
+                return false;
+            }
+        }
+
         // Listener Principal do Firestore
         onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
             tarefasCache = [];
@@ -331,12 +354,15 @@
                 return;
             }
             pendentes.forEach(d => {
+                const isUrgente = verificarEtdProximo(d.data, d.etd);
+                const etdClasse = isUrgente ? "text-red-600 dark:text-red-400 font-extrabold animate-pulse" : "dark:text-darkText";
+
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
                     <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data} | ETD: ${d.etd}</p>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <span class="${etdClasse}">ETD: ${d.etd || '-'}</span></p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data || '-'}</p>
                     </div>
                     <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Picking</button>
                 `;
