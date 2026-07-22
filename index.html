@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal ICQA</title>
+    <title>Portal LOST-FOUND</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 
             darkBg: '#090F15', darkCard: '#444E54', darkText: '#B3B7BA', 
@@ -13,169 +14,692 @@
         }}}}
     </script>
 </head>
-<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300">
+<body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
-    <header class="bg-lightBg dark:bg-darkBg border-b border-borderGray/30 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-            <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
-            <nav class="flex items-center space-x-4">
-                <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
-                    <button data-tab="conferencia" class="nav-btn px-4 py-2 rounded-md text-sm font-bold bg-primaryBtn text-white shadow">Conferência</button>
-                    <button data-tab="auditoria" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Auditoria</button>
-                    <button data-tab="dashboard" class="nav-btn px-4 py-2 rounded-md text-sm font-bold text-black dark:text-darkText">Dashboard</button>
-                </div>
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-300 dark:bg-darkCard text-black dark:text-white">
-                    <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
-                    <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
-                </button>
-            </nav>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <section id="tab-conferencia" class="page-section">
-            <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
-                <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Conferência ICQA</h2>
-                <form id="form-conferencia" class="space-y-4">
-                    <input type="text" id="mz" placeholder="MZ" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
-                    <input type="text" id="meli" placeholder="MELI" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
-                    <input type="number" id="qtd" placeholder="QUANTIDADE" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white">
-                    
-                    <div class="bg-gray-100 dark:bg-black/20 p-3 rounded border">
-                        <label class="block text-sm font-bold text-black dark:text-darkText mb-2">Físico está de acordo com o sistêmico?</label>
-                        <div class="flex space-x-6 text-sm dark:text-darkText">
-                            <label class="flex items-center space-x-2"><input type="radio" name="acordo" value="Sim" onclick="toggleFound(false)"> <span>Sim</span></label>
-                            <label class="flex items-center space-x-2"><input type="radio" name="acordo" value="Não" onclick="toggleFound(true)"> <span>Não</span></label>
-                        </div>
+    <div>
+        <header class="bg-lightCard dark:bg-darkCard border-b border-borderGray/30 shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+                <h1 class="text-black dark:text-darkText font-bold text-xl">Portal ICQA</h1>
+                <nav class="flex items-center space-x-4">
+                    <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
+                        <button data-tab="solicitacao" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold bg-primaryBtn text-white shadow">Solicitação</button>
+                        <button data-tab="auditoria-picking" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Auditoria Picking</button>
+                        <button data-tab="auditoria-packing" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Auditoria Packing</button>
+                        <button data-tab="lost-salvo" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Lost Salvo</button>
+                        <button data-tab="lost-nao-localizado" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Lost não localizado</button>
+                        <button data-tab="dashboard" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Dashboard</button>
                     </div>
+                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-darkCard text-black dark:text-white border border-borderGray/40">
+                        <i data-lucide="sun" class="dark:hidden w-5 h-5"></i>
+                        <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
+                    </button>
+                </nav>
+            </div>
+        </header>
 
-                    <div id="found-section" class="hidden p-3 border-l-4 border-red-500 bg-gray-100 dark:bg-black/20 rounded">
-                        <label class="block text-sm font-bold text-black dark:text-darkText mb-2">Foi realizado Found?</label>
-                        <div class="flex space-x-6 text-sm dark:text-darkText mb-4">
-                            <label class="flex items-center space-x-2"><input type="radio" name="found" value="Sim" onclick="toggleDataFields(true)"> <span>Sim</span></label>
-                            <label class="flex items-center space-x-2"><input type="radio" name="found" value="Não" onclick="toggleDataFields(false)"> <span>Não</span></label>
-                        </div>
-                        <div id="data-fields" class="hidden border rounded p-3 bg-white dark:bg-black/20">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">DATA</label>
-                                    <input type="date" id="data_found" class="w-full p-1 border rounded dark:bg-black/20 dark:text-white">
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- ABA 1: SOLICITAÇÃO -->
+            <section id="tab-solicitacao" class="page-section">
+                <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
+                    <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação ICQA</h2>
+                    <form class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
+                        <input type="text" id="sol_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="sol_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="number" id="sol_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="sol_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="sol_tl" placeholder="Team Leader (TL)" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold dark:text-darkText block mb-1">DATA</label>
+                                <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
+                                    <input type="date" id="sol_data" class="w-full bg-transparent dark:text-white focus:outline-none">
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">HORÁRIO</label>
-                                    <input type="time" id="hora_found" class="w-full p-1 border rounded dark:bg-black/20 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
+                                <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
+                                    <input type="time" id="sol_etd" class="w-full bg-transparent dark:text-white focus:outline-none">
                                 </div>
                             </div>
                         </div>
+
+                        <div class="bg-gray-100 dark:bg-black/20 p-3 rounded border dark:border-borderGray">
+                            <label class="text-sm font-bold dark:text-darkText">Físico está de acordo com o sistêmico?</label>
+                            <select id="sol_fisico_ok" class="w-full p-2 mt-1 rounded dark:bg-black/20 dark:text-white border dark:border-borderGray">
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ABA 2: AUDITORIA PICKING -->
+            <section id="tab-auditoria-picking" class="page-section hidden">
+                <div class="max-w-5xl mx-auto">
+                    <h2 class="text-xl font-bold dark:text-darkText mb-4">Auditoria Picking</h2>
+                    <div id="lista-auditoria-picking" class="grid gap-3"></div>
+                </div>
+            </section>
+
+            <!-- ABA 3: AUDITORIA PACKING -->
+            <section id="tab-auditoria-packing" class="page-section hidden">
+                <div class="max-w-5xl mx-auto">
+                    <h2 class="text-xl font-bold dark:text-darkText mb-4">Auditoria Packing</h2>
+                    <div id="lista-auditoria-packing" class="grid gap-3"></div>
+                </div>
+            </section>
+
+            <!-- ABA 4: LOST SALVO -->
+            <section id="tab-lost-salvo" class="page-section hidden">
+                <div class="max-w-5xl mx-auto flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold dark:text-darkText">Lost Salvo</h2>
+                </div>
+                <div id="lista-lost-salvo" class="grid gap-3"></div>
+            </section>
+
+            <!-- ABA 5: LOST NÃO LOCALIZADO -->
+            <section id="tab-lost-nao-localizado" class="page-section hidden">
+                <div class="max-w-5xl mx-auto flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold dark:text-darkText">Lost não localizado</h2>
+                </div>
+                <div id="lista-lost-nao-localizado" class="grid gap-3"></div>
+            </section>
+
+            <!-- ABA 6: DASHBOARD -->
+            <section id="tab-dashboard" class="page-section hidden">
+                <div class="grid grid-cols-4 gap-4 mb-4" id="cards-stats"></div>
+                
+                <!-- Botão e Painel de Gráficos (Localizado no canto direito, logo acima dos filtros) -->
+                <div class="flex justify-end mb-4">
+                    <button onclick="toggleGraficosPainel()" class="px-4 py-2 bg-primaryBtn text-white rounded text-sm font-bold flex items-center gap-2 shadow">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Mostrar Gráficos
+                    </button>
+                </div>
+
+                <div id="painel-graficos" class="hidden bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold dark:text-darkText">Análise Gráfica</h3>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold dark:text-darkText">Período:</label>
+                            <select id="filtro-periodo-grafico" onchange="atualizarGraficos()" class="p-1 text-xs rounded border dark:bg-black/20 dark:text-white dark:border-borderGray">
+                                <option value="dia">Hoje / Dia</option>
+                                <option value="semana">Semana</option>
+                                <option value="mes" selected>Mês</option>
+                                <option value="todos">Todos</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="button" onclick="salvarTarefa()" class="w-full bg-primaryBtn text-white py-3 rounded font-bold">Salvar e Enviar Task</button>
-                </form>
-            </div>
-        </section>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">Culpabilidade</span>
+                            <div class="w-full h-48 flex justify-center"><canvas id="chartCulpabilidade"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">Lost Salvos</span>
+                            <div class="w-full h-48 flex justify-center"><canvas id="chartLostSalvos"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">Lost Não Localizado</span>
+                            <div class="w-full h-48 flex justify-center"><canvas id="chartLostNaoLocalizado"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">ETD Distribuição</span>
+                            <div class="w-full h-48 flex justify-center"><canvas id="chartEtd"></canvas></div>
+                        </div>
+                        <div class="col-span-2 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">Team Leaders (TLs)</span>
+                            <div class="w-full h-48 flex justify-center"><canvas id="chartTls"></canvas></div>
+                        </div>
+                    </div>
+                </div>
 
-        <section id="tab-auditoria" class="page-section hidden">
-            <div class="max-w-5xl mx-auto"><h2 class="text-xl font-bold dark:text-darkText mb-4">Casos para Auditar</h2>
-            <div id="lista-auditoria" class="grid gap-3"></div></div>
-        </section>
+                <!-- Filtros Globais da Tabela -->
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 mb-4 flex flex-wrap gap-3 items-center">
+                    <span class="text-xs font-bold dark:text-darkText uppercase">Filtros:</span>
+                    <input type="date" id="filtro-data" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    <button onclick="setFiltroStatus('Pendente')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Pendente">Pendente</button>
+                    <button onclick="setFiltroStatus('Auditado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Auditado">Auditado</button>
+                    <button onclick="setFiltroStatus('Lost Salvo')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost Salvo">Lost Salvos</button>
+                    <button onclick="setFiltroStatus('Lost não localizado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost não localizado">Lost não localizado</button>
+                    <button onclick="limparFiltros()" class="px-3 py-1.5 text-xs rounded border bg-red-500 text-white font-bold">Limpar Filtros</button>
+                </div>
 
-        <section id="tab-dashboard" class="page-section hidden">
-            <div class="grid grid-cols-4 gap-4 mb-8 text-center" id="cards-stats"></div>
-            <div class="bg-white dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30">
-                <h2 class="font-bold dark:text-darkText mb-4">Monitoramento Geral de Tasks</h2>
-                <table class="w-full text-left dark:text-white">
-                    <thead><tr class="border-b text-xs uppercase"><th>MZ</th><th>Meli</th><th>Qtd</th><th>Status Físico</th><th>Found?</th><th>Resultado Auditoria</th></tr></thead>
-                    <tbody id="tabela-body"></tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+                <!-- Tabela de Monitoramento -->
+                <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30 overflow-x-auto">
+                    <h2 class="font-bold dark:text-darkText mb-4">Monitoramento Geral de Tasks</h2>
+                    <table class="w-full text-left dark:text-white text-sm">
+                        <thead>
+                            <tr class="border-b border-borderGray/30 text-xs uppercase">
+                                <th class="p-2">TOTE</th>
+                                <th class="p-2">MZ</th>
+                                <th class="p-2">Meli</th>
+                                <th class="p-2">Quantidade</th>
+                                <th class="p-2">Status</th>
+                                <th class="p-2">ETD</th>
+                                <th class="p-2">Resultado Auditoria</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
 
+    <!-- BOTÃO FLUTUANTE PARA LOST SALVO (+) -->
+    <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">
+        +
+    </button>
+
+    <!-- BOTÃO FLUTUANTE PARA LOST NÃO LOCALIZADO (+) -->
+    <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">
+        +
+    </button>
+
+    <!-- MODAL DE AUDITORIA PICKING / PACKING -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl">
-            <h2 class="text-xl font-bold mb-1">Auditoria da Tratativa</h2>
-            <p class="text-sm text-gray-500 mb-4">Validação final do processo de investigação pelo ICQA</p>
-            <div id="modal-content" class="bg-gray-50 dark:bg-black/20 p-3 rounded mb-4 font-bold text-sm"></div>
-            <div class="mb-4">
-                <label class="block font-bold mb-2">Packing realizou a investigação conforme fluxo?</label>
-                <div class="flex gap-4"><label><input type="radio" name="investigacao" value="Sim"> Sim</label><label><input type="radio" name="investigacao" value="Não"> Não</label></div>
-            </div>
-            <div class="mb-4">
-                <label class="block font-bold mb-2">Preenchido como:</label>
-                <div class="space-y-1 text-sm">
-                    <label class="flex items-center gap-2"><input type="checkbox" value="Erro de picking"> Erro de picking</label>
-                    <label class="flex items-center gap-2"><input type="checkbox" value="Erro de packing"> Erro de packing</label>
-                    <label class="flex items-center gap-2"><input type="checkbox" value="Inconclusivo"> Inconclusivo</label>
-                    <label class="flex items-center gap-2"><input type="checkbox" value="Outros"> Outros</label>
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
+            <h2 id="modal-titulo" class="text-xl font-bold mb-4">Auditoria</h2>
+            <div id="modal-content" class="mb-4 text-sm space-y-1"></div>
+            <div id="modal-opcoes-culpabilidade" class="space-y-3 mb-4">
+                <label class="text-xs font-bold block">Selecione a Culpabilidade / Resultado:</label>
+                <select id="select-culpabilidade" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    <option value="Conforme">Conforme</option>
+                    <option value="Necessita Correção">Necessita Correção</option>
+                    <option value="Erro Operacional">Erro Operacional</option>
+                    <option value="Erro Sistema">Erro Sistema</option>
+                </select>
+                <div id="div-opcao-enviar-lost-salvo" class="hidden items-center gap-2 mt-2">
+                    <input type="checkbox" id="check-enviar-lost-salvo" class="w-4 h-4">
+                    <label for="check-enviar-lost-salvo" class="text-xs font-bold text-green-600 dark:text-green-400">Enviar para Lost Salvo</label>
                 </div>
             </div>
-            <label class="block font-bold mb-1 text-sm">Team Leader (Gestor)</label>
-            <input type="text" id="gestor" class="w-full p-2 border rounded mb-6 dark:bg-black/20" placeholder="Nome do Gestor">
             <div class="flex gap-2">
-                <button onclick="finalizarAuditoria('Conforme')" class="flex-1 bg-green-600 text-white py-3 rounded font-bold">Conforme</button>
-                <button onclick="finalizarAuditoria('Necessita de Correção')" class="flex-1 bg-red-600 text-white py-3 rounded font-bold">Necessita Correção</button>
+                <button onclick="salvarAuditoriaModal()" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold">Salvar Auditoria</button>
+                <button onclick="fecharModalAuditoria()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL JANELA FLUTUANTE: LOST SALVO -->
+    <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
+            <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
+            <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostSalvoManual();">
+                <input type="text" id="ls_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="number" id="ls_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="ls_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="ls_etd" placeholder="ETD" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold block mb-1">Data do ETD:</label>
+                    <input type="date" id="ls_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                </div>
+                <div class="space-y-2 pt-2 border-t dark:border-borderGray">
+                    <label class="text-xs font-bold block">Alternativas:</label>
+                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Encontrado no Packing/Inventário" checked> <span class="text-sm">Encontrado no Packing/Inventário</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Encontrado no Shipping"> <span class="text-sm">Encontrado no Shipping</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Caído na Mecanização"> <span class="text-sm">Caído na Mecanização</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="ls_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
+                </div>
+                <div class="flex gap-2 pt-3">
+                    <button type="submit" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold">Salvar</button>
+                    <button type="button" onclick="fecharModalLostSalvo()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL JANELA FLUTUANTE: LOST NÃO LOCALIZADO -->
+    <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
+            <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
+            <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostNaoLocalizadoManual();">
+                <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="number" id="lnl_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="lnl_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="lnl_etd" placeholder="ETD" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold block mb-1">Data do ETD:</label>
+                    <input type="date" id="lnl_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                </div>
+                <div class="space-y-2 pt-2 border-t dark:border-borderGray">
+                    <label class="text-xs font-bold block">Alternativas:</label>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote perdido em MZ" checked> <span class="text-sm">Tote perdido em MZ</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote vazio na esteira"> <span class="text-sm">Tote vazio na esteira</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Missed Backlog (5 dias)"> <span class="text-sm">Missed Backlog (5 dias)</span></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
+                </div>
+                <div class="flex gap-2 pt-3">
+                    <button type="submit" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold">Salvar</button>
+                    <button type="button" onclick="fecharModalLostNaoLocalizado()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE E SCRIPT PRINCIPAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
-        let currentId = null;
+        let tarefasCache = [];
+        let currentModalId = null;
+        let currentModalTipo = null; // 'picking' ou 'packing'
+        let filtroStatusAtivo = null;
+        let chartsInstance = {};
 
+        // Listener Principal do Firestore
         onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
-            const lista = document.getElementById('lista-auditoria');
-            const tabela = document.getElementById('tabela-body');
-            lista.innerHTML = ""; tabela.innerHTML = "";
+            tarefasCache = [];
             snapshot.forEach((docRef) => {
-                const d = docRef.data();
-                const div = document.createElement('div');
-                div.className = "bg-white dark:bg-darkCard p-4 rounded border cursor-pointer dark:text-white";
-                div.innerHTML = `<p><b>MELI:</b> ${d.meli}</p><p><b>MZ:</b> ${d.mz}</p>`;
-                div.onclick = () => { currentId = docRef.id; document.getElementById('modal-content').innerHTML = `Meli: ${d.meli} | MZ: ${d.mz}`; document.getElementById('modal-auditoria').classList.remove('hidden'); };
-                lista.appendChild(div);
-                tabela.innerHTML += `<tr><td>${d.mz}</td><td>${d.meli}</td><td>${d.qtd}</td><td>${d.fisico_ok}</td><td>${d.realizou_found === 'Sim' ? 'Sim ('+d.data_found+' '+d.hora_found+')' : 'Não'}</td><td>${d.auditoria || 'Aguardando...'}</td></tr>`;
+                tarefasCache.push({ id: docRef.id, ...docRef.data() });
             });
+            renderizarTudo();
         });
 
-        window.salvarTarefa = async () => {
-            const radioAcordo = document.querySelector('input[name="acordo"]:checked');
-            const radioFound = document.querySelector('input[name="found"]:checked');
-            
+        window.renderizarTudo = () => {
+            renderizarAuditoriaPicking();
+            renderizarAuditoriaPacking();
+            renderizarLostSalvo();
+            renderizarLostNaoLocalizado();
+            renderizarDashboard();
+        }
+
+        // --- ABA 1: SOLICITAÇÃO ---
+        window.salvarSolicitacao = async () => {
             await addDoc(collection(db, "tarefas"), { 
-                mz: document.getElementById('mz').value, 
-                meli: document.getElementById('meli').value, 
-                qtd: document.getElementById('qtd').value, 
-                fisico_ok: radioAcordo ? radioAcordo.value : 'Não informado',
-                realizou_found: radioFound ? radioFound.value : 'Não',
-                data_found: document.getElementById('data_found').value,
-                hora_found: document.getElementById('hora_found').value,
-                auditoria: 'Aguardando...',
+                mz: document.getElementById('sol_mz').value, 
+                meli: document.getElementById('sol_meli').value, 
+                qtd: document.getElementById('sol_qtd').value,
+                tote: document.getElementById('sol_tote').value,
+                tl: document.getElementById('sol_tl').value,
+                data: document.getElementById('sol_data').value,
+                etd: document.getElementById('sol_etd').value,
+                fisico_ok: document.getElementById('sol_fisico_ok').value,
+                status: 'Pendente',
+                status_fisico: 'Pendente',
+                resultado_auditoria: 'Aguardando',
                 criadoEm: new Date() 
             });
-            alert("Enviado com sucesso!");
-            document.getElementById('form-conferencia').reset();
-            window.toggleFound(false);
-            window.toggleDataFields(false);
+            alert("Solicitação enviada com sucesso!");
+            document.querySelector('form').reset();
         };
 
-        window.finalizarAuditoria = async (resultado) => {
-            await updateDoc(doc(db, "tarefas", currentId), { auditoria: resultado });
+        // --- ABA 2: AUDITORIA PICKING ---
+        window.renderizarAuditoriaPicking = () => {
+            const container = document.getElementById('lista-auditoria-picking');
+            container.innerHTML = "";
+            const pendentes = tarefasCache.filter(t => t.status === 'Pendente');
+            if(pendentes.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Picking.</p>`;
+                return;
+            }
+            pendentes.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | TL: ${d.tl} | Data: ${d.data} | ETD: ${d.etd}</p>
+                    </div>
+                    <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Picking</button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // --- ABA 3: AUDITORIA PACKING ---
+        window.renderizarAuditoriaPacking = () => {
+            const container = document.getElementById('lista-auditoria-packing');
+            container.innerHTML = "";
+            const pendentes = tarefasCache.filter(t => t.status === 'Pendente');
+            if(pendentes.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
+                return;
+            }
+            pendentes.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | TL: ${d.tl} | Data: ${d.data} | ETD: ${d.etd}</p>
+                    </div>
+                    <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold">Auditar Packing</button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // --- MODAL DE AUDITORIA ---
+        window.abrirModalAuditoria = (id, tipo) => {
+            currentModalId = id;
+            currentModalTipo = tipo;
+            const d = tarefasCache.find(t => t.id === id);
+            document.getElementById('modal-titulo').innerText = `Auditoria ${tipo === 'picking' ? 'Picking' : 'Packing'}`;
+            document.getElementById('modal-content').innerHTML = `TOTE: ${d.tote} | Meli: ${d.meli} | MZ: ${d.mz}`;
+            
+            const divLost = document.getElementById('div-opcao-enviar-lost-salvo');
+            if(tipo === 'packing') {
+                divLost.classList.remove('hidden');
+                divLost.classList.add('flex');
+            } else {
+                divLost.classList.add('hidden');
+                divLost.classList.remove('flex');
+                document.getElementById('check-enviar-lost-salvo').checked = false;
+            }
+            document.getElementById('modal-auditoria').classList.remove('hidden');
+        };
+
+        window.fecharModalAuditoria = () => {
             document.getElementById('modal-auditoria').classList.add('hidden');
+            currentModalId = null;
         };
 
-        window.toggleFound = (show) => document.getElementById('found-section').classList.toggle('hidden', !show);
-        window.toggleDataFields = (show) => document.getElementById('data-fields').classList.toggle('hidden', !show);
-        
-        document.getElementById('theme-toggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+        window.salvarAuditoriaModal = async () => {
+            const resultado = document.getElementById('select-culpabilidade').value;
+            const enviarLost = document.getElementById('check-enviar-lost-salvo').checked;
+
+            let updateData = {
+                status: 'Auditado',
+                status_fisico: 'Auditado',
+                resultado_auditoria: resultado
+            };
+
+            if(enviarLost && currentModalTipo === 'packing') {
+                updateData.resultado_auditoria = 'Lost Salvo';
+            }
+
+            await updateDoc(doc(db, "tarefas", currentModalId), updateData);
+            fecharModalAuditoria();
+            alert("Auditoria salva com sucesso!");
+        };
+
+        // --- ABA 4: LOST SALVO ---
+        window.renderizarLostSalvo = () => {
+            const container = document.getElementById('lista-lost-salvo');
+            container.innerHTML = "";
+            const itens = tarefasCache.filter(t => t.resultado_auditoria === 'Lost Salvo');
+            if(itens.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro de Lost Salvo.</p>`;
+                return;
+            }
+            itens.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm dark:text-white flex justify-between items-center";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | ETD: ${d.etd} (${d.data_etd || d.data}) | Detalhe: ${d.alternativa || '-'}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.abrirModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.remove('hidden');
+        window.fecharModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.add('hidden');
+
+        window.salvarLostSalvoManual = async () => {
+            const altSelecionada = document.querySelector('input[name="ls_alt"]:checked').value;
+            const outroTexto = document.getElementById('ls_outro_texto').value;
+            const detalhe = altSelecionada === 'Outro' ? `Outro: ${outroTexto}` : altSelecionada;
+
+            await addDoc(collection(db, "tarefas"), {
+                mz: 'MZ-MANUAL',
+                meli: document.getElementById('ls_meli').value,
+                qtd: document.getElementById('ls_qtd').value,
+                tote: document.getElementById('ls_tote').value,
+                etd: document.getElementById('ls_etd').value,
+                data: document.getElementById('ls_data_etd').value,
+                data_etd: document.getElementById('ls_data_etd').value,
+                status: '-',
+                status_fisico: '-',
+                resultado_auditoria: 'Lost Salvo',
+                alternativa: detalhe,
+                tl: 'Manual',
+                criadoEm: new Date()
+            });
+            fecharModalLostSalvo();
+            alert("Lost Salvo cadastrado com sucesso!");
+        };
+
+        // --- ABA 5: LOST NÃO LOCALIZADO ---
+        window.renderizarLostNaoLocalizado = () => {
+            const container = document.getElementById('lista-lost-nao-localizado');
+            container.innerHTML = "";
+            const itens = tarefasCache.filter(t => t.resultado_auditoria === 'Lost não localizado');
+            if(itens.length === 0) {
+                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum registro de Lost não localizado.</p>`;
+                return;
+            }
+            itens.forEach(d => {
+                const card = document.createElement('div');
+                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm dark:text-white flex justify-between items-center";
+                card.innerHTML = `
+                    <div>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz}</p>
+                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | ETD: ${d.etd} (${d.data_etd || d.data}) | Detalhe: ${d.alternativa || '-'}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.abrirModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.remove('hidden');
+        window.fecharModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.add('hidden');
+
+        window.salvarLostNaoLocalizadoManual = async () => {
+            const altSelecionada = document.querySelector('input[name="lnl_alt"]:checked').value;
+            const outroTexto = document.getElementById('lnl_outro_texto').value;
+            const detalhe = altSelecionada === 'Outro' ? `Outro: ${outroTexto}` : altSelecionada;
+
+            await addDoc(collection(db, "tarefas"), {
+                mz: 'MZ-MANUAL',
+                meli: document.getElementById('lnl_meli').value,
+                qtd: document.getElementById('lnl_qtd').value,
+                tote: document.getElementById('lnl_tote').value,
+                etd: document.getElementById('lnl_etd').value,
+                data: document.getElementById('lnl_data_etd').value,
+                data_etd: document.getElementById('lnl_data_etd').value,
+                status: '-',
+                status_fisico: '-',
+                resultado_auditoria: 'Lost não localizado',
+                alternativa: detalhe,
+                tl: 'Manual',
+                criadoEm: new Date()
+            });
+            fecharModalLostNaoLocalizado();
+            alert("Lost não localizado cadastrado com sucesso!");
+        };
+
+        // --- ABA 6: DASHBOARD & FILTROS & GRÁFICOS ---
+        window.renderizarDashboard = () => {
+            const total = tarefasCache.length;
+            const ok = tarefasCache.filter(t => t.fisico_ok === 'Sim').length;
+            const divergencia = total - ok;
+            const lostSalvosCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost Salvo').length;
+            const lostNaoLocalizadoCount = tarefasCache.filter(t => t.resultado_auditoria === 'Lost não localizado').length;
+
+            document.getElementById('cards-stats').innerHTML = `
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
+                    <span class="text-xs uppercase font-bold text-gray-500">Volume Total</span>
+                    <h2 class="text-2xl font-bold">${total}</h2>
+                </div>
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
+                    <span class="text-xs uppercase font-bold text-gray-500">Físico x Sistêmico</span>
+                    <p class="text-sm mt-1"><span class="text-green-600 font-bold">OK: ${ok}</span> | <span class="text-red-500 font-bold">Divergência: ${divergencia}</span></p>
+                </div>
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
+                    <span class="text-xs uppercase font-bold text-gray-500">Volume de Lost Salvos</span>
+                    <h2 class="text-2xl font-bold text-green-600">${lostSalvosCount}</h2>
+                </div>
+                <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 dark:text-white text-center">
+                    <span class="text-xs uppercase font-bold text-gray-500">Volume Lost não localizado</span>
+                    <h2 class="text-2xl font-bold text-amber-500">${lostNaoLocalizadoCount}</h2>
+                </div>
+            `;
+
+            // Filtragem da Tabela
+            const fData = document.getElementById('filtro-data').value;
+            const fEtd = document.getElementById('filtro-etd').value.toLowerCase();
+
+            let dadosFiltrados = tarefasCache.filter(t => {
+                let match = true;
+                if(fData && t.data !== fData) match = false;
+                if(fEtd && !(t.etd && t.etd.toLowerCase().includes(fEtd))) match = false;
+                if(filtroStatusAtivo) {
+                    if(filtroStatusAtivo === 'Pendente' && t.status !== 'Pendente') match = false;
+                    if(filtroStatusAtivo === 'Auditado' && t.status !== 'Auditado') match = false;
+                    if(filtroStatusAtivo === 'Lost Salvo' && t.resultado_auditoria !== 'Lost Salvo') match = false;
+                    if(filtroStatusAtivo === 'Lost não localizado' && t.resultado_auditoria !== 'Lost não localizado') match = false;
+                }
+                return match;
+            });
+
+            const tabelaBody = document.getElementById('tabela-body');
+            tabelaBody.innerHTML = "";
+            if(dadosFiltrados.length === 0) {
+                tabelaBody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            dadosFiltrados.forEach(d => {
+                let statusHtml = '';
+                if(d.status === 'Auditado') statusHtml = `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Auditado</span>`;
+                else if(d.status === 'Pendente') statusHtml = `<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold">Pendente</span>`;
+                else statusHtml = `-`;
+
+                tabelaBody.innerHTML += `
+                    <tr class="border-b border-borderGray/20">
+                        <td class="p-2 font-mono">${d.tote || '-'}</td>
+                        <td class="p-2">${d.mz}</td>
+                        <td class="p-2">${d.meli}</td>
+                        <td class="p-2">${d.qtd}</td>
+                        <td class="p-2">${statusHtml}</td>
+                        <td class="p-2">${d.etd || '-'}</td>
+                        <td class="p-2">${d.resultado_auditoria || '-'}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        window.setFiltroStatus = (status) => {
+            filtroStatusAtivo = (filtroStatusAtivo === status) ? null : status;
+            document.querySelectorAll('.btn-filtro').forEach(b => {
+                if(b.getAttribute('data-status') === filtroStatusAtivo) b.classList.add('bg-primaryBtn', 'text-white');
+                else b.classList.remove('bg-primaryBtn', 'text-white');
+            });
+            renderizarDashboard();
+        };
+
+        window.limparFiltros = () => {
+            document.getElementById('filtro-data').value = '';
+            document.getElementById('filtro-etd').value = '';
+            filtroStatusAtivo = null;
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
+            renderizarDashboard();
+        };
+
+        // Painel de Gráficos e Instanciação Chart.js
+        window.toggleGraficosPainel = () => {
+            const painel = document.getElementById('painel-graficos');
+            painel.classList.toggle('hidden');
+            if(!painel.classList.contains('hidden')) {
+                atualizarGraficos();
+            }
+        };
+
+        window.atualizarGraficos = () => {
+            const periodo = document.getElementById('filtro-periodo-grafico').value;
+            // Filtragem por período simulada para demonstração robusta
+            let dados = tarefasCache;
+            
+            // Processamento Culpabilidade
+            let culpCounts = {};
+            let lostSalvosCounts = {};
+            let lostNaoLocCounts = {};
+            let etdCounts = {};
+            let tlsCounts = {};
+
+            dados.forEach(t => {
+                let c = t.resultado_auditoria || 'Outros';
+                culpCounts[c] = (culpCounts[c] || 0) + 1;
+
+                if(t.resultado_auditoria === 'Lost Salvo') {
+                    let alt = t.alternativa || 'Outros';
+                    lostSalvosCounts[alt] = (lostSalvosCounts[alt] || 0) + 1;
+                }
+                if(t.resultado_auditoria === 'Lost não localizado') {
+                    let alt = t.alternativa || 'Outros';
+                    lostNaoLocCounts[alt] = (lostNaoLocCounts[alt] || 0) + 1;
+                }
+                let etdKey = t.etd || 'N/D';
+                etdCounts[etdKey] = (etdCounts[etdKey] || 0) + 1;
+
+                let tl = t.tl || 'Não informado';
+                tlsCounts[tl] = (tlsCounts[tl] || 0) + 1;
+            });
+
+            renderChart('chartCulpabilidade', 'pie', Object.keys(culpCounts), Object.values(culpCounts));
+            renderChart('chartLostSalvos', 'pie', Object.keys(lostSalvosCounts).length ? Object.keys(lostSalvosCounts) : ['Nenhum'], Object.keys(lostSalvosCounts).length ? Object.values(lostSalvosCounts) : [1]);
+            renderChart('chartLostNaoLocalizado', 'pie', Object.keys(lostNaoLocCounts).length ? Object.keys(lostNaoLocCounts) : ['Nenhum'], Object.keys(lostNaoLocCounts).length ? Object.values(lostNaoLocCounts) : [1]);
+            renderChart('chartEtd', 'pie', Object.keys(etdCounts), Object.values(etdCounts));
+            renderChart('chartTls', 'bar', Object.keys(tlsCounts), Object.values(tlsCounts));
+        };
+
+        window.renderChart = (canvasId, type, labels, data) => {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if(chartsInstance[canvasId]) {
+                chartsInstance[canvasId].destroy();
+            }
+            chartsInstance[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#002147', '#444E54', '#6C6D74', '#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+        };
+
+        // --- NAVEGAÇÃO DE ABAS & CONTROLE DE BOTÕES FLUTUANTES ---
         document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const tabName = e.target.getAttribute('data-tab');
             document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`tab-${e.target.getAttribute('data-tab')}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-primaryBtn', 'text-white'));
             e.target.classList.add('bg-primaryBtn', 'text-white');
+
+            // Controle dos botões flutuantes (+)
+            const btnLostSalvo = document.getElementById('btn-floating-lost-salvo');
+            const btnLostNaoLocalizado = document.getElementById('btn-floating-lost-nao-localizado');
+            
+            btnLostSalvo.classList.add('hidden');
+            btnLostNaoLocalizado.classList.add('hidden');
+
+            if(tabName === 'lost-salvo') btnLostSalvo.classList.remove('hidden');
+            if(tabName === 'lost-nao-localizado') btnLostNaoLocalizado.classList.remove('hidden');
         }));
+
+        // Controle de Tema Claro/Escuro
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
         lucide.createIcons();
     </script>
 </body>
