@@ -421,7 +421,7 @@
             document.querySelector('form').reset();
         };
 
-        // Função genérica de ordenação priorizando a data de hoje
+        // Função de ordenação corrigida: Prioriza estritamente a data atual (hoje) no topo
         const ordenarTarefasPorPrioridadeData = (lista) => {
             const hojeStr = new Date().toISOString().split('T')[0];
             return lista.sort((a, b) => {
@@ -432,10 +432,10 @@
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
 
                 if (ehHojeA !== ehHojeB) {
-                    return ehHojeA - ehHojeB; // Hoje vem primeiro
+                    return ehHojeA - ehHojeB; // Hoje vem sempre primeiro
                 }
                 if (dataA !== dataB) {
-                    return dataA.localeCompare(dataB);
+                    return dataA.localeCompare(dataB); // Ordenação cronológica para as outras datas
                 }
                 return (a.etd || '').localeCompare(b.etd || '');
             });
@@ -459,7 +459,6 @@
 
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
-                // Ordem ajustada: ETD -> Data -> Qtd
                 card.innerHTML = `
                     <div class="flex items-center gap-4 flex-wrap">
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdClasse}">ETD: ${d.etd || '-'}</b></p>
@@ -486,7 +485,6 @@
             pendentes.forEach(d => {
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
-                // Ordem ajustada: ETD -> Data -> Qtd
                 card.innerHTML = `
                     <div class="flex items-center gap-4 flex-wrap">
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
