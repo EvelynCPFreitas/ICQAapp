@@ -154,7 +154,7 @@
                             <div class="w-full h-48 flex justify-center"><canvas id="chartEtd"></canvas></div>
                         </div>
                         <div class="col-span-2 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
-                            <span class="text-xs font-bold mb-2 dark:text-darkText">Team Leaders (TLs)</span>
+                            <span class="text-xs font-bold mb-2 dark:text-darkText">Team Leaders (TLs) - <span class="text-[10px] text-blue-500 font-normal">Clique em uma barra para ver os colaboradores</span></span>
                             <div class="w-full h-48 flex justify-center"><canvas id="chartTls"></canvas></div>
                         </div>
                     </div>
@@ -275,6 +275,20 @@
         </div>
     </div>
 
+    <!-- MODAL DETALHES TL & COLABORADORES -->
+    <div id="modal-detalhes-tl" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
+            <button onclick="fecharModalDetalhesTl()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
+            <h2 id="modal-tl-titulo" class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Colaboradores do TL</h2>
+            <div id="modal-tl-conteudo" class="max-h-60 overflow-y-auto space-y-2 mb-4 text-sm">
+                <!-- Lista de colaboradores inserida dinamicamente -->
+            </div>
+            <div class="flex justify-end pt-3 border-t border-borderGray/30">
+                <button onclick="fecharModalDetalhesTl()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL LOST SALVO -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
@@ -343,6 +357,7 @@
         let currentModalTipo = null;
         let filtroStatusAtivo = null;
         let chartsInstance = {};
+        let dadosFiltradosGraficoCache = []; // Usado para referenciar os colaboradores do TL clicado
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof lucide !== 'undefined') {
@@ -667,7 +682,6 @@
         window.atualizarGraficos = () => {
             const periodo = document.getElementById('filtro-periodo-grafico').value;
             
-            // Filtro por período básico
             const agora = new Date();
             let dados = tarefasCache.filter(t => {
                 if(!t.criadoEm) return true;
@@ -682,6 +696,8 @@
                 }
                 return true;
             });
+
+            dadosFiltradosGraficoCache = dados; // Salva para uso no modal do TL
 
             // 1. Culpabilidade / Resultado Auditoria (Pizza)
             const mapCulp = {};
@@ -722,13 +738,13 @@
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
-            // 5. Team Leaders - TLs (Barra)
+            // 5. Team Leaders - TLs (Barra com clique para ver colaboradores)
             const mapTls = {};
             dados.forEach(t => {
                 const k = t.tl || 'Não informado';
                 mapTls[k] = (mapTls[k] || 0) + 1;
             });
-            destruirOuCriarGrafico('chartTls', 'bar', Object.keys(mapTls), Object.values(mapTls), ['#002147']);
+            destruirOuCriarGraficoTl('chartTls', Object.keys(mapTls), Object.values(mapTls));
         };
 
         function destruirOuCriarGrafico(canvasId, tipo, labels, data, cores) {
@@ -757,6 +773,75 @@
                 }
             });
         }
+
+        function destruirOuCriarGraficoTl(canvasId, labels, data) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            if(chartsInstance[canvasId]) chartsInstance[canvasId].destroy();
+            
+            chartsInstance[canvasId] = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#002147']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    onClick: (event, elements) => {
+                        if(elements.length > 0) {
+                            const index = elements[0].index;
+                            const nomeTl = labels[index];
+                            abrirModalDetalhesTl(nomeTl);
+                        }
+                    }
+                }
+            });
+        }
+
+        window.abrirModalDetalhesTl = (nomeTl) => {
+            const modal = document.getElementById('modal-detalhes-tl');
+            const titulo = document.getElementById('modal-tl-titulo');
+            const conteudo = document.getElementById('modal-tl-conteudo');
+
+            titulo.innerText = `Colaboradores do TL: ${nomeTl}`;
+            
+            // Filtra os colaboradores que pertencem a este TL nas tarefas do período atual
+            const colaboradoresSet = new Set();
+            dadosFiltradosGraficoCache.forEach(t => {
+                const tlTask = t.tl || 'Não informado';
+                if(tlTask === nomeTl && t.colaborador) {
+                    colaboradoresSet.add(t.colaborador);
+                }
+            });
+
+            const colaboradores = Array.from(colaboradoresSet);
+
+            if(colaboradores.length === 0) {
+                conteudo.innerHTML = `<p class="italic text-gray-400">Nenhum colaborador registrado especificamente para este Team Leader no período.</p>`;
+            } else {
+                let htmlList = `<ul class="divide-y divide-borderGray/30">`;
+                colaboradores.forEach(colab => {
+                    htmlList += `<li class="py-2 px-3 bg-gray-50 dark:bg-black/20 rounded mb-1 flex items-center justify-between">
+                        <span class="font-medium dark:text-white">${colab}</span>
+                    </li>`;
+                });
+                htmlList += `</ul>`;
+                conteudo.innerHTML = htmlList;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.fecharModalDetalhesTl = () => {
+            document.getElementById('modal-detalhes-tl').classList.add('hidden');
+        };
 
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
