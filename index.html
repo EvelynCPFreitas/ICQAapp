@@ -344,7 +344,6 @@
         let filtroStatusAtivo = null;
         let chartsInstance = {};
 
-        // Função para alternar o tema com o ícone restaurado (sol/lua)
         window.alternarTema = () => {
             const html = document.documentElement;
             const iconeTema = document.getElementById('icone-tema');
@@ -356,7 +355,6 @@
             }
         };
 
-        // Função auxiliar para formatar a data de YYYY-MM-DD para DD/MM/YYYY
         const formatarDataBR = (dataStr) => {
             if (!dataStr) return '-';
             if (dataStr.includes('/')) return dataStr;
@@ -367,24 +365,30 @@
             return dataStr;
         };
 
-        function verificarEtdProximo(dataEtd, etdHora) {
-            if (!etdHora) return false;
+        // Função corrigida para definir a estilização do ETD (Verde/Vermelho se próximo, ou cinza escuro se já passou)
+        function avaliarStatusEtd(dataEtd, etdHora) {
+            if (!etdHora) return { classe: "dark:text-darkText", textoStatus: "normal" };
             try {
                 const agora = new Date();
-                let targetDate;
-                if (dataEtd) {
-                    const [ano, mes, dia] = dataEtd.split('-').map(Number);
-                    const [hora, min] = etdHora.split(':').map(Number);
-                    targetDate = new Date(ano, mes - 1, dia, hora, min, 0);
-                } else {
-                    const [hora, min] = etdHora.split(':').map(Number);
-                    targetDate = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), hora, min, 0);
-                }
+                const [ano, mes, dia] = (dataEtd || agora.toISOString().split('T')[0]).split('-').map(Number);
+                const [hora, min] = etdHora.split(':').map(Number);
+                const targetDate = new Date(ano, mes - 1, dia, hora, min, 0);
+                
                 const diffMs = targetDate - agora;
                 const diffMins = diffMs / (1000 * 60);
-                return diffMins <= 20;
+
+                if (diffMins < 0) {
+                    // Já passou do horário -> Preto muito escuro / cinza apagado
+                    return { classe: "text-gray-700 dark:text-gray-400 font-semibold", status: "passou" };
+                } else if (diffMins <= 20) {
+                    // Próximo de vencer (menos de 20 min) -> Vermelho urgente
+                    return { classe: "text-red-600 dark:text-red-400 font-extrabold animate-pulse", status: "urgente" };
+                } else {
+                    // Longe do horário atual -> Normal
+                    return { classe: "dark:text-darkText", status: "normal" };
+                }
             } catch (e) {
-                return false;
+                return { classe: "dark:text-darkText", status: "normal" };
             }
         }
 
@@ -421,8 +425,8 @@
             document.querySelector('form').reset();
         };
 
-        // Função de ordenação corrigida: Prioriza estritamente a data atual (hoje) no topo
-        const ordenarTarefasPorPrioridadeData = (lista) => {
+        // Lógica de Ordenação Atualizada: Hoje primeiro (ordenado por horário), datas futuras por último
+        const ordenarTarefasPorPrioridadeDataEHorario = (lista) => {
             const hojeStr = new Date().toISOString().split('T')[0];
             return lista.sort((a, b) => {
                 const dataA = a.data ? a.data.split('T')[0] : '';
@@ -432,11 +436,12 @@
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
 
                 if (ehHojeA !== ehHojeB) {
-                    return ehHojeA - ehHojeB; // Hoje vem sempre primeiro
+                    return ehHojeA - ehHojeB; // O que for de hoje vem sempre antes
                 }
                 if (dataA !== dataB) {
-                    return dataA.localeCompare(dataB); // Ordenação cronológica para as outras datas
+                    return dataA.localeCompare(dataB); // Ordem cronológica das datas (ex: dia 22 antes do dia 23)
                 }
+                // Se forem da mesma data, ordena cronologicamente pelo horário do ETD
                 return (a.etd || '').localeCompare(b.etd || '');
             });
         };
@@ -447,21 +452,20 @@
             container.innerHTML = "";
             
             const pendentes = tarefasCache.filter(t => t.status === 'Pendente');
-            ordenarTarefasPorPrioridadeData(pendentes);
+            ordenarTarefasPorPrioridadeDataEHorario(pendentes);
 
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Picking.</p>`;
                 return;
             }
             pendentes.forEach(d => {
-                const isUrgente = verificarEtdProximo(d.data, d.etd);
-                const etdClasse = isUrgente ? "text-red-600 dark:text-red-400 font-extrabold animate-pulse" : "dark:text-darkText";
+                const etdInfo = avaliarStatusEtd(d.data, d.etd);
 
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
                     <div class="flex items-center gap-4 flex-wrap">
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdClasse}">ETD: ${d.etd || '-'}</b></p>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}">ETD: ${d.etd || '-'}</b></p>
                         <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
                     </div>
                     <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
@@ -476,18 +480,19 @@
             container.innerHTML = "";
             
             const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
-            ordenarTarefasPorPrioridadeData(pendentes);
+            ordenarTarefasPorPrioridadeDataEHorario(pendentes);
 
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
                 return;
             }
             pendentes.forEach(d => {
+                const etdInfo = avaliarStatusEtd(d.data, d.etd);
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
                     <div class="flex items-center gap-4 flex-wrap">
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
+                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}">ETD: ${d.etd || '-'}</b></p>
                         <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
                     </div>
                     <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
@@ -710,7 +715,6 @@
             });
         };
 
-        // Lógica de Troca de Abas
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
