@@ -101,7 +101,21 @@
 
             <!-- ABA 6: DASHBOARD -->
             <section id="tab-dashboard" class="page-section hidden">
-                <div class="grid grid-cols-4 gap-4 mb-4" id="cards-stats"></div>
+                <!-- CARDS DE ESTATÍSTICAS / VOLUMES -->
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Total</span>
+                        <span id="stat-volume-total" class="text-3xl font-extrabold text-black dark:text-white">0</span>
+                    </div>
+                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume de Lost Salvos</span>
+                        <span id="stat-volume-salvos" class="text-3xl font-extrabold text-green-600 dark:text-green-400">0</span>
+                    </div>
+                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Lost Não Localizado</span>
+                        <span id="stat-volume-nao-localizado" class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">0</span>
+                    </div>
+                </div>
                 
                 <div class="flex justify-end mb-4">
                     <button onclick="toggleGraficosPainel()" class="px-4 py-2 bg-primaryBtn text-white rounded text-sm font-bold flex items-center gap-2 shadow">
@@ -202,14 +216,12 @@
                     </div>
                 </div>
 
-                <!-- Botão Sem Divergência (aparece se SIM) -->
                 <div id="div-btn-sem-divergencia" class="hidden">
                     <button type="button" onclick="abrirConfirmacaoSemDivergencia()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-sm shadow">
                         Sem divergência
                     </button>
                 </div>
 
-                <!-- Campos se NÃO -->
                 <div id="div-campos-divergencia" class="hidden space-y-3 pt-2 border-t border-borderGray/30">
                     <div>
                         <label class="text-xs font-bold block mb-1">Culpabilidade:</label>
@@ -249,10 +261,6 @@
                         <option value="Erro Operacional">Erro Operacional</option>
                         <option value="Erro Sistema">Erro Sistema</option>
                     </select>
-                    <div id="div-opcao-enviar-lost-salvo" class="hidden items-center gap-2 mt-2">
-                        <input type="checkbox" id="check-enviar-lost-salvo" class="w-4 h-4">
-                        <label for="check-enviar-lost-salvo" class="text-xs font-bold text-green-600 dark:text-green-400">Enviar para Lost Salvo</label>
-                    </div>
                 </div>
                 <button type="button" onclick="salvarAuditoriaModal()" class="w-full bg-primaryBtn text-white py-2 rounded font-bold">Salvar Auditoria</button>
             </div>
@@ -263,7 +271,7 @@
         </div>
     </div>
 
-    <!-- MINI-MODAL / MENSAGEM FLUTUANTE "TEM CERTEZA?" (SEM DIVERGÊNCIA) -->
+    <!-- MINI-MODAL / MENSAGEM FLUTUANTE "TEM CERTEZA?" -->
     <div id="modal-confirmacao-sem-div" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
             <button onclick="fecharConfirmacaoSemDivergencia()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
@@ -344,14 +352,12 @@
         let filtroStatusAtivo = null;
         let chartsInstance = {};
 
-        // Inicializa os ícones do Lucide ao carregar a página
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
         });
 
-        // Função para alternar o tema usando os ícones Lucide (sun/moon)
         window.alternarTema = () => {
             const html = document.documentElement;
             const iconeTema = document.getElementById('icone-tema');
@@ -359,7 +365,6 @@
             const isDark = html.classList.contains('dark');
             
             if (iconeTema) {
-                // Altera o atributo data-lucide para o ícone correspondente
                 iconeTema.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
@@ -367,7 +372,6 @@
             }
         };
 
-        // Função auxiliar para formatar a data de YYYY-MM-DD para DD/MM/YYYY
         const formatarDataBR = (dataStr) => {
             if (!dataStr) return '-';
             if (dataStr.includes('/')) return dataStr;
@@ -378,7 +382,6 @@
             return dataStr;
         };
 
-        // Regras para a cor do ETD
         function obterEstiloEtd(dataEtd, etdHora) {
             if (!etdHora) return { classe: "dark:text-darkText", texto: '-' };
             try {
@@ -571,6 +574,15 @@
                 if (filtroEtd && !(t.etd && t.etd.toLowerCase().includes(filtroEtd))) return false;
                 return true;
             });
+
+            // Atualiza os contadores dos Cards de Volume no Topo da Dashboard
+            let volTotal = tarefasCache.length;
+            let volSalvos = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
+            let volNaoLocalizado = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
+
+            document.getElementById('stat-volume-total').innerText = volTotal;
+            document.getElementById('stat-volume-salvos').innerText = volSalvos;
+            document.getElementById('stat-volume-nao-localizado').innerText = volNaoLocalizado;
 
             dadosFiltrados.forEach(d => {
                 const tr = document.createElement('tr');
