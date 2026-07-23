@@ -424,27 +424,27 @@
             });
         };
 
-        window.renderizarAuditoriaPacking = () => {
-            const container = document.getElementById('lista-auditoria-packing');
-            container.innerHTML = "";
-            const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
-            if(pendentes.length === 0) {
-                container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
-                return;
-            }
-            pendentes.forEach(d => {
-                const card = document.createElement('div');
-                card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
-                card.innerHTML = `
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
-                        <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Colab: ${d.colaborador || '-'}</p>
-                    </div>
-                    <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
-                `;
-                container.appendChild(card);
-            });
-        };
+       window.renderizarAuditoriaPacking = () => {
+    const container = document.getElementById('lista-auditoria-packing');
+    container.innerHTML = "";
+    const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
+    if(pendentes.length === 0) {
+        container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
+        return;
+    }
+    pendentes.forEach(d => {
+        const card = document.createElement('div');
+        card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+        card.innerHTML = `
+            <div class="flex items-center gap-4 flex-wrap">
+                <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
+                <p class="text-xs text-gray-500 dark:text-darkText">Qtd: ${d.qtd} | Data: ${d.data || '-'}</p>
+            </div>
+            <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
+        `;
+        container.appendChild(card);
+    });
+};
 
         window.renderizarLostSalvo = () => {
             const container = document.getElementById('lista-lost-salvo');
