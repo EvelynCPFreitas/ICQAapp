@@ -30,7 +30,7 @@
                         <button data-tab="dashboard" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Dashboard</button>
                     </div>
                     <button id="theme-toggle" onclick="alternarTema()" class="p-2 rounded-full bg-gray-200 dark:bg-darkCard text-black dark:text-white border border-borderGray/40 flex items-center justify-center">
-                        <span id="icone-tema" class="text-base leading-none">🌙</span>
+                        <i id="icone-tema" data-lucide="moon" class="w-5 h-5"></i>
                     </button>
                 </nav>
             </div>
@@ -344,15 +344,26 @@
         let filtroStatusAtivo = null;
         let chartsInstance = {};
 
-        // Função para alternar o tema com o ícone restaurado (sol/lua)
+        // Inicializa os ícones do Lucide ao carregar a página
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // Função para alternar o tema usando os ícones Lucide (sun/moon)
         window.alternarTema = () => {
             const html = document.documentElement;
             const iconeTema = document.getElementById('icone-tema');
             html.classList.toggle('dark');
             const isDark = html.classList.contains('dark');
             
-            if(iconeTema) {
-                iconeTema.innerHTML = isDark ? '☀️' : '🌙';
+            if (iconeTema) {
+                // Altera o atributo data-lucide para o ícone correspondente
+                iconeTema.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
             }
         };
 
@@ -367,7 +378,7 @@
             return dataStr;
         };
 
-        // Regras atualizadas para a cor do ETD
+        // Regras para a cor do ETD
         function obterEstiloEtd(dataEtd, etdHora) {
             if (!etdHora) return { classe: "dark:text-darkText", texto: '-' };
             try {
@@ -386,13 +397,10 @@
                 const diffMins = diffMs / (1000 * 60);
 
                 if (diffMins < 0) {
-                    // Já passou -> cor roxa #6A0DAD
                     return { classe: "", style: "color: #6A0DAD;", texto: etdHora };
                 } else if (diffMins <= 20) {
-                    // Prestes a vencer (próximos 20 minutos) -> Vermelho de alerta piscando
                     return { classe: "text-red-600 dark:text-red-400 font-extrabold animate-pulse", style: "", texto: etdHora };
                 } else {
-                    // Distante / Normal
                     return { classe: "dark:text-darkText", style: "", texto: etdHora };
                 }
             } catch (e) {
@@ -433,7 +441,6 @@
             document.querySelector('form').reset();
         };
 
-        // Função de ordenação ajustada: Prioriza rigorosamente a data de hoje (mais próximo/passado para o futuro) e joga o dia seguinte/futuro para o final
         const ordenarTarefasPorPrioridadeData = (lista) => {
             const hojeStr = new Date().toISOString().split('T')[0];
             return lista.sort((a, b) => {
@@ -444,12 +451,12 @@
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
 
                 if (ehHojeA !== ehHojeB) {
-                    return ehHojeA - ehHojeB; // Hoje vem sempre antes de amanhã/outros dias
+                    return ehHojeA - ehHojeB;
                 }
                 if (dataA !== dataB) {
-                    return dataA.localeCompare(dataB); // Ordem cronológica para datas futuras
+                    return dataA.localeCompare(dataB);
                 }
-                return (a.etd || '').localeCompare(b.etd || ''); // Mesmo dia ordenado por horário ETD
+                return (a.etd || '').localeCompare(b.etd || '');
             });
         };
 
@@ -721,7 +728,6 @@
             });
         };
 
-        // Lógica de Troca de Abas
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
