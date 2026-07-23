@@ -196,30 +196,23 @@
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
 
-    <!-- MODAL DE AUDITORIA PICKING / PACKING -->
+    <!-- MODAL DE AUDITORIA -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
             <h2 id="modal-titulo" class="text-xl font-bold mb-3">Auditoria</h2>
             <div id="modal-content" class="mb-4 text-sm space-y-1"></div>
             
-            <!-- CONTEÚDO ESPECÍFICO PARA AUDITORIA PICKING -->
             <div id="container-picking-fluxo" class="space-y-4">
                 <div class="p-3 bg-gray-100 dark:bg-black/20 rounded border border-borderGray/30">
                     <label class="text-xs font-bold block mb-2">Físico está de acordo com o sistêmico?</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-1.5 text-sm cursor-pointer">
-                            <input type="radio" name="fisico_sistemico" value="Sim" onclick="tratarFisicoSistemico('Sim')"> Sim
-                        </label>
-                        <label class="flex items-center gap-1.5 text-sm cursor-pointer">
-                            <input type="radio" name="fisico_sistemico" value="Nao" onclick="tratarFisicoSistemico('Nao')"> Não
-                        </label>
+                        <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="fisico_sistemico" value="Sim" onclick="tratarFisicoSistemico('Sim')"> Sim</label>
+                        <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="fisico_sistemico" value="Nao" onclick="tratarFisicoSistemico('Nao')"> Não</label>
                     </div>
                 </div>
 
                 <div id="div-btn-sem-divergencia" class="hidden">
-                    <button type="button" onclick="abrirConfirmacaoSemDivergencia()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-sm shadow">
-                        Sem divergência
-                    </button>
+                    <button type="button" onclick="abrirConfirmacaoSemDivergencia()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-sm shadow">Sem divergência</button>
                 </div>
 
                 <div id="div-campos-divergencia" class="hidden space-y-3 pt-2 border-t border-borderGray/30">
@@ -251,7 +244,6 @@
                 </div>
             </div>
 
-            <!-- CONTEÚDO ORIGINAL PARA PACKING -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
                 <div id="modal-opcoes-culpabilidade" class="space-y-3">
                     <label class="text-xs font-bold block">Selecione a Culpabilidade / Resultado:</label>
@@ -271,7 +263,7 @@
         </div>
     </div>
 
-    <!-- MINI-MODAL / MENSAGEM FLUTUANTE "TEM CERTEZA?" -->
+    <!-- MODAL CONFIRMAÇÃO -->
     <div id="modal-confirmacao-sem-div" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
             <button onclick="fecharConfirmacaoSemDivergencia()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
@@ -283,7 +275,7 @@
         </div>
     </div>
 
-    <!-- MODAL JANELA FLUTUANTE: LOST SALVO -->
+    <!-- MODAL LOST SALVO -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
             <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
@@ -311,7 +303,7 @@
         </div>
     </div>
 
-    <!-- MODAL JANELA FLUTUANTE: LOST NÃO LOCALIZADO -->
+    <!-- MODAL LOST NÃO LOCALIZADO -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -339,7 +331,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE E SCRIPT PRINCIPAL -->
+    <!-- SCRIPT FIREBASE E GRÁFICOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -363,12 +355,9 @@
             const iconeTema = document.getElementById('icone-tema');
             html.classList.toggle('dark');
             const isDark = html.classList.contains('dark');
-            
             if (iconeTema) {
                 iconeTema.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         };
 
@@ -376,9 +365,7 @@
             if (!dataStr) return '-';
             if (dataStr.includes('/')) return dataStr;
             const partes = dataStr.split('-');
-            if (partes.length === 3) {
-                return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            }
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
             return dataStr;
         };
 
@@ -395,17 +382,10 @@
                     const [hora, min] = etdHora.split(':').map(Number);
                     targetDate = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), hora, min, 0);
                 }
-                
-                const diffMs = targetDate - agora;
-                const diffMins = diffMs / (1000 * 60);
-
-                if (diffMins < 0) {
-                    return { classe: "", style: "color: #6A0DAD;", texto: etdHora };
-                } else if (diffMins <= 20) {
-                    return { classe: "text-red-600 dark:text-red-400 font-extrabold animate-pulse", style: "", texto: etdHora };
-                } else {
-                    return { classe: "dark:text-darkText", style: "", texto: etdHora };
-                }
+                const diffMins = (targetDate - agora) / (1000 * 60);
+                if (diffMins < 0) return { classe: "", style: "color: #6A0DAD;", texto: etdHora };
+                if (diffMins <= 20) return { classe: "text-red-600 dark:text-red-400 font-extrabold animate-pulse", style: "", texto: etdHora };
+                return { classe: "dark:text-darkText", style: "", texto: etdHora };
             } catch (e) {
                 return { classe: "dark:text-darkText", style: "", texto: etdHora };
             }
@@ -425,7 +405,10 @@
             renderizarLostSalvo();
             renderizarLostNaoLocalizado();
             renderizarDashboard();
-        }
+            if (!document.getElementById('painel-graficos').classList.contains('hidden')) {
+                atualizarGraficos();
+            }
+        };
 
         window.salvarSolicitacao = async () => {
             await addDoc(collection(db, "tarefas"), { 
@@ -449,16 +432,10 @@
             return lista.sort((a, b) => {
                 const dataA = a.data ? a.data.split('T')[0] : '';
                 const dataB = b.data ? b.data.split('T')[0] : '';
-
                 const ehHojeA = dataA === hojeStr ? 0 : 1;
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
-
-                if (ehHojeA !== ehHojeB) {
-                    return ehHojeA - ehHojeB;
-                }
-                if (dataA !== dataB) {
-                    return dataA.localeCompare(dataB);
-                }
+                if (ehHojeA !== ehHojeB) return ehHojeA - ehHojeB;
+                if (dataA !== dataB) return dataA.localeCompare(dataB);
                 return (a.etd || '').localeCompare(b.etd || '');
             });
         };
@@ -467,17 +444,14 @@
             const container = document.getElementById('lista-auditoria-picking');
             if (!container) return;
             container.innerHTML = "";
-            
             const pendentes = tarefasCache.filter(t => t.status === 'Pendente');
             ordenarTarefasPorPrioridadeData(pendentes);
-
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Picking.</p>`;
                 return;
             }
             pendentes.forEach(d => {
                 const etdInfo = obterEstiloEtd(d.data, d.etd);
-
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
@@ -495,10 +469,8 @@
             const container = document.getElementById('lista-auditoria-packing');
             if (!container) return;
             container.innerHTML = "";
-            
             const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
             ordenarTarefasPorPrioridadeData(pendentes);
-
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
                 return;
@@ -564,7 +536,6 @@
         window.renderizarDashboard = () => {
             const tbody = document.getElementById('tabela-body');
             tbody.innerHTML = "";
-            
             const filtroData = document.getElementById('filtro-data').value;
             const filtroEtd = document.getElementById('filtro-etd').value.toLowerCase();
 
@@ -575,14 +546,9 @@
                 return true;
             });
 
-            // Atualiza os contadores dos Cards de Volume no Topo da Dashboard
-            let volTotal = tarefasCache.length;
-            let volSalvos = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
-            let volNaoLocalizado = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
-
-            document.getElementById('stat-volume-total').innerText = volTotal;
-            document.getElementById('stat-volume-salvos').innerText = volSalvos;
-            document.getElementById('stat-volume-nao-localizado').innerText = volNaoLocalizado;
+            document.getElementById('stat-volume-total').innerText = tarefasCache.length;
+            document.getElementById('stat-volume-salvos').innerText = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
+            document.getElementById('stat-volume-nao-localizado').innerText = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
 
             dadosFiltrados.forEach(d => {
                 const tr = document.createElement('tr');
@@ -624,13 +590,10 @@
                 document.getElementById('container-picking-fluxo').classList.add('hidden');
                 document.getElementById('container-packing-fluxo').classList.remove('hidden');
             }
-
             document.getElementById('modal-auditoria').classList.remove('hidden');
         };
 
-        window.fecharModalAuditoria = () => {
-            document.getElementById('modal-auditoria').classList.add('hidden');
-        };
+        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
 
         window.tratarFisicoSistemico = (valor) => {
             if(valor === 'Sim') {
@@ -642,22 +605,15 @@
             }
         };
 
-        window.abrirConfirmacaoSemDivergencia = () => {
-            document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
-        };
-
-        window.fecharConfirmacaoSemDivergencia = () => {
-            document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
-        };
+        window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
+        window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
 
         window.confirmarSemDivergenciaEnvio = async () => {
             fecharConfirmacaoSemDivergencia();
             fecharModalAuditoria();
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado',
-                    status_fisico: 'Sim',
-                    resultado_auditoria: 'Sem divergência'
+                    status: 'Auditado', status_fisico: 'Sim', resultado_auditoria: 'Sem divergência'
                 });
                 alert("Auditado com sucesso!");
             }
@@ -666,22 +622,14 @@
         window.salvarAuditoriaPickingNao = async () => {
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-            if(culpabilidade === 'Outros') {
-                culpabilidade = document.getElementById('picking_outro_texto').value;
-            }
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('picking_outro_texto').value;
             const colaborador = document.getElementById('picking_colaborador').value;
             const tl = document.getElementById('picking_tl').value;
             const observacao = document.getElementById('picking_observacao').value;
 
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado',
-                    status_fisico: 'Nao',
-                    culpabilidade,
-                    colaborador,
-                    tl,
-                    observacao,
-                    resultado_auditoria: 'Com divergência'
+                    status: 'Auditado', status_fisico: 'Nao', culpabilidade, colaborador, tl, observacao, resultado_auditoria: 'Com divergência'
                 });
                 fecharModalAuditoria();
                 alert("Divergência salva com sucesso!");
@@ -691,26 +639,17 @@
         window.salvarAuditoriaModal = async () => {
             const culpabilidade = document.getElementById('select-culpabilidade').value;
             if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado',
-                    resultado_auditoria: culpabilidade
-                });
+                await updateDoc(doc(db, "tarefas", currentModalId), { status: 'Auditado', resultado_auditoria: culpabilidade });
                 fecharModalAuditoria();
                 alert("Auditoria Packing salva!");
             }
         };
 
         window.deletarTarefa = async (id) => {
-            if(confirm("Deseja realmente excluir este registro?")) {
-                await deleteDoc(doc(db, "tarefas", id));
-            }
+            if(confirm("Deseja realmente excluir este registro?")) await deleteDoc(doc(db, "tarefas", id));
         };
 
-        window.setFiltroStatus = (status) => {
-            filtroStatusAtivo = status;
-            renderizarDashboard();
-        };
-
+        window.setFiltroStatus = (status) => { filtroStatusAtivo = status; renderizarDashboard(); };
         window.limparFiltros = () => {
             filtroStatusAtivo = null;
             document.getElementById('filtro-data').value = '';
@@ -721,24 +660,103 @@
         window.toggleGraficosPainel = () => {
             const painel = document.getElementById('painel-graficos');
             painel.classList.toggle('hidden');
-            if(!painel.classList.contains('hidden')) {
-                atualizarGraficos();
-            }
+            if(!painel.classList.contains('hidden')) atualizarGraficos();
         };
 
+        // Geração dos Gráficos com Dados Reais
         window.atualizarGraficos = () => {
-            ['chartCulpabilidade', 'chartLostSalvos', 'chartLostNaoLocalizado', 'chartEtd', 'chartTls'].forEach(id => {
-                const canvas = document.getElementById(id);
-                if(canvas) {
-                    if(chartsInstance[id]) chartsInstance[id].destroy();
-                    chartsInstance[id] = new Chart(canvas, {
-                        type: 'bar',
-                        data: { labels: ['Exemplo'], datasets: [{ data: [1], backgroundColor: '#002147' }] },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+            const periodo = document.getElementById('filtro-periodo-grafico').value;
+            
+            // Filtro por período básico
+            const agora = new Date();
+            let dados = tarefasCache.filter(t => {
+                if(!t.criadoEm) return true;
+                const dataCriacao = t.criadoEm.toDate ? t.criadoEm.toDate() : new Date(t.criadoEm);
+                if(periodo === 'dia') {
+                    return dataCriacao.toDateString() === agora.toDateString();
+                } else if(periodo === 'semana') {
+                    const umaSemanaAtras = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return dataCriacao >= umaSemanaAtras;
+                } else if(periodo === 'mes') {
+                    return dataCriacao.getMonth() === agora.getMonth() && dataCriacao.getFullYear() === agora.getFullYear();
+                }
+                return true;
+            });
+
+            // 1. Culpabilidade / Resultado Auditoria (Pizza)
+            const mapCulp = {};
+            dados.forEach(t => {
+                const k = t.resultado_auditoria || 'Aguardando';
+                mapCulp[k] = (mapCulp[k] || 0) + 1;
+            });
+            destruirOuCriarGrafico('chartCulpabilidade', 'pie', Object.keys(mapCulp), Object.values(mapCulp), ['#002147', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']);
+
+            // 2. Lost Salvos Alternativas (Pizza)
+            const mapSalvos = {};
+            dados.filter(t => t.status === 'Lost Salvo').forEach(t => {
+                const k = t.alternativa || 'Outro';
+                mapSalvos[k] = (mapSalvos[k] || 0) + 1;
+            });
+            const labelsSalvos = Object.keys(mapSalvos);
+            const dataSalvos = Object.values(mapSalvos);
+            destruirOuCriarGrafico('chartLostSalvos', 'pie', labelsSalvos.length ? labelsSalvos : ['Nenhum'], dataSalvos.length ? dataSalvos : [1], labelsSalvos.length ? ['#002147', '#3B82F6', '#10B981', '#F59E0B'] : ['#E5E7EB']);
+
+            // 3. Lost Não Localizado Alternativas (Pizza)
+            const mapNaoLoc = {};
+            dados.filter(t => t.status === 'Lost não localizado').forEach(t => {
+                const k = t.alternativa || 'Outro';
+                mapNaoLoc[k] = (mapNaoLoc[k] || 0) + 1;
+            });
+            const labelsNaoLoc = Object.keys(mapNaoLoc);
+            const dataNaoLoc = Object.values(mapNaoLoc);
+            destruirOuCriarGrafico('chartLostNaoLocalizado', 'pie', labelsNaoLoc.length ? labelsNaoLoc : ['Nenhum'], dataNaoLoc.length ? dataNaoLoc : [1], labelsNaoLoc.length ? ['#002147', '#EF4444', '#F59E0B', '#6366F1'] : ['#E5E7EB']);
+
+            // 4. ETD Distribuição (Pizza)
+            const mapEtd = {};
+            dados.forEach(t => {
+                const k = t.etd || 'N/D';
+                mapEtd[k] = (mapEtd[k] || 0) + 1;
+            });
+            const labelsEtd = Object.keys(mapEtd);
+            const dataEtd = Object.values(mapEtd);
+            const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
+            destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
+
+            // 5. Team Leaders - TLs (Barra)
+            const mapTls = {};
+            dados.forEach(t => {
+                const k = t.tl || 'Não informado';
+                mapTls[k] = (mapTls[k] || 0) + 1;
+            });
+            destruirOuCriarGrafico('chartTls', 'bar', Object.keys(mapTls), Object.values(mapTls), ['#002147']);
+        };
+
+        function destruirOuCriarGrafico(canvasId, tipo, labels, data, cores) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            if(chartsInstance[canvasId]) chartsInstance[canvasId].destroy();
+            
+            chartsInstance[canvasId] = new Chart(canvas, {
+                type: tipo,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: cores
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: tipo === 'pie' ? 'bottom' : 'none',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        }
+                    }
                 }
             });
-        };
+        }
 
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
