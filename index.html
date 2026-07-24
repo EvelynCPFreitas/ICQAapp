@@ -193,10 +193,76 @@
     </div>
 
     <!-- BOTÕES FLUTUANTES -->
+    <button id="btn-floating-auditoria-packing" onclick="abrirModalAuditoriaPackingManual()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
 
-    <!-- MODAL DE AUDITORIA -->
+    <!-- MODAL NOVO DE AUDITORIA PACKING (ABERTURA PELO BOTÃO +) -->
+    <div id="modal-flutuante-auditoria-packing" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4">Auditoria Packing</h2>
+            <form class="space-y-3" onsubmit="event.preventDefault(); salvarAuditoriaPackingManual();">
+                <input type="text" id="apk_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="apk_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="apk_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="number" id="apk_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="apk_etd" placeholder="ETD (ex: 12:00)" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold block mb-1">Data do ETD:</label>
+                    <input type="date" id="apk_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                </div>
+
+                <div class="space-y-2 pt-2 border-t dark:border-borderGray">
+                    <label class="text-xs font-bold block">Culpabilidade:</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="apk_culpabilidade" value="Tote finalizada pela bancada com produto" checked> 
+                            <span>Tote finalizada pela bancada com produto</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="apk_culpabilidade" value="Troca de etiqueta ou produto (inversão de pedido)"> 
+                            <span>Troca de etiqueta ou produto (inversão de pedido)</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="apk_culpabilidade" value="Packing não bipou todas as unidades"> 
+                            <span>Packing não bipou todas as unidades</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="apk_culpabilidade" value="Inconclusivo"> 
+                            <span>Inconclusivo</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="apk_culpabilidade" value="Outros" id="apk_radio_outros"> 
+                            <span class="text-sm shrink-0">Outros:</span> 
+                            <input type="text" id="apk_outro_texto" placeholder="Escreva..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
+                    <input type="text" id="apk_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
+                    <input type="text" id="apk_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
+                    <textarea id="apk_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-3">
+                    <button type="submit" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold text-sm shadow">Salvar Auditoria</button>
+                    <button type="button" onclick="fecharModalAuditoriaPackingManual()" class="bg-gray-400 text-white px-4 py-2 rounded text-sm">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE AUDITORIA EXISTENTE -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl font-bold mb-3">Auditoria</h2>
@@ -245,7 +311,7 @@
                 </div>
             </div>
 
-            <!-- FLUXO PACKING (ATUALIZADO) -->
+            <!-- FLUXO PACKING -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
                 <div>
                     <label class="text-xs font-bold block mb-2">Culpabilidade:</label>
@@ -392,7 +458,7 @@
         let currentModalTipo = null;
         let filtroStatusAtivo = null;
         let chartsInstance = {};
-        let dadosFiltradosGraficoCache = []; // Usado para referenciar os colaboradores do TL clicado
+        let dadosFiltradosGraficoCache = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof lucide !== 'undefined') {
@@ -675,7 +741,6 @@
                 document.getElementById('container-picking-fluxo').classList.add('hidden');
                 document.getElementById('container-packing-fluxo').classList.remove('hidden');
                 
-                // Limpa/Reseta campos do Packing
                 const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
                 if(radioDefault) radioDefault.checked = true;
                 document.getElementById('packing_outro_texto').value = '';
@@ -933,6 +998,7 @@
             document.getElementById('modal-detalhes-tl').classList.add('hidden');
         };
 
+        // ALTERNÂNCIA DE ABAS
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
@@ -946,18 +1012,50 @@
                 document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
                 document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
+                // Esconde todos os botões flutuantes por padrão
+                document.getElementById('btn-floating-auditoria-packing').classList.add('hidden');
                 document.getElementById('btn-floating-lost-salvo').classList.add('hidden');
                 document.getElementById('btn-floating-lost-nao-localizado').classList.add('hidden');
 
+                // Exibe o botão flutuante correspondente
+                if(tab === 'auditoria-packing') document.getElementById('btn-floating-auditoria-packing').classList.remove('hidden');
                 if(tab === 'lost-salvo') document.getElementById('btn-floating-lost-salvo').classList.remove('hidden');
                 if(tab === 'lost-nao-localizado') document.getElementById('btn-floating-lost-nao-localizado').classList.remove('hidden');
             });
         });
 
+        // FUNÇÕES MODAIS FLUTUANTES
+        window.abrirModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.remove('hidden');
+        window.fecharModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.add('hidden');
+
         window.abrirModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.remove('hidden');
         window.fecharModalLostSalvo = () => document.getElementById('modal-flutuante-lost-salvo').classList.add('hidden');
         window.abrirModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.remove('hidden');
         window.fecharModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.add('hidden');
+
+        // SALVAR AUDITORIA PACKING MANUALMENTE VIA BOTÃO +
+        window.salvarAuditoriaPackingManual = async () => {
+            const culpabilidadeEl = document.querySelector('input[name="apk_culpabilidade"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('apk_outro_texto').value;
+
+            await addDoc(collection(db, "tarefas"), {
+                tote: document.getElementById('apk_tote').value,
+                meli: document.getElementById('apk_meli').value,
+                mz: document.getElementById('apk_mz').value,
+                qtd: document.getElementById('apk_qtd').value,
+                etd: document.getElementById('apk_etd').value,
+                data: document.getElementById('apk_data_etd').value,
+                resultado_auditoria: culpabilidade,
+                colaborador: document.getElementById('apk_colaborador').value,
+                tl: document.getElementById('apk_tl').value,
+                observacao: document.getElementById('apk_observacao').value,
+                status: 'Auditado',
+                criadoEm: new Date()
+            });
+            fecharModalAuditoriaPackingManual();
+            alert("Auditoria Packing salva com sucesso!");
+        };
 
         window.salvarLostSalvoManual = async () => {
             const altEl = document.querySelector('input[name="ls_alt"]:checked');
