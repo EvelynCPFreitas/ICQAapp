@@ -384,6 +384,25 @@
             return dataStr;
         };
 
+        const formatarDataHoraCriacao = (criadoEm) => {
+            if (!criadoEm) return '-';
+            let dataObj;
+            if (criadoEm.toDate) {
+                dataObj = criadoEm.toDate();
+            } else if (criadoEm instanceof Date) {
+                dataObj = criadoEm;
+            } else {
+                dataObj = new Date(criadoEm);
+            }
+            if (isNaN(dataObj.getTime())) return '-';
+            const dia = String(dataObj.getDate()).padStart(2, '0');
+            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            const ano = dataObj.getFullYear();
+            const hora = String(dataObj.getHours()).padStart(2, '0');
+            const min = String(dataObj.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes}/${ano} ${hora}:${min}`;
+        };
+
         function obterEstiloEtd(dataEtd, etdHora) {
             if (!etdHora) return { classe: "dark:text-darkText", texto: '-' };
             try {
@@ -516,11 +535,12 @@
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
-                    <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>Qtd:</b> ${d.qtd}</p>
-                        <p class="text-xs text-gray-400">Alternativa: ${d.alternativa || '-'}</p>
+                    <div class="space-y-1">
+                        <p><b>TOTE:</b> ${d.tote || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
+                        <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 font-bold text-xs">Excluir</button>
+                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs shrink-0 ml-4">Excluir</button>
                 `;
                 container.appendChild(card);
             });
@@ -538,11 +558,12 @@
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
-                    <div>
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>Qtd:</b> ${d.qtd}</p>
-                        <p class="text-xs text-gray-400">Alternativa: ${d.alternativa || '-'}</p>
+                    <div class="space-y-1">
+                        <p><b>TOTE:</b> ${d.tote || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
+                        <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 font-bold text-xs">Excluir</button>
+                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs shrink-0 ml-4">Excluir</button>
                 `;
                 container.appendChild(card);
             });
