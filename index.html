@@ -198,10 +198,11 @@
 
     <!-- MODAL DE AUDITORIA -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl font-bold mb-3">Auditoria</h2>
             <div id="modal-content" class="mb-4 text-sm space-y-1"></div>
             
+            <!-- FLUXO PICKING -->
             <div id="container-picking-fluxo" class="space-y-4">
                 <div class="p-3 bg-gray-100 dark:bg-black/20 rounded border border-borderGray/30">
                     <label class="text-xs font-bold block mb-2">Físico está de acordo com o sistêmico?</label>
@@ -219,8 +220,8 @@
                     <div>
                         <label class="text-xs font-bold block mb-1">Culpabilidade:</label>
                         <div class="space-y-1.5">
-                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="culpabilidade_picking" value="Meli divergente"> Meli divergente</label>
-                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="culpabilidade_picking" value="Picking Massivo"> Picking Massivo</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Meli divergente"> Meli divergente</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Picking Massivo"> Picking Massivo</label>
                             <div class="flex items-center gap-2">
                                 <input type="radio" name="culpabilidade_picking" value="Outros" id="radio_outros_picking"> 
                                 <span class="text-sm">Outros:</span> 
@@ -244,17 +245,51 @@
                 </div>
             </div>
 
+            <!-- FLUXO PACKING (ATUALIZADO) -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
-                <div id="modal-opcoes-culpabilidade" class="space-y-3">
-                    <label class="text-xs font-bold block">Selecione a Culpabilidade / Resultado:</label>
-                    <select id="select-culpabilidade" class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray text-sm">
-                        <option value="Conforme">Conforme</option>
-                        <option value="Necessita Correção">Necessita Correção</option>
-                        <option value="Erro Operacional">Erro Operacional</option>
-                        <option value="Erro Sistema">Erro Sistema</option>
-                    </select>
+                <div>
+                    <label class="text-xs font-bold block mb-2">Culpabilidade:</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="culpabilidade_packing" value="Tote finalizada pela bancada com produto" checked> 
+                            <span>Tote finalizada pela bancada com produto</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="culpabilidade_packing" value="Troca de etiqueta ou produto (inversão de pedido)"> 
+                            <span>Troca de etiqueta ou produto (inversão de pedido)</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="culpabilidade_packing" value="Packing não bipou todas as unidades"> 
+                            <span>Packing não bipou todas as unidades</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="culpabilidade_packing" value="Inconclusivo"> 
+                            <span>Inconclusivo</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="culpabilidade_packing" value="Outros" id="radio_outros_packing"> 
+                            <span class="text-sm shrink-0">Outros:</span> 
+                            <input type="text" id="packing_outro_texto" placeholder="Escreva..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray">
+                        </div>
+                    </div>
                 </div>
-                <button type="button" onclick="salvarAuditoriaModal()" class="w-full bg-primaryBtn text-white py-2 rounded font-bold">Salvar Auditoria</button>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
+                    <input type="text" id="packing_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
+                    <input type="text" id="packing_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
+                    <textarea id="packing_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
+                </div>
+
+                <button type="button" onclick="salvarAuditoriaModal()" class="w-full bg-primaryBtn text-white py-2.5 rounded font-bold text-sm shadow">Salvar Auditoria</button>
             </div>
 
             <div class="mt-4 pt-3 border-t border-borderGray/30 flex justify-end">
@@ -590,7 +625,6 @@
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-borderGray/20 text-xs";
                 
-                // Normalização do status para atribuição de cores dinâmicas
                 const statusNormalizado = (d.status || '').toLowerCase().trim();
                 let statusClass = "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
 
@@ -640,6 +674,14 @@
             } else {
                 document.getElementById('container-picking-fluxo').classList.add('hidden');
                 document.getElementById('container-packing-fluxo').classList.remove('hidden');
+                
+                // Limpa/Reseta campos do Packing
+                const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
+                if(radioDefault) radioDefault.checked = true;
+                document.getElementById('packing_outro_texto').value = '';
+                document.getElementById('packing_colaborador').value = '';
+                document.getElementById('packing_tl').value = '';
+                document.getElementById('packing_observacao').value = '';
             }
             document.getElementById('modal-auditoria').classList.remove('hidden');
         };
@@ -688,11 +730,24 @@
         };
 
         window.salvarAuditoriaModal = async () => {
-            const culpabilidade = document.getElementById('select-culpabilidade').value;
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+            
+            const colaborador = document.getElementById('packing_colaborador').value;
+            const tl = document.getElementById('packing_tl').value;
+            const observacao = document.getElementById('packing_observacao').value;
+
             if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), { status: 'Auditado', resultado_auditoria: culpabilidade });
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Auditado', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao
+                });
                 fecharModalAuditoria();
-                alert("Auditoria Packing salva!");
+                alert("Auditoria Packing salva com sucesso!");
             }
         };
 
@@ -733,7 +788,7 @@
                 return true;
             });
 
-            dadosFiltradosGraficoCache = dados; // Salva para uso no modal do TL
+            dadosFiltradosGraficoCache = dados;
 
             // 1. Culpabilidade / Resultado Auditoria (Pizza)
             const mapCulp = {};
@@ -848,7 +903,6 @@
 
             titulo.innerText = `Colaboradores do TL: ${nomeTl}`;
             
-            // Filtra os colaboradores que pertencem a este TL nas tarefas do período atual
             const colaboradoresSet = new Set();
             dadosFiltradosGraficoCache.forEach(t => {
                 const tlTask = t.tl || 'Não informado';
