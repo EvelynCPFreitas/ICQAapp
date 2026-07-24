@@ -568,12 +568,27 @@
             dadosFiltrados.forEach(d => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-borderGray/20 text-xs";
+                
+                // Normalização do status para atribuição de cores dinâmicas
+                const statusNormalizado = (d.status || '').toLowerCase().trim();
+                let statusClass = "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+
+                if (statusNormalizado === 'auditado') {
+                    statusClass = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+                } else if (statusNormalizado === 'pendente') {
+                    statusClass = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                } else if (statusNormalizado.includes('não localizado') || statusNormalizado.includes('nao localizado')) {
+                    statusClass = "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+                } else if (statusNormalizado === 'lost salvo') {
+                    statusClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+                }
+
                 tr.innerHTML = `
                     <td class="p-2">${d.tote || '-'}</td>
                     <td class="p-2">${d.mz || '-'}</td>
                     <td class="p-2">${d.meli || '-'}</td>
                     <td class="p-2">${d.qtd || '-'}</td>
-                    <td class="p-2"><span class="px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">${d.status}</span></td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded font-bold ${statusClass}">${d.status || '-'}</span></td>
                     <td class="p-2">${d.etd || '-'}</td>
                     <td class="p-2">${d.resultado_auditoria || '-'}</td>
                 `;
