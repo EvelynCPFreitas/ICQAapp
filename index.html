@@ -197,7 +197,7 @@
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
 
-    <!-- MODAL NOVO DE AUDITORIA PACKING (ABERTURA PELO BOTÃO +) -->
+    <!-- MODAL DE AUDITORIA PACKING MANUAL -->
     <div id="modal-flutuante-auditoria-packing" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Auditoria Packing</h2>
@@ -418,9 +418,9 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO -->
+    <!-- MODAL LOST NÃO LOCALIZADO (ATUALIZADO) -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
             <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostNaoLocalizadoManual();">
                 <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -436,11 +436,27 @@
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote perdido em MZ" checked> <span class="text-sm">Tote perdido em MZ</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote vazio na esteira"> <span class="text-sm">Tote vazio na esteira</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Missed Backlog (5 dias)"> <span class="text-sm">Missed Backlog (5 dias)</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray"></div>
                 </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
+                    <input type="text" id="lnl_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
+                    <input type="text" id="lnl_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
+                    <textarea id="lnl_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
+                </div>
+
                 <div class="flex gap-2 pt-3">
-                    <button type="submit" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold">Salvar</button>
-                    <button type="button" onclick="fecharModalLostNaoLocalizado()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-primaryBtn text-white py-2.5 rounded font-bold text-sm shadow">Salvar Auditoria</button>
+                    <button type="button" onclick="fecharModalLostNaoLocalizado()" class="bg-gray-400 text-white px-4 py-2 rounded text-sm">Cancelar</button>
                 </div>
             </form>
         </div>
@@ -661,7 +677,8 @@
                 card.innerHTML = `
                     <div class="space-y-1">
                         <p><b>TOTE:</b> ${d.tote || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'} | <b>Colaborador:</b> ${d.colaborador || '-'} | <b>TL:</b> ${d.tl || '-'}</p>
+                        ${d.observacao ? `<p class="text-xs text-gray-500 dark:text-gray-300"><b>Obs:</b> ${d.observacao}</p>` : ''}
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
                     <button onclick="deletarTarefa('${d.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs shrink-0 ml-4">Excluir</button>
@@ -1012,12 +1029,10 @@
                 document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
                 document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
-                // Esconde todos os botões flutuantes por padrão
                 document.getElementById('btn-floating-auditoria-packing').classList.add('hidden');
                 document.getElementById('btn-floating-lost-salvo').classList.add('hidden');
                 document.getElementById('btn-floating-lost-nao-localizado').classList.add('hidden');
 
-                // Exibe o botão flutuante correspondente
                 if(tab === 'auditoria-packing') document.getElementById('btn-floating-auditoria-packing').classList.remove('hidden');
                 if(tab === 'lost-salvo') document.getElementById('btn-floating-lost-salvo').classList.remove('hidden');
                 if(tab === 'lost-nao-localizado') document.getElementById('btn-floating-lost-nao-localizado').classList.remove('hidden');
@@ -1076,6 +1091,7 @@
             alert("Lost Salvo registrado com sucesso!");
         };
 
+        // SALVAR LOST NÃO LOCALIZADO VIA BOTÃO + (ATUALIZADO)
         window.salvarLostNaoLocalizadoManual = async () => {
             const altEl = document.querySelector('input[name="lnl_alt"]:checked');
             let alternativa = altEl ? altEl.value : '';
@@ -1088,6 +1104,9 @@
                 etd: document.getElementById('lnl_etd').value,
                 data: document.getElementById('lnl_data_etd').value,
                 alternativa,
+                colaborador: document.getElementById('lnl_colaborador').value,
+                tl: document.getElementById('lnl_tl').value,
+                observacao: document.getElementById('lnl_observacao').value,
                 status: 'Lost não localizado',
                 criadoEm: new Date()
             });
