@@ -37,11 +37,11 @@
         </header>
 
         <main class="max-w-7xl mx-auto px-4 py-8">
-            <!-- ABA 1: SOLICITAÇÃO -->
+            <!-- ABA 1: SOLICITAÇÃO (ATUALIZADA) -->
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                     <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
-                    <form class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
+                    <form id="form-solicitacao" class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
                         <input type="text" id="sol_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="text" id="sol_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="number" id="sol_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -51,15 +51,35 @@
                             <div>
                                 <label class="text-xs font-bold dark:text-darkText block mb-1">DATA</label>
                                 <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
-                                    <input type="date" id="sol_data" class="w-full bg-transparent dark:text-white focus:outline-none">
+                                    <input type="date" id="sol_data" required class="w-full bg-transparent dark:text-white focus:outline-none">
                                 </div>
                             </div>
                             <div>
                                 <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
                                 <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
-                                    <input type="time" id="sol_etd" class="w-full bg-transparent dark:text-white focus:outline-none">
+                                    <input type="time" id="sol_etd" required class="w-full bg-transparent dark:text-white focus:outline-none">
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- PERGUNTA DE SOBRA DE PRODUTO NA CAIXA -->
+                        <div class="p-3 bg-gray-100 dark:bg-black/20 rounded border border-borderGray/30">
+                            <label class="text-xs font-bold block mb-2 dark:text-darkText">Sobrou algum produto na caixa?</label>
+                            <div class="flex gap-6">
+                                <label class="flex items-center gap-1.5 text-sm cursor-pointer dark:text-white">
+                                    <input type="radio" name="sol_sobra_radio" value="Sim" onclick="tratarSobraProduto('Sim')"> Sim
+                                </label>
+                                <label class="flex items-center gap-1.5 text-sm cursor-pointer dark:text-white">
+                                    <input type="radio" name="sol_sobra_radio" value="Nao" checked onclick="tratarSobraProduto('Nao')"> Não
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- CAMPOS EXTRAS CASO SIM -->
+                        <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
+                            <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
+                            <input type="text" id="sol_sobra_meli" placeholder="MELI" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                            <input type="number" id="sol_sobra_qtd" placeholder="QUANTIDADE" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                         </div>
 
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
@@ -418,7 +438,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO (ATUALIZADO) -->
+    <!-- MODAL LOST NÃO LOCALIZADO -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -561,7 +581,24 @@
             }
         };
 
+        // LÓGICA SOBRA DE PRODUTO NA SOLICITAÇÃO
+        window.tratarSobraProduto = (valor) => {
+            const container = document.getElementById('container-sobra-produto');
+            if (valor === 'Sim') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('sol_sobra_meli').value = '';
+                document.getElementById('sol_sobra_qtd').value = '';
+            }
+        };
+
         window.salvarSolicitacao = async () => {
+            const sobraRadio = document.querySelector('input[name="sol_sobra_radio"]:checked');
+            const sobrouProduto = sobraRadio ? sobraRadio.value : 'Nao';
+            const sobraMeli = document.getElementById('sol_sobra_meli').value;
+            const sobraQtd = document.getElementById('sol_sobra_qtd').value;
+
             await addDoc(collection(db, "tarefas"), { 
                 mz: document.getElementById('sol_mz').value, 
                 meli: document.getElementById('sol_meli').value, 
@@ -569,13 +606,17 @@
                 tote: document.getElementById('sol_tote').value,
                 data: document.getElementById('sol_data').value,
                 etd: document.getElementById('sol_etd').value,
+                sobrou_produto: sobrouProduto,
+                sobra_meli: sobrouMeli || null,
+                sobra_qtd: sobraQtd || null,
                 status: 'Pendente',
                 status_fisico: 'Pendente',
                 resultado_auditoria: 'Aguardando',
                 criadoEm: new Date() 
             });
             alert("Solicitação enviada com sucesso!");
-            document.querySelector('form').reset();
+            document.getElementById('form-solicitacao').reset();
+            tratarSobraProduto('Nao');
         };
 
         const ordenarTarefasPorPrioridadeData = (lista) => {
@@ -1091,7 +1132,7 @@
             alert("Lost Salvo registrado com sucesso!");
         };
 
-        // SALVAR LOST NÃO LOCALIZADO VIA BOTÃO + (ATUALIZADO)
+        // SALVAR LOST NÃO LOCALIZADO VIA BOTÃO +
         window.salvarLostNaoLocalizadoManual = async () => {
             const altEl = document.querySelector('input[name="lnl_alt"]:checked');
             let alternativa = altEl ? altEl.value : '';
