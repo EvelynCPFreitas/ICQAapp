@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[cite: 3]<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -137,7 +137,8 @@
                     </div>
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume de Lost Salvos</span>
-                        <span id="stat-volume-salvos" class="text-3xl font-extrabold text-green-600 dark:text-green-400">0</span>
+                        <!-- ALTERAÇÃO FEITA AQUI: De text-green-600 dark:text-green-400 para text-blue-600 dark:text-blue-400 -->
+                        <span id="stat-volume-salvos" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400">0</span>
                     </div>
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Lost Não Localizado</span>
@@ -630,7 +631,7 @@
                 data: document.getElementById('sol_data').value,
                 etd: document.getElementById('sol_etd').value,
                 sobrou_produto: sobrouProduto,
-                sobra_meli: sobrouMeli || null,
+                sobra_meli: sobraMeli || null,
                 sobra_qtd: sobraQtd || null,
                 status: 'Pendente',
                 status_fisico: 'Pendente',
