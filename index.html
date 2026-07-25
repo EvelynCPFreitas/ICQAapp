@@ -37,7 +37,7 @@
         </header>
 
         <main class="max-w-7xl mx-auto px-4 py-8">
-            <!-- ABA 1: SOLICITAÇÃO (ATUALIZADA) -->
+            <!-- ABA 1: SOLICITAÇÃO -->
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                     <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
@@ -226,7 +226,12 @@
                 <input type="text" id="apk_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="apk_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="apk_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="apk_etd" placeholder="ETD (ex: 12:00)" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
+                    <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
+                        <input type="time" id="apk_etd" required class="w-full bg-transparent dark:text-white focus:outline-none text-sm">
+                    </div>
+                </div>
                 <div>
                     <label class="text-xs font-bold block mb-1">Data do ETD:</label>
                     <input type="date" id="apk_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -410,15 +415,20 @@
         </div>
     </div>
 
-    <!-- MODAL LOST SALVO -->
+    <!-- MODAL LOST SALVO (ATUALIZADO ETD) -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
             <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostSalvoManual();">
                 <input type="text" id="ls_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="ls_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="ls_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="ls_etd" placeholder="ETD" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
+                    <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
+                        <input type="time" id="ls_etd" required class="w-full bg-transparent dark:text-white focus:outline-none text-sm">
+                    </div>
+                </div>
                 <div>
                     <label class="text-xs font-bold block mb-1">Data do ETD:</label>
                     <input type="date" id="ls_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -438,7 +448,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO -->
+    <!-- MODAL LOST NÃO LOCALIZADO (ATUALIZADO ETD) -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -446,7 +456,12 @@
                 <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="lnl_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="lnl_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="lnl_etd" placeholder="ETD" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <div>
+                    <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
+                    <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
+                        <input type="time" id="lnl_etd" required class="w-full bg-transparent dark:text-white focus:outline-none text-sm">
+                    </div>
+                </div>
                 <div>
                     <label class="text-xs font-bold block mb-1">Data do ETD:</label>
                     <input type="date" id="lnl_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
