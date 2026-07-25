@@ -122,10 +122,18 @@
             <!-- ABA 6: DASHBOARD -->
             <section id="tab-dashboard" class="page-section hidden">
                 <!-- CARDS DE ESTATÍSTICAS / VOLUMES -->
-                <div class="grid grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-4 gap-4 mb-6">
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Total</span>
                         <span id="stat-volume-total" class="text-3xl font-extrabold text-black dark:text-white">0</span>
+                    </div>
+                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Pendente x Auditado</span>
+                        <div class="flex justify-center items-center gap-2">
+                            <span id="stat-volume-pendente" class="text-2xl font-extrabold text-red-600 dark:text-red-400" title="Pendentes">0</span>
+                            <span class="text-xl font-bold text-gray-400">/</span>
+                            <span id="stat-volume-auditado" class="text-2xl font-extrabold text-green-600 dark:text-green-400" title="Auditados">0</span>
+                        </div>
                     </div>
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume de Lost Salvos</span>
@@ -756,7 +764,10 @@
                 return true;
             });
 
+            // Atualização dos cards estatísticos
             document.getElementById('stat-volume-total').innerText = tarefasCache.length;
+            document.getElementById('stat-volume-pendente').innerText = tarefasCache.filter(t => t.status === 'Pendente').length;
+            document.getElementById('stat-volume-auditado').innerText = tarefasCache.filter(t => t.status === 'Auditado').length;
             document.getElementById('stat-volume-salvos').innerText = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
             document.getElementById('stat-volume-nao-localizado').innerText = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
 
