@@ -242,6 +242,7 @@
                                 <th class="p-2">Status</th>
                                 <th class="p-2">ETD</th>
                                 <th class="p-2">Resultado Auditoria</th>
+                                <th class="p-2 text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-body"></tbody>
@@ -955,9 +956,14 @@
                     <td class="p-2"><span class="px-2 py-0.5 rounded font-bold ${statusClass}">${d.status || '-'}</span></td>
                     <td class="p-2">${d.etd || '-'}</td>
                     <td class="p-2">${d.resultado_auditoria || '-'}</td>
+                    <td class="p-2 text-right">
+                        ${obterBotaoExcluirAdmin(d.id)}
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
         window.abrirModalAuditoria = (id, tipo) => {
