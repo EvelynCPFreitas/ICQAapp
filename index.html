@@ -425,7 +425,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST SALVO (ATUALIZADO ETD) -->
+    <!-- MODAL LOST SALVO -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
@@ -458,7 +458,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO (ATUALIZADO ETD) -->
+    <!-- MODAL LOST NÃO LOCALIZADO -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -606,7 +606,6 @@
             }
         };
 
-        // LÓGICA SOBRA DE PRODUTO NA SOLICITAÇÃO
         window.tratarSobraProduto = (valor) => {
             const container = document.getElementById('container-sobra-produto');
             if (valor === 'Sim') {
@@ -644,7 +643,7 @@
             tratarSobraProduto('Nao');
         };
 
-        // LÓGICA ATUALIZADA: Prioriza estritamente por Data e ETD (ignorando Tote, Meli ou Quantidade)
+        // ORDENAÇÃO RIGOROSAMENTE CORRIGIDA (Prioriza data atual e horário ETD, ignorando campos textuais de Tote/Meli)
         const ordenarTarefasPorPrioridadeData = (lista) => {
             const hojeStr = new Date().toISOString().split('T')[0];
             return lista.sort((a, b) => {
@@ -652,6 +651,7 @@
                 const dataB = b.data ? b.data.split('T')[0] : '';
                 const ehHojeA = dataA === hojeStr ? 0 : 1;
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
+                
                 if (ehHojeA !== ehHojeB) return ehHojeA - ehHojeB;
                 if (dataA !== dataB) return dataA.localeCompare(dataB);
                 return (a.etd || '').localeCompare(b.etd || '');
@@ -767,7 +767,6 @@
                 return true;
             });
 
-            // Atualização dos cards estatísticos
             document.getElementById('stat-volume-total').innerText = tarefasCache.length;
             document.getElementById('stat-volume-pendente').innerText = tarefasCache.filter(t => t.status === 'Pendente').length;
             document.getElementById('stat-volume-auditado').innerText = tarefasCache.filter(t => t.status === 'Auditado').length;
@@ -921,10 +920,8 @@
             if(!painel.classList.contains('hidden')) atualizarGraficos();
         };
 
-        // Geração dos Gráficos com Dados Reais
         window.atualizarGraficos = () => {
             const periodo = document.getElementById('filtro-periodo-grafico').value;
-            
             const agora = new Date();
             let dados = tarefasCache.filter(t => {
                 if(!t.criadoEm) return true;
@@ -942,7 +939,6 @@
 
             dadosFiltradosGraficoCache = dados;
 
-            // 1. Culpabilidade / Resultado Auditoria (Pizza)
             const mapCulp = {};
             dados.forEach(t => {
                 const k = t.resultado_auditoria || 'Aguardando';
@@ -950,7 +946,6 @@
             });
             destruirOuCriarGrafico('chartCulpabilidade', 'pie', Object.keys(mapCulp), Object.values(mapCulp), ['#002147', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']);
 
-            // 2. Lost Salvos Alternativas (Pizza)
             const mapSalvos = {};
             dados.filter(t => t.status === 'Lost Salvo').forEach(t => {
                 const k = t.alternativa || 'Outro';
@@ -960,7 +955,6 @@
             const dataSalvos = Object.values(mapSalvos);
             destruirOuCriarGrafico('chartLostSalvos', 'pie', labelsSalvos.length ? labelsSalvos : ['Nenhum'], dataSalvos.length ? dataSalvos : [1], labelsSalvos.length ? ['#002147', '#3B82F6', '#10B981', '#F59E0B'] : ['#E5E7EB']);
 
-            // 3. Lost Não Localizado Alternativas (Pizza)
             const mapNaoLoc = {};
             dados.filter(t => t.status === 'Lost não localizado').forEach(t => {
                 const k = t.alternativa || 'Outro';
@@ -970,7 +964,6 @@
             const dataNaoLoc = Object.values(mapNaoLoc);
             destruirOuCriarGrafico('chartLostNaoLocalizado', 'pie', labelsNaoLoc.length ? labelsNaoLoc : ['Nenhum'], dataNaoLoc.length ? dataNaoLoc : [1], labelsNaoLoc.length ? ['#002147', '#EF4444', '#F59E0B', '#6366F1'] : ['#E5E7EB']);
 
-            // 4. ETD Distribuição (Pizza)
             const mapEtd = {};
             dados.forEach(t => {
                 const k = t.etd || 'N/D';
@@ -981,7 +974,6 @@
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
-            // 5. Team Leaders - TLs (Barra com clique para ver colaboradores)
             const mapTls = {};
             dados.forEach(t => {
                 const k = t.tl || 'Não informado';
@@ -1085,7 +1077,6 @@
             document.getElementById('modal-detalhes-tl').classList.add('hidden');
         };
 
-        // ALTERNÂNCIA DE ABAS
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
@@ -1109,7 +1100,6 @@
             });
         });
 
-        // FUNÇÕES MODAIS FLUTUANTES
         window.abrirModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.remove('hidden');
         window.fecharModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.add('hidden');
 
@@ -1118,7 +1108,6 @@
         window.abrirModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.remove('hidden');
         window.fecharModalLostNaoLocalizado = () => document.getElementById('modal-flutuante-lost-nao-localizado').classList.add('hidden');
 
-        // SALVAR AUDITORIA PACKING MANUALMENTE VIA BOTÃO +
         window.salvarAuditoriaPackingManual = async () => {
             const culpabilidadeEl = document.querySelector('input[name="apk_culpabilidade"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -1161,7 +1150,6 @@
             alert("Lost Salvo registrado com sucesso!");
         };
 
-        // SALVAR LOST NÃO LOCALIZADO VIA BOTÃO +
         window.salvarLostNaoLocalizadoManual = async () => {
             const altEl = document.querySelector('input[name="lnl_alt"]:checked');
             let alternativa = altEl ? altEl.value : '';
@@ -1186,4 +1174,3 @@
     </script>
 </body>
 </html>
-```[cite: 4]
