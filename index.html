@@ -643,19 +643,38 @@
             tratarSobraProduto('Nao');
         };
 
-        // ORDENAÇÃO RIGOROSAMENTE CORRIGIDA (Prioriza data atual e horário ETD, ignorando campos textuais de Tote/Meli)
+        // ORDENAÇÃO RIGOROSAMENTE CORRIGIDA COM PARSE NUMÉRICO DE DATA E HORA
         const ordenarTarefasPorPrioridadeData = (lista) => {
             const hojeStr = new Date().toISOString().split('T')[0];
+            
             return lista.sort((a, b) => {
-                const dataA = a.data ? a.data.split('T')[0] : '';
-                const dataB = b.data ? b.data.split('T')[0] : '';
+                const dataA = (a.data || '').trim();
+                const dataB = (b.data || '').trim();
+                
                 const ehHojeA = dataA === hojeStr ? 0 : 1;
                 const ehHojeB = dataB === hojeStr ? 0 : 1;
                 
+                // 1º Prioridade: Se um for de hoje e o outro não, o de hoje vem sempre primeiro
                 if (ehHojeA !== ehHojeB) return ehHojeA - ehHojeB;
-                if (dataA !== dataB) return dataA.localeCompare(dataB);
-                return (a.etd || '').localeCompare(b.etd || '');
+
+                // 2º Prioridade: Ordenação estrita por data (ano/mês/dia)
+                if (dataA !== dataB) {
+                    return dataA.localeCompare(dataB);
+                }
+
+                // 3º Prioridade: Se a data for a mesma, ordena estritamente pelo horário ETD convertido em minutos
+                const minA = converterHoraParaMinutos(a.etd);
+                const minB = converterHoraParaMinutos(b.etd);
+                return minA - minB;
             });
+        };
+
+        const converterHoraParaMinutos = (horaStr) => {
+            if (!horaStr || !horaStr.includes(':')) return 99999;
+            const partes = horaStr.split(':');
+            const horas = parseInt(partes[0], 10) || 0;
+            const minutos = parseInt(partes[1], 10) || 0;
+            return (horas * 60) + minutos;
         };
 
         window.renderizarAuditoriaPicking = () => {
