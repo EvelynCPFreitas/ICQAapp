@@ -18,6 +18,27 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
+    <!-- TELA / MODAL DE LOGIN -->
+    <div id="modal-login" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-8 rounded-xl max-w-sm w-full dark:text-white shadow-2xl border border-borderGray/30 text-center">
+            <h2 class="text-2xl font-bold text-primaryBtn dark:text-white mb-2">Portal LOST-FOUND</h2>
+            <p class="text-xs text-gray-500 dark:text-darkText mb-6">Identifique-se para acessar o sistema</p>
+            
+            <form id="form-login" onsubmit="event.preventDefault(); processarLogin();" class="space-y-4">
+                <div>
+                    <input type="text" id="login_nome" placeholder="Digite seu nome..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
+                </div>
+
+                <div id="container-senha-admin" class="hidden space-y-1 text-left">
+                    <label class="text-xs font-bold dark:text-darkText">Senha de Administrador:</label>
+                    <input type="password" id="login_senha" placeholder="Digite a senha..." class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
+                </div>
+
+                <button type="submit" class="w-full bg-primaryBtn text-white py-2.5 rounded font-bold text-sm shadow hover:opacity-90">Entrar</button>
+            </form>
+        </div>
+    </div>
+
     <div>
         <header class="bg-lightCard dark:bg-darkCard border-b border-borderGray/30 shadow-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
@@ -31,9 +52,17 @@
                         <button data-tab="lost-nao-localizado" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Lost não localizado</button>
                         <button data-tab="dashboard" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Dashboard</button>
                     </div>
-                    <button id="theme-toggle" onclick="alternarTema()" class="p-2 rounded-full bg-gray-200 dark:bg-darkCard text-black dark:text-white border border-borderGray/40 flex items-center justify-center">
-                        <i id="icone-tema" data-lucide="moon" class="w-5 h-5"></i>
-                    </button>
+
+                    <!-- USER INFO & TEMA -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <span id="user-display-name" class="block text-xs font-bold text-black dark:text-white"></span>
+                            <button onclick="fazerLogout()" class="text-[10px] text-red-500 hover:underline">Sair</button>
+                        </div>
+                        <button id="theme-toggle" onclick="alternarTema()" class="p-2 rounded-full bg-gray-200 dark:bg-darkCard text-black dark:text-white border border-borderGray/40 flex items-center justify-center">
+                            <i id="icone-tema" data-lucide="moon" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </nav>
             </div>
         </header>
@@ -425,7 +454,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST SALVO (ATUALIZADO ETD) -->
+    <!-- MODAL LOST SALVO -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
@@ -458,7 +487,7 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO (ATUALIZADO ETD) -->
+    <!-- MODAL LOST NÃO LOCALIZADO -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -481,7 +510,7 @@
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote perdido em MZ" checked> <span class="text-sm">Tote perdido em MZ</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote vazio na esteira"> <span class="text-sm">Tote vazio na esteira</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Missed Backlog (5 dias)"> <span class="text-sm">Missed Backlog (5 dias)</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray"></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
                 </div>
 
                 <div>
@@ -507,7 +536,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE E GRÁFICOS -->
+    <!-- SCRIPT FIREBASE E LÓGICA GERAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -521,11 +550,79 @@
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
 
+        // LÓGICA DE LOGIN E AUTENTICAÇÃO
+        let usuarioAtual = null;
+        let SOU_ADMIN = false;
+
         document.addEventListener("DOMContentLoaded", () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+            verificarSessaoLogin();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            // Monitora digitação do nome para exibir campo de senha do admin
+            const inputNome = document.getElementById('login_nome');
+            if (inputNome) {
+                inputNome.addEventListener('input', (e) => {
+                    const containerSenha = document.getElementById('container-senha-admin');
+                    const inputSenha = document.getElementById('login_senha');
+                    if (e.target.value.trim().toLowerCase() === 'evelyn') {
+                        containerSenha.classList.remove('hidden');
+                        inputSenha.setAttribute('required', 'true');
+                    } else {
+                        containerSenha.classList.add('hidden');
+                        inputSenha.removeAttribute('required');
+                        inputSenha.value = '';
+                    }
+                });
             }
         });
+
+        window.verificarSessaoLogin = () => {
+            const sessao = sessionStorage.getItem("user_session");
+            if (sessao) {
+                const dados = JSON.parse(sessao);
+                usuarioAtual = dados.nome;
+                SOU_ADMIN = dados.isAdmin;
+                document.getElementById('modal-login').classList.add('hidden');
+                document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
+                renderizarTudo();
+            } else {
+                document.getElementById('modal-login').classList.remove('hidden');
+            }
+        };
+
+        window.processarLogin = () => {
+            const nomeInput = document.getElementById('login_nome').value.trim();
+            const senhaInput = document.getElementById('login_senha').value.trim();
+
+            if (!nomeInput) return;
+
+            if (nomeInput.toLowerCase() === 'evelyn') {
+                if (senhaInput === 'Jolyn26') {
+                    usuarioAtual = 'Evelyn';
+                    SOU_ADMIN = true;
+                } else {
+                    alert('Senha incorreta para a conta de Administrador!');
+                    return;
+                }
+            } else {
+                usuarioAtual = nomeInput;
+                SOU_ADMIN = false;
+            }
+
+            sessionStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
+            document.getElementById('modal-login').classList.add('hidden');
+            document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
+            renderizarTudo();
+        };
+
+        window.fazerLogout = () => {
+            sessionStorage.removeItem("user_session");
+            usuarioAtual = null;
+            SOU_ADMIN = false;
+            document.getElementById('form-login').reset();
+            document.getElementById('container-senha-admin').classList.add('hidden');
+            document.getElementById('modal-login').classList.remove('hidden');
+        };
 
         window.alternarTema = () => {
             const html = document.documentElement;
@@ -604,6 +701,7 @@
             if (!document.getElementById('painel-graficos').classList.contains('hidden')) {
                 atualizarGraficos();
             }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
         // LÓGICA SOBRA DE PRODUTO NA SOLICITAÇÃO
@@ -634,6 +732,7 @@
                 sobrou_produto: sobrouProduto,
                 sobra_meli: sobraMeli || null,
                 sobra_qtd: sobraQtd || null,
+                solicitadoPor: usuarioAtual || 'Anônimo',
                 status: 'Pendente',
                 status_fisico: 'Pendente',
                 resultado_auditoria: 'Aguardando',
@@ -657,6 +756,16 @@
             });
         };
 
+        // GERADOR DE LIXEIRA APENAS PARA ADMIN
+        const obterBotaoExcluirAdmin = (id) => {
+            if (!SOU_ADMIN) return '';
+            return `
+                <button onclick="deletarTarefa('${id}')" title="Excluir Registro" class="text-red-500 hover:text-red-700 p-1.5 rounded transition-colors shrink-0 ml-2">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+        };
+
         window.renderizarAuditoriaPicking = () => {
             const container = document.getElementById('lista-auditoria-picking');
             if (!container) return;
@@ -676,7 +785,10 @@
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}" style="${etdInfo.style}">ETD: ${etdInfo.texto}</b></p>
                         <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
                     </div>
-                    <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
+                        ${obterBotaoExcluirAdmin(d.id)}
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -700,7 +812,10 @@
                         <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
                         <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
                     </div>
-                    <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
+                        ${obterBotaoExcluirAdmin(d.id)}
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -723,7 +838,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs shrink-0 ml-4">Excluir</button>
+                    ${obterBotaoExcluirAdmin(d.id)}
                 `;
                 container.appendChild(card);
             });
@@ -747,7 +862,7 @@
                         ${d.observacao ? `<p class="text-xs text-gray-500 dark:text-gray-300"><b>Obs:</b> ${d.observacao}</p>` : ''}
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    <button onclick="deletarTarefa('${d.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs shrink-0 ml-4">Excluir</button>
+                    ${obterBotaoExcluirAdmin(d.id)}
                 `;
                 container.appendChild(card);
             });
@@ -857,7 +972,8 @@
             fecharModalAuditoria();
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', status_fisico: 'Sim', resultado_auditoria: 'Sem divergência'
+                    status: 'Auditado', status_fisico: 'Sim', resultado_auditoria: 'Sem divergência',
+                    auditadoPor: usuarioAtual
                 });
                 alert("Auditado com sucesso!");
             }
@@ -873,7 +989,8 @@
 
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', status_fisico: 'Nao', culpabilidade, colaborador, tl, observacao, resultado_auditoria: 'Com divergência'
+                    status: 'Auditado', status_fisico: 'Nao', culpabilidade, colaborador, tl, observacao, resultado_auditoria: 'Com divergência',
+                    auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
                 alert("Divergência salva com sucesso!");
@@ -895,7 +1012,8 @@
                     resultado_auditoria: culpabilidade,
                     colaborador: colaborador,
                     tl: tl,
-                    observacao: observacao
+                    observacao: observacao,
+                    auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
                 alert("Auditoria Packing salva com sucesso!");
@@ -903,7 +1021,13 @@
         };
 
         window.deletarTarefa = async (id) => {
-            if(confirm("Deseja realmente excluir este registro?")) await deleteDoc(doc(db, "tarefas", id));
+            if(!SOU_ADMIN) {
+                alert("Apenas administradores podem excluir registros.");
+                return;
+            }
+            if(confirm("Deseja realmente excluir este registro?")) {
+                await deleteDoc(doc(db, "tarefas", id));
+            }
         };
 
         window.setFiltroStatus = (status) => { filtroStatusAtivo = status; renderizarDashboard(); };
@@ -1134,6 +1258,7 @@
                 colaborador: document.getElementById('apk_colaborador').value,
                 tl: document.getElementById('apk_tl').value,
                 observacao: document.getElementById('apk_observacao').value,
+                registradoPor: usuarioAtual,
                 status: 'Auditado',
                 criadoEm: new Date()
             });
@@ -1153,6 +1278,7 @@
                 etd: document.getElementById('ls_etd').value,
                 data: document.getElementById('ls_data_etd').value,
                 alternativa,
+                registradoPor: usuarioAtual,
                 status: 'Lost Salvo',
                 criadoEm: new Date()
             });
@@ -1176,6 +1302,7 @@
                 colaborador: document.getElementById('lnl_colaborador').value,
                 tl: document.getElementById('lnl_tl').value,
                 observacao: document.getElementById('lnl_observacao').value,
+                registradoPor: usuarioAtual,
                 status: 'Lost não localizado',
                 criadoEm: new Date()
             });
