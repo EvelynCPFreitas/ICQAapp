@@ -261,7 +261,6 @@
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Auditoria Packing</h2>
             <form class="space-y-3" onsubmit="event.preventDefault(); salvarAuditoriaPackingManual();">
-                <!-- NOVA ORDEM DOS CAMPOS SOLICITADA -->
                 <input type="text" id="apk_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="apk_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="apk_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -495,9 +494,12 @@
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
             <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostNaoLocalizadoManual();">
+                <!-- NOVA ORDEM DOS CAMPOS -->
                 <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="lnl_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="lnl_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                <input type="text" id="lnl_id_pedido" placeholder="ID PEDIDO" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                
                 <div>
                     <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
                     <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
@@ -898,7 +900,7 @@
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 card.innerHTML = `
                     <div class="space-y-1">
-                        <p><b>TOTE:</b> ${d.tote || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
+                        <p><b>TOTE:</b> ${d.tote || '-'} | <b>ID PEDIDO:</b> ${d.id_pedido || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'} | <b>Colaborador:</b> ${d.colaborador || '-'} | <b>TL:</b> ${d.tl || '-'}</p>
                         ${d.observacao ? `<p class="text-xs text-gray-500 dark:text-gray-300"><b>Obs:</b> ${d.observacao}</p>` : ''}
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
@@ -1350,13 +1352,16 @@
             let alternativa = altEl ? altEl.value : '';
             if(alternativa === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
 
-            const tote = document.getElementById('lnl_tote').value;
             const meli = document.getElementById('lnl_meli').value;
+            const qtd = document.getElementById('lnl_qtd').value;
+            const tote = document.getElementById('lnl_tote').value;
+            const idPedido = document.getElementById('lnl_id_pedido').value;
 
             await addDoc(collection(db, "tarefas"), {
                 meli: meli,
-                qtd: document.getElementById('lnl_qtd').value,
+                qtd: qtd,
                 tote: tote,
+                id_pedido: idPedido,
                 etd: document.getElementById('lnl_etd').value,
                 data: document.getElementById('lnl_data_etd').value,
                 alternativa,
@@ -1372,7 +1377,7 @@
             window.registrarNaPlanilha({
                 acao: "Lost Não Localizado",
                 usuario: usuarioAtual || 'Anônimo',
-                detalhes: `TOTE: ${tote} | MELI: ${meli}`
+                detalhes: `MELI: ${meli} | Qtd: ${qtd} | TOTE: ${tote} | ID Pedido: ${idPedido}`
             });
 
             fecharModalLostNaoLocalizado();
