@@ -18,9 +18,9 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
-    <!-- TELA / MODAL DE LOGIN -->
-    <div id="modal-login" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-8 rounded-xl max-w-sm w-full dark:text-white shadow-2xl border border-borderGray/30 text-center">
+    <!-- TELA / MODAL DE LOGIN (FUNDO IGUAL AO DAS TELAS) -->
+    <div id="modal-login" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-8 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 text-center">
             <h2 class="text-2xl font-bold text-primaryBtn dark:text-white mb-2">Portal LOST-FOUND</h2>
             <p class="text-xs text-gray-500 dark:text-darkText mb-6">Identifique-se para acessar o sistema</p>
             
@@ -510,7 +510,7 @@
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote perdido em MZ" checked> <span class="text-sm">Tote perdido em MZ</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote vazio na esteira"> <span class="text-sm">Tote vazio na esteira</span></div>
                     <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Missed Backlog (5 dias)"> <span class="text-sm">Missed Backlog (5 dias)</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
+                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray"></div>
                 </div>
 
                 <div>
