@@ -108,7 +108,7 @@
 
                         <!-- CAMPOS EXTRAS CASO SIM -->
                         <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
-                            <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
+                            <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações du Produto Sobrando:</span>
                             <input type="text" id="sol_sobra_meli" placeholder="MELI" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                             <input type="number" id="sol_sobra_qtd" placeholder="QUANTIDADE" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                         </div>
@@ -1171,7 +1171,7 @@
 
             const mapTls = {};
             dados.forEach(t => {
-                const k = t.tl || 'Não informado';
+                const k = (t.tl && t.tl.trim() !== '') ? t.tl : 'Não informado';
                 mapTls[k] = (mapTls[k] || 0) + 1;
             });
             destruirOuCriarGraficoTl('chartTls', Object.keys(mapTls), Object.values(mapTls));
@@ -1244,7 +1244,7 @@
             
             const colaboradoresSet = new Set();
             dadosFiltradosGraficoCache.forEach(t => {
-                const tlTask = t.tl || 'Não informado';
+                const tlTask = (t.tl && t.tl.trim() !== '') ? t.tl : 'Não informado';
                 if(tlTask === nomeTl && t.colaborador) {
                     colaboradoresSet.add(t.colaborador);
                 }
