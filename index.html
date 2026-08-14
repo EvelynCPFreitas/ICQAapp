@@ -6,7 +6,7 @@
     <title>Portal LOST-FOUND</title>
     <!-- Favicon personalizado LF -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 93.3,25 93.3,75 50,95 6.7,75 6.7,25' fill='none' stroke='%23002147' stroke-width='8'/><text x='50' y='64' font-family='Arial, sans-serif' font-size='42' font-weight='bold' fill='%23002147' text-anchor='middle'>LF</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -256,6 +256,20 @@
     <button id="btn-floating-auditoria-packing" onclick="abrirModalAuditoriaPackingManual()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
+
+    <!-- MODAL DE VISUALIZAÇÃO DETALHADA (ICONE DE OLHO) -->
+    <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/35 relative">
+            <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400">Detalhes do Registro</h2>
+            <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm">
+                <!-- Conteúdo preenchido dinamicamente -->
+            </div>
+            <div class="flex justify-end pt-4 border-t border-borderGray/30 mt-4">
+                <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-2 rounded text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL DE AUDITORIA PACKING MANUAL -->
     <div id="modal-flutuante-auditoria-packing" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -550,21 +564,20 @@
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
         // INTEGRAÇÃO COM A PLANILHA DO GOOGLE SHEETS
-       
-       window.registrarNaPlanilha = async function(dados) {
-    const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
-    
-    try {
-        const resposta = await fetch(urlWebAppData, {
-            method: 'POST',
-            body: JSON.stringify(dados)
-        });
-        const resultado = await resposta.json();
-        console.log("Salvo na planilha com sucesso:", resultado);
-    } catch (erro) {
-        console.error("Erro ao salvar na planilha:", erro);
-    }
-};
+        window.registrarNaPlanilha = async function(dados) {
+            const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
+            try {
+                const resposta = await fetch(urlWebAppData, {
+                    method: 'POST',
+                    body: JSON.stringify(dados)
+                });
+                const resultado = await resposta.json();
+                console.log("Salvo na planilha com sucesso:", resultado);
+            } catch (erro) {
+                console.error("Erro ao salvar na planilha:", erro);
+            }
+        };
+
         let tarefasCache = [];
         let currentModalId = null;
         let currentModalTipo = null;
@@ -572,7 +585,6 @@
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
 
-        // LÓGICA DE LOGIN E AUTENTICAÇÃO
         let usuarioAtual = null;
         let SOU_ADMIN = false;
 
@@ -580,7 +592,6 @@
             verificarSessaoLogin();
             if (typeof lucide !== 'undefined') lucide.createIcons();
             
-            // Monitora digitação do nome para exibir campo de senha do admin
             const inputNome = document.getElementById('login_nome');
             if (inputNome) {
                 inputNome.addEventListener('input', (e) => {
@@ -633,7 +644,6 @@
 
             sessionStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
             
-            // REGISTRA O LOGIN NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Login",
                 usuario: usuarioAtual,
@@ -741,7 +751,6 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
-        // LÓGICA SOBRA DE PRODUTO NA SOLICITAÇÃO
         window.tratarSobraProduto = (valor) => {
             const container = document.getElementById('container-sobra-produto');
             if (valor === 'Sim') {
@@ -778,7 +787,6 @@
                 criadoEm: new Date() 
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Nova Solicitação",
                 usuario: usuarioAtual || 'Anônimo',
@@ -803,6 +811,24 @@
             });
         };
 
+        const obterBotoesAcaoDashboard = (tarefa) => {
+            let htmlBotoes = `
+                <div class="flex items-center justify-end gap-1">
+                    <button onclick="abrirModalDetalhesTarefa('${tarefa.id}')" title="Visualizar Detalhes" class="text-blue-500 hover:text-blue-700 p-1.5 rounded transition-colors shrink-0">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+            `;
+            if (SOU_ADMIN) {
+                htmlBotoes += `
+                    <button onclick="deletarTarefa('${tarefa.id}')" title="Excluir Registro" class="text-red-500 hover:text-red-700 p-1.5 rounded transition-colors shrink-0">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+            }
+            htmlBotoes += `</div>`;
+            return htmlBotoes;
+        };
+
         const obterBotaoExcluirAdmin = (id) => {
             if (!SOU_ADMIN) return '';
             return `
@@ -810,6 +836,35 @@
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             `;
+        };
+
+        window.abrirModalDetalhesTarefa = (id) => {
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if (!tarefa) return;
+
+            const conteudo = document.getElementById('conteudo-detalhes-tarefa');
+            conteudo.innerHTML = `
+                <p><b>Status:</b> <span class="px-2 py-0.5 rounded bg-gray-200 dark:bg-black/30 font-bold">${tarefa.status || '-'}</span></p>
+                <p><b>TOTE:</b> ${tarefa.tote || '-'}</p>
+                <p><b>MZ:</b> ${tarefa.mz || '-'}</p>
+                <p><b>MELI:</b> ${tarefa.meli || '-'}</p>
+                <p><b>ID Pedido:</b> ${tarefa.id_pedido || '-'}</p>
+                <p><b>Quantidade:</b> ${tarefa.qtd || '-'}</p>
+                <p><b>Data / ETD:</b> ${formatarDataBR(tarefa.data)} às ${tarefa.etd || '-'}</p>
+                <p><b>Resultado da Auditoria:</b> ${tarefa.resultado_auditoria || '-'}</p>
+                <p><b>Colaborador:</b> ${tarefa.colaborador || '-'}</p>
+                <p><b>Team Leader (TL):</b> ${tarefa.tl || '-'}</p>
+                <p><b>Alternativa:</b> ${tarefa.alternativa || '-'}</p>
+                ${tarefa.observacao ? `<p><b>Observação:</b> ${tarefa.observacao}</p>` : ''}
+                <p class="text-xs text-gray-400 mt-2"><b>Criado em:</b> ${formatarDataHoraCriacao(tarefa.criadoEm)}</p>
+            `;
+
+            document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.fecharModalDetalhesTarefa = () => {
+            document.getElementById('modal-detalhes-tarefa').classList.add('hidden');
         };
 
         window.renderizarAuditoriaPicking = () => {
@@ -827,7 +882,6 @@
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 
-                // Exibe as informações de sobra de produto caso tenha sido marcado como "Sim"
                 let infoSobraHTML = '';
                 if (d.sobrou_produto === 'Sim') {
                     infoSobraHTML = `<div class="w-full mt-2 p-2 bg-blue-50/40 dark:bg-black/30 rounded border border-blue-200 dark:border-borderGray text-xs">
@@ -972,7 +1026,7 @@
                     <td class="p-2">${d.etd || '-'}</td>
                     <td class="p-2">${d.resultado_auditoria || '-'}</td>
                     <td class="p-2 text-right">
-                        ${obterBotaoExcluirAdmin(d.id)}
+                        ${obterBotoesAcaoDashboard(d)}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1272,7 +1326,6 @@
             document.getElementById('modal-detalhes-tl').classList.add('hidden');
         };
 
-        // ALTERNÂNCIA DE ABAS
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
@@ -1296,7 +1349,6 @@
             });
         });
 
-        // FUNÇÕES MODAIS FLUTUANTES
         window.abrirModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.remove('hidden');
         window.fecharModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.add('hidden');
 
@@ -1331,7 +1383,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Auditoria Packing Manual",
                 usuario: usuarioAtual || 'Anônimo',
@@ -1364,7 +1415,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Lost Salvo Registrado",
                 usuario: usuarioAtual || 'Anônimo',
@@ -1401,7 +1451,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Lost Não Localizado",
                 usuario: usuarioAtual || 'Anônimo',
