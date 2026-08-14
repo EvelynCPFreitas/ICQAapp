@@ -550,18 +550,21 @@
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
         // INTEGRAÇÃO COM A PLANILHA DO GOOGLE SHEETS
-        window.registrarNaPlanilha = async function(dados) {
-            const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
-            try {
-                await fetch(urlWebAppData, {
-                    method: 'POST',
-                    body: JSON.stringify(dados)
-                });
-            } catch (erro) {
-                console.error("Erro ao salvar na planilha:", erro);
-            }
-        };
-
+       
+       window.registrarNaPlanilha = async function(dados) {
+    const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
+    
+    try {
+        const resposta = await fetch(urlWebAppData, {
+            method: 'POST',
+            body: JSON.stringify(dados)
+        });
+        const resultado = await resposta.json();
+        console.log("Salvo na planilha com sucesso:", resultado);
+    } catch (erro) {
+        console.error("Erro ao salvar na planilha:", erro);
+    }
+};
         let tarefasCache = [];
         let currentModalId = null;
         let currentModalTipo = null;
@@ -779,7 +782,7 @@
             window.registrarNaPlanilha({
                 acao: "Nova Solicitação",
                 usuario: usuarioAtual || 'Anônimo',
-                detalhes: `TOTE: ${tote} | MELI: ${meli}`
+                detalhes: `TOTE: ${tote} | MELI: ${meli} | Sobrou Produto: ${sobrouProduto}`
             });
 
             alert("Solicitação enviada com sucesso!");
@@ -823,10 +826,23 @@
                 const etdInfo = obterEstiloEtd(d.data, d.etd);
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
+                
+                // Exibe as informações de sobra de produto caso tenha sido marcado como "Sim"
+                let infoSobraHTML = '';
+                if (d.sobrou_produto === 'Sim') {
+                    infoSobraHTML = `<div class="w-full mt-2 p-2 bg-blue-50/40 dark:bg-black/30 rounded border border-blue-200 dark:border-borderGray text-xs">
+                        <span class="font-bold text-primaryBtn dark:text-blue-400">Produto Sobrando na Caixa:</span> 
+                        MELI: <b>${d.sobra_meli || '-'}</b> | Quantidade: <b>${d.sobra_qtd || '-'}</b>
+                    </div>`;
+                }
+
                 card.innerHTML = `
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}" style="${etdInfo.style}">ETD: ${etdInfo.texto}</b></p>
-                        <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
+                    <div class="flex flex-col flex-wrap w-full pr-4">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}" style="${etdInfo.style}">ETD: ${etdInfo.texto}</b></p>
+                            <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
+                        </div>
+                        ${infoSobraHTML}
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
@@ -972,12 +988,19 @@
             if(!tarefa) return;
 
             document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
-            document.getElementById('modal-content').innerHTML = `
+            
+            let htmlDetalhes = `
                 <p><b>TOTE:</b> ${tarefa.tote}</p>
                 <p><b>MELI:</b> ${tarefa.meli}</p>
                 <p><b>MZ:</b> ${tarefa.mz}</p>
                 <p><b>Qtd:</b> ${tarefa.qtd}</p>
             `;
+
+            if (tarefa.sobrou_produto === 'Sim') {
+                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}</p>`;
+            }
+
+            document.getElementById('modal-content').innerHTML = htmlDetalhes;
 
             if(tipo === 'picking') {
                 document.getElementById('container-picking-fluxo').classList.remove('hidden');
