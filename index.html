@@ -542,6 +542,20 @@
         </div>
     </div>
 
+    <!-- MODAL DE DETALHES DA TAREFA (ÍCONE DE OLHO) -->
+    <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
+            <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
+            <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes da Task</h2>
+            <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4">
+                <!-- Informações detalhadas inseridas via JS -->
+            </div>
+            <div class="flex justify-end pt-3 border-t border-borderGray/30">
+                <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT FIREBASE E LÓGICA GERAL + INTEGRAÇÃO GOOGLE SHEETS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -550,6 +564,7 @@
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
         // INTEGRAÇÃO COM A PLANILHA DO GOOGLE SHEETS
+       
         window.registrarNaPlanilha = async function(dados) {
             const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
             
@@ -580,7 +595,6 @@
             verificarSessaoLogin();
             if (typeof lucide !== 'undefined') lucide.createIcons();
             
-            // Monitora digitação do nome para exibir campo de senha do admin
             const inputNome = document.getElementById('login_nome');
             if (inputNome) {
                 inputNome.addEventListener('input', (e) => {
@@ -633,7 +647,6 @@
 
             sessionStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
             
-            // REGISTRA O LOGIN NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Login",
                 usuario: usuarioAtual,
@@ -699,28 +712,6 @@
             return `${dia}/${mes}/${ano} ${hora}:${min}`;
         };
 
-        function obterEstiloEtd(dataEtd, etdHora) {
-            if (!etdHora) return { classe: "dark:text-darkText", texto: '-' };
-            try {
-                const agora = new Date();
-                let targetDate;
-                if (dataEtd) {
-                    const [ano, mes, dia] = dataEtd.split('-').map(Number);
-                    const [hora, min] = etdHora.split(':').map(Number);
-                    targetDate = new Date(ano, mes - 1, dia, hora, min, 0);
-                } else {
-                    const [hora, min] = etdHora.split(':').map(Number);
-                    targetDate = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), hora, min, 0);
-                }
-                const diffMins = (targetDate - agora) / (1000 * 60);
-                if (diffMins < 0) return { classe: "", style: "color: #6A0DAD;", texto: etdHora };
-                if (diffMins <= 20) return { classe: "text-red-600 dark:text-red-400 font-extrabold animate-pulse", style: "", texto: etdHora };
-                return { classe: "dark:text-darkText", style: "", texto: etdHora };
-            } catch (e) {
-                return { classe: "dark:text-darkText", style: "", texto: etdHora };
-            }
-        }
-
         onSnapshot(query(collection(db, "tarefas"), orderBy("criadoEm", "desc")), (snapshot) => {
             tarefasCache = [];
             snapshot.forEach((docRef) => {
@@ -741,7 +732,6 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
-        // LÓGICA SOBRA DE PRODUTO NA SOLICITAÇÃO
         window.tratarSobraProduto = (valor) => {
             const container = document.getElementById('container-sobra-produto');
             if (valor === 'Sim') {
@@ -778,7 +768,6 @@
                 criadoEm: new Date() 
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Nova Solicitação",
                 usuario: usuarioAtual || 'Anônimo',
@@ -803,13 +792,44 @@
             });
         };
 
-        const obterBotaoExcluirAdmin = (id) => {
-            if (!SOU_ADMIN) return '';
+        // Acesso liberado para o ícone do olho e da lixeira para todos os logins
+        const obterAcoesTabela = (id) => {
             return `
-                <button onclick="deletarTarefa('${id}')" title="Excluir Registro" class="text-red-500 hover:text-red-700 p-1.5 rounded transition-colors shrink-0 ml-2">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="abrirDetalhesTarefa('${id}')" title="Visualizar Detalhes" class="text-blue-500 hover:text-blue-700 p-1.5 rounded transition-colors">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="deletarTarefa('${id}')" title="Excluir Registro" class="text-red-500 hover:text-red-700 p-1.5 rounded transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
             `;
+        };
+
+        window.abrirDetalhesTarefa = (id) => {
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if (!tarefa) return;
+            
+            const conteudo = document.getElementById('conteudo-detalhes-tarefa');
+            conteudo.innerHTML = `
+                <p><b>TOTE:</b> ${tarefa.tote || '-'}</p>
+                <p><b>MZ:</b> ${tarefa.mz || '-'}</p>
+                <p><b>MELI:</b> ${tarefa.meli || '-'}</p>
+                <p><b>Quantidade:</b> ${tarefa.qtd || '-'}</p>
+                <p><b>Status:</b> ${tarefa.status || '-'}</p>
+                <p><b>ETD:</b> ${tarefa.etd || '-'}</p>
+                <p><b>Data:</b> ${formatarDataBR(tarefa.data)}</p>
+                <p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria || '-'}</p>
+                ${tarefa.colaborador ? `<p><b>Colaborador:</b> ${tarefa.colaborador}</p>` : ''}
+                ${tarefa.tl ? `<p><b>Team Leader:</b> ${tarefa.tl}</p>` : ''}
+                ${tarefa.observacao ? `<p><b>Observação:</b> ${tarefa.observacao}</p>` : ''}
+            `;
+            document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.fecharModalDetalhesTarefa = () => {
+            document.getElementById('modal-detalhes-tarefa').classList.add('hidden');
         };
 
         window.renderizarAuditoriaPicking = () => {
@@ -823,7 +843,6 @@
                 return;
             }
             pendentes.forEach(d => {
-                const etdInfo = obterEstiloEtd(d.data, d.etd);
                 const card = document.createElement('div');
                 card.className = "bg-lightCard dark:bg-darkCard p-4 rounded border border-borderGray/30 shadow-sm flex justify-between items-center dark:text-white";
                 
@@ -838,14 +857,13 @@
                 card.innerHTML = `
                     <div class="flex flex-col flex-wrap w-full pr-4">
                         <div class="flex items-center gap-4 flex-wrap">
-                            <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b class="${etdInfo.classe}" style="${etdInfo.style}">ETD: ${etdInfo.texto}</b></p>
+                            <p><b>TOTE:</b> ${d.tote} | <b>MELI:</b> ${d.meli} | <b>MZ:</b> ${d.mz} | <b>ETD:</b> ${d.etd || '-'}</p>
                             <p class="text-xs text-gray-500 dark:text-darkText"><b>Data:</b> ${formatarDataBR(d.data)} | Qtd: ${d.qtd}</p>
                         </div>
                         ${infoSobraHTML}
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
-                        ${obterBotaoExcluirAdmin(d.id)}
                     </div>
                 `;
                 container.appendChild(card);
@@ -872,7 +890,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="abrirModalAuditoria('${d.id}', 'packing')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Packing</button>
-                        ${obterBotaoExcluirAdmin(d.id)}
                     </div>
                 `;
                 container.appendChild(card);
@@ -896,7 +913,6 @@
                         <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    ${obterBotaoExcluirAdmin(d.id)}
                 `;
                 container.appendChild(card);
             });
@@ -920,7 +936,6 @@
                         ${d.observacao ? `<p class="text-xs text-gray-500 dark:text-gray-300"><b>Obs:</b> ${d.observacao}</p>` : ''}
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
-                    ${obterBotaoExcluirAdmin(d.id)}
                 `;
                 container.appendChild(card);
             });
@@ -971,7 +986,7 @@
                     <td class="p-2">${d.etd || '-'}</td>
                     <td class="p-2">${d.resultado_auditoria || '-'}</td>
                     <td class="p-2 text-right">
-                        ${obterBotaoExcluirAdmin(d.id)}
+                        ${obterAcoesTabela(d.id)}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1090,10 +1105,6 @@
         };
 
         window.deletarTarefa = async (id) => {
-            if(!SOU_ADMIN) {
-                alert("Apenas administradores podem excluir registros.");
-                return;
-            }
             if(confirm("Deseja realmente excluir este registro?")) {
                 await deleteDoc(doc(db, "tarefas", id));
             }
@@ -1271,7 +1282,6 @@
             document.getElementById('modal-detalhes-tl').classList.add('hidden');
         };
 
-        // ALTERNÂNCIA DE ABAS
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => {
@@ -1295,7 +1305,6 @@
             });
         });
 
-        // FUNÇÕES MODAIS FLUTUANTES
         window.abrirModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.remove('hidden');
         window.fecharModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.add('hidden');
 
@@ -1330,7 +1339,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Auditoria Packing Manual",
                 usuario: usuarioAtual || 'Anônimo',
@@ -1363,7 +1371,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Lost Salvo Registrado",
                 usuario: usuarioAtual || 'Anônimo',
@@ -1400,7 +1407,6 @@
                 criadoEm: new Date()
             });
 
-            // REGISTRO NA PLANILHA GOOGLE
             window.registrarNaPlanilha({
                 acao: "Lost Não Localizado",
                 usuario: usuarioAtual || 'Anônimo',
