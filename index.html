@@ -557,7 +557,6 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
                 </div>
             </div>
@@ -805,9 +804,6 @@
                     <button onclick="abrirDetalhesTarefa('${id}')" title="Visualizar Detalhes" class="text-blue-500 hover:text-blue-700 p-1.5 rounded transition-colors">
                         <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="deletarTarefa('${id}')" title="Excluir Registro" class="text-red-500 hover:text-red-700 p-1.5 rounded transition-colors">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
                 </div>
             `;
         };
@@ -863,8 +859,7 @@
 
             conteudo.innerHTML = htmlDetalhes;
 
-            // Configurar botões do rodapé do modal de detalhes (lápis e lixeira)
-            document.getElementById('btn-detalhes-excluir').setAttribute('onclick', `deletarTarefa('${id}'); fecharModalDetalhesTarefa();`);
+            // Configurar botões do rodapé do modal de detalhes (apenas lápis se necessário)
             document.getElementById('btn-detalhes-editar').setAttribute('onclick', `fecharModalDetalhesTarefa();`);
 
             document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
@@ -1160,12 +1155,6 @@
                 });
                 fecharModalAuditoria();
                 alert("Auditoria Packing salva com sucesso!");
-            }
-        };
-
-        window.deletarTarefa = async (id) => {
-            if(confirm("Deseja realmente excluir este registro?")) {
-                await deleteDoc(doc(db, "tarefas", id));
             }
         };
 
