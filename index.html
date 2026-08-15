@@ -546,7 +546,7 @@
     <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
-            <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes da Task</h2>
+            <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes Task</h2>
             <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4">
                 <!-- Informações detalhadas inseridas via JS -->
             </div>
@@ -556,9 +556,10 @@
                     <!-- Espaço reservado para ações futuras de edição/exclusão se necessário, mantendo os ícones pedidos no rodapé -->
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
-                </div>
+    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+</div>
             </div>
         </div>
     </div>
