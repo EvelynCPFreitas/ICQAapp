@@ -550,16 +550,25 @@
             <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4">
                 <!-- Informações detalhadas inseridas via JS -->
             </div>
-            <!-- Ícones de edição (lápis) e exclusão (lixeira) ao lado do botão de fechar -->
+            <!-- Ações no rodapé do modal -->
             <div class="flex justify-between items-center pt-3 border-t border-borderGray/30">
                 <div class="flex items-center gap-2">
-                    <!-- Espaço reservado para ações futuras de edição/exclusão se necessário, mantendo os ícones pedidos no rodapé -->
+                    <!-- Reservado se necessário -->
                 </div>
                 <div class="flex items-center gap-2">
-    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
-</div>
+                    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded">
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
+                    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    <button id="btn-detalhes-salvar" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-xs font-bold transition-all shadow">
+                        OK
+                    </button>
+                    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">
+                        Fechar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -813,6 +822,9 @@
             const tarefa = tarefasCache.find(t => t.id === id);
             if (!tarefa) return;
             
+            // Oculta o botão "OK" de salvar ao visualizar normalmente
+            document.getElementById('btn-detalhes-salvar').classList.add('hidden');
+
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
             
             let htmlDetalhes = `
@@ -824,21 +836,16 @@
                 <p><b>ETD:</b> ${tarefa.etd || '-'}</p>
             `;
 
-            // Omitir o campo "Resultado Auditoria" para "Lost Salvo" e "Lost não localizado"
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
             if (tarefa.adicionadoPackingManual) {
-                // Caso adicionado diretamente pelo ícone de + na packing
                 htmlDetalhes += `
                     <p><b>Login Auditoria Packing:</b> ${tarefa.registradoPor || '-'}</p>
                     <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
                 `;
             } else {
-                // Fluxo completo ou etapas normais
-                if (tarefa.solicitadoPor) {
-                    htmlDetalhes += `<p><b>Login Solicitação:</b> ${tarefa.solicitadoPor}</p>`;
-                }
+                if (tarefa.solicitadoPor) htmlDetalhes += `<p><b>Login Solicitação:</b> ${tarefa.solicitadoPor}</p>`;
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
@@ -860,15 +867,131 @@
 
             conteudo.innerHTML = htmlDetalhes;
 
-            // Configurar botões do rodapé do modal de detalhes (apenas lápis se necessário)
-            document.getElementById('btn-detalhes-editar').setAttribute('onclick', `fecharModalDetalhesTarefa();`);
+            // Atribui eventos aos botões
+            document.getElementById('btn-detalhes-editar').onclick = () => habilitarEdicaoTarefa(id);
+            document.getElementById('btn-detalhes-excluir').onclick = () => excluirTarefa(id);
 
             document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
             if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
         window.fecharModalDetalhesTarefa = () => {
+            document.getElementById('btn-detalhes-salvar').classList.add('hidden');
             document.getElementById('modal-detalhes-tarefa').classList.add('hidden');
+        };
+
+        window.habilitarEdicaoTarefa = (id) => {
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if (!tarefa) return;
+
+            const conteudo = document.getElementById('conteudo-detalhes-tarefa');
+
+            // Formulário com campos preenchidos
+            conteudo.innerHTML = `
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">TOTE:</label>
+                        <input type="text" id="edit_tote" value="${tarefa.tote || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">MZ:</label>
+                        <input type="text" id="edit_mz" value="${tarefa.mz || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">MELI:</label>
+                        <input type="text" id="edit_meli" value="${tarefa.meli || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Quantidade:</label>
+                        <input type="number" id="edit_qtd" value="${tarefa.qtd || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Status:</label>
+                        <select id="edit_status" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                            <option value="Pendente" ${tarefa.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Auditado" ${tarefa.status === 'Auditado' ? 'selected' : ''}>Auditado</option>
+                            <option value="Lost Salvo" ${tarefa.status === 'Lost Salvo' ? 'selected' : ''}>Lost Salvo</option>
+                            <option value="Lost não localizado" ${tarefa.status === 'Lost não localizado' ? 'selected' : ''}>Lost não localizado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">ETD:</label>
+                        <input type="time" id="edit_etd" value="${tarefa.etd || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Resultado Auditoria:</label>
+                        <input type="text" id="edit_resultado_auditoria" value="${tarefa.resultado_auditoria || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Colaborador:</label>
+                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Team Leader:</label>
+                        <input type="text" id="edit_tl" value="${tarefa.tl || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Observação:</label>
+                        <textarea id="edit_observacao" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray h-16">${tarefa.observacao || ''}</textarea>
+                    </div>
+                </div>
+            `;
+
+            // Exibe o botão "OK" para salvar
+            const btnSalvar = document.getElementById('btn-detalhes-salvar');
+            btnSalvar.classList.remove('hidden');
+            btnSalvar.onclick = () => salvarEdicaoTarefa(id);
+        };
+
+        window.salvarEdicaoTarefa = async (id) => {
+            try {
+                const dadosAtualizados = {
+                    tote: document.getElementById('edit_tote').value,
+                    mz: document.getElementById('edit_mz').value,
+                    meli: document.getElementById('edit_meli').value,
+                    qtd: document.getElementById('edit_qtd').value,
+                    status: document.getElementById('edit_status').value,
+                    etd: document.getElementById('edit_etd').value,
+                    resultado_auditoria: document.getElementById('edit_resultado_auditoria').value,
+                    colaborador: document.getElementById('edit_colaborador').value,
+                    tl: document.getElementById('edit_tl').value,
+                    observacao: document.getElementById('edit_observacao').value
+                };
+
+                await updateDoc(doc(db, "tarefas", id), dadosAtualizados);
+
+                window.registrarNaPlanilha({
+                    acao: "Edição de Task",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${id} | TOTE: ${dadosAtualizados.tote}`
+                });
+
+                alert("Informações atualizadas com sucesso!");
+                abrirDetalhesTarefa(id);
+            } catch (erro) {
+                console.error("Erro ao atualizar task:", erro);
+                alert("Erro ao salvar alterações.");
+            }
+        };
+
+        window.excluirTarefa = async (id) => {
+            if (confirm("Tem certeza de que deseja excluir esta task?")) {
+                try {
+                    await deleteDoc(doc(db, "tarefas", id));
+
+                    window.registrarNaPlanilha({
+                        acao: "Exclusão de Task",
+                        usuario: usuarioAtual || 'Anônimo',
+                        detalhes: `ID Excluído: ${id}`
+                    });
+
+                    fecharModalDetalhesTarefa();
+                    alert("Task excluída com sucesso!");
+                } catch (erro) {
+                    console.error("Erro ao excluir task:", erro);
+                    alert("Erro ao tentar excluir a task.");
+                }
+            }
         };
 
         window.renderizarAuditoriaPicking = () => {
@@ -1016,7 +1139,6 @@
                     statusClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
                 }
 
-                // Para Lost Salvo e Lost não localizado, não precisa mostrar Resultado Auditoria na tabela geral
                 const ehLostNaTabela = statusNormalizado.includes('lost');
                 const textoResultado = ehLostNaTabela ? '-' : (d.resultado_auditoria || '-');
 
