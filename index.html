@@ -221,7 +221,14 @@
 
                 <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 mb-4 flex flex-wrap gap-3 items-center">
                     <span class="text-xs font-bold dark:text-darkText uppercase">Filtros:</span>
-                    <input type="date" id="filtro-data" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    
+                    <!-- NOVO FILTRO DE PERÍODO DE DATA (DE / ATÉ) -->
+                    <div class="flex items-center gap-1.5">
+                        <input type="date" id="filtro-data-inicio" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Inicial">
+                        <span class="text-xs font-bold dark:text-darkText">até</span>
+                        <input type="date" id="filtro-data-fim" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Final">
+                    </div>
+
                     <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     <button onclick="setFiltroStatus('Pendente')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Pendente">Pendente</button>
                     <button onclick="setFiltroStatus('Auditado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Auditado">Auditado</button>
@@ -1193,12 +1200,22 @@
         window.renderizarDashboard = () => {
             const tbody = document.getElementById('tabela-body');
             tbody.innerHTML = "";
-            const filtroData = document.getElementById('filtro-data').value;
+            const filtroDataInicio = document.getElementById('filtro-data-inicio').value;
+            const filtroDataFim = document.getElementById('filtro-data-fim').value;
             const filtroEtd = document.getElementById('filtro-etd').value.toLowerCase();
 
             let dadosFiltrados = tarefasCache.filter(t => {
                 if (filtroStatusAtivo && t.status !== filtroStatusAtivo) return false;
-                if (filtroData && t.data !== filtroData) return false;
+                
+                // Filtro por Período de Datas (De / Até)
+                if (t.data) {
+                    const dataTask = t.data.split('T')[0];
+                    if (filtroDataInicio && dataTask < filtroDataInicio) return false;
+                    if (filtroDataFim && dataTask > filtroDataFim) return false;
+                } else if (filtroDataInicio || filtroDataFim) {
+                    return false;
+                }
+
                 if (filtroEtd && !(t.etd && t.etd.toLowerCase().includes(filtroEtd))) return false;
                 return true;
             });
@@ -1371,7 +1388,8 @@
         window.setFiltroStatus = (status) => { filtroStatusAtivo = status; renderizarDashboard(); };
         window.limparFiltros = () => {
             filtroStatusAtivo = null;
-            document.getElementById('filtro-data').value = '';
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
             document.getElementById('filtro-etd').value = '';
             renderizarDashboard();
         };
