@@ -544,14 +544,22 @@
 
     <!-- MODAL DE DETALHES DA TAREFA (ÍCONE DE OLHO) -->
     <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
             <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes da Task</h2>
             <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4">
                 <!-- Informações detalhadas inseridas via JS -->
             </div>
-            <div class="flex justify-end pt-3 border-t border-borderGray/30">
-                <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+            <!-- Ícones de edição (lápis) e exclusão (lixeira) ao lado do botão de fechar -->
+            <div class="flex justify-between items-center pt-3 border-t border-borderGray/30">
+                <div class="flex items-center gap-2">
+                    <!-- Espaço reservado para ações futuras de edição/exclusão se necessário, mantendo os ícones pedidos no rodapé -->
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -564,7 +572,6 @@
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
         // INTEGRAÇÃO COM A PLANILHA DO GOOGLE SHEETS
-       
         window.registrarNaPlanilha = async function(dados) {
             const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
             
@@ -792,7 +799,6 @@
             });
         };
 
-        // Acesso liberado para o ícone do olho e da lixeira para todos os logins
         const obterAcoesTabela = (id) => {
             return `
                 <div class="flex items-center justify-end gap-2">
@@ -811,19 +817,56 @@
             if (!tarefa) return;
             
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
-            conteudo.innerHTML = `
+            
+            let htmlDetalhes = `
                 <p><b>TOTE:</b> ${tarefa.tote || '-'}</p>
                 <p><b>MZ:</b> ${tarefa.mz || '-'}</p>
                 <p><b>MELI:</b> ${tarefa.meli || '-'}</p>
                 <p><b>Quantidade:</b> ${tarefa.qtd || '-'}</p>
                 <p><b>Status:</b> ${tarefa.status || '-'}</p>
                 <p><b>ETD:</b> ${tarefa.etd || '-'}</p>
-                <p><b>Data:</b> ${formatarDataBR(tarefa.data)}</p>
-                <p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria || '-'}</p>
-                ${tarefa.colaborador ? `<p><b>Colaborador:</b> ${tarefa.colaborador}</p>` : ''}
-                ${tarefa.tl ? `<p><b>Team Leader:</b> ${tarefa.tl}</p>` : ''}
-                ${tarefa.observacao ? `<p><b>Observação:</b> ${tarefa.observacao}</p>` : ''}
             `;
+
+            // Omitir o campo "Resultado Auditoria" para "Lost Salvo" e "Lost não localizado"
+            const statusAtual = (tarefa.status || '').toLowerCase();
+            const ehLost = statusAtual.includes('lost');
+
+            if (tarefa.adicionadoPackingManual) {
+                // Caso adicionado diretamente pelo ícone de + na packing
+                htmlDetalhes += `
+                    <p><b>Login Auditoria Packing:</b> ${tarefa.registradoPor || '-'}</p>
+                    <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
+                `;
+            } else {
+                // Fluxo completo ou etapas normais
+                if (tarefa.solicitadoPor) {
+                    htmlDetalhes += `<p><b>Login Solicitação:</b> ${tarefa.solicitadoPor}</p>`;
+                }
+                if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
+                    htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
+                }
+                if (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência')) {
+                    htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || tarefa.auditadoPor || '-'}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
+                }
+            }
+
+            if (!ehLost && tarefa.resultado_auditoria && !tarefa.adicionadoPackingManual && !tarefa.auditadoPackingPor) {
+                htmlDetalhes += `<p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria}</p>`;
+            }
+
+            if (tarefa.colaborador) htmlDetalhes += `<p><b>Colaborador:</b> ${tarefa.colaborador}</p>`;
+            if (tarefa.tl) htmlDetalhes += `<p><b>Team Leader:</b> ${tarefa.tl}</p>`;
+            if (tarefa.alternativa) htmlDetalhes += `<p><b>Alternativa:</b> ${tarefa.alternativa}</p>`;
+            if (tarefa.observacao) htmlDetalhes += `<p><b>Observação:</b> ${tarefa.observacao}</p>`;
+
+            conteudo.innerHTML = htmlDetalhes;
+
+            // Configurar botões do rodapé do modal de detalhes (lápis e lixeira)
+            document.getElementById('btn-detalhes-excluir').setAttribute('onclick', `deletarTarefa('${id}'); fecharModalDetalhesTarefa();`);
+            document.getElementById('btn-detalhes-editar').setAttribute('onclick', `fecharModalDetalhesTarefa();`);
+
             document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
             if (typeof lucide !== 'undefined') lucide.createIcons();
         };
@@ -977,6 +1020,10 @@
                     statusClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
                 }
 
+                // Para Lost Salvo e Lost não localizado, não precisa mostrar Resultado Auditoria na tabela geral
+                const ehLostNaTabela = statusNormalizado.includes('lost');
+                const textoResultado = ehLostNaTabela ? '-' : (d.resultado_auditoria || '-');
+
                 tr.innerHTML = `
                     <td class="p-2">${d.tote || '-'}</td>
                     <td class="p-2">${d.mz || '-'}</td>
@@ -984,7 +1031,7 @@
                     <td class="p-2">${d.qtd || '-'}</td>
                     <td class="p-2"><span class="px-2 py-0.5 rounded font-bold ${statusClass}">${d.status || '-'}</span></td>
                     <td class="p-2">${d.etd || '-'}</td>
-                    <td class="p-2">${d.resultado_auditoria || '-'}</td>
+                    <td class="p-2">${textoResultado}</td>
                     <td class="p-2 text-right">
                         ${obterAcoesTabela(d.id)}
                     </td>
@@ -1056,7 +1103,10 @@
             fecharModalAuditoria();
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', status_fisico: 'Sim', resultado_auditoria: 'Sem divergência',
+                    status: 'Auditado', 
+                    status_fisico: 'Sim', 
+                    resultado_auditoria: 'Sem divergência',
+                    auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
                 alert("Auditado com sucesso!");
@@ -1073,7 +1123,15 @@
 
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', status_fisico: 'Nao', culpabilidade, colaborador, tl, observacao, resultado_auditoria: 'Com divergência',
+                    status: 'Auditado', 
+                    status_fisico: 'Nao', 
+                    culpabilidade, 
+                    colaborador, 
+                    tl, 
+                    observacao, 
+                    resultado_auditoria: 'Com divergência',
+                    resultado_picking: culpabilidade,
+                    auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
@@ -1097,6 +1155,7 @@
                     colaborador: colaborador,
                     tl: tl,
                     observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
@@ -1335,7 +1394,9 @@
                 tl: document.getElementById('apk_tl').value,
                 observacao: document.getElementById('apk_observacao').value,
                 registradoPor: usuarioAtual,
+                auditadoPackingPor: usuarioAtual,
                 status: 'Auditado',
+                adicionadoPackingManual: true,
                 criadoEm: new Date()
             });
 
