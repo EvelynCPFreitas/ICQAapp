@@ -870,9 +870,19 @@
 
             conteudo.innerHTML = htmlDetalhes;
 
-            // Atribui eventos aos botões
-            document.getElementById('btn-detalhes-editar').onclick = () => habilitarEdicaoTarefa(id);
-            document.getElementById('btn-detalhes-excluir').onclick = () => excluirTarefa(id);
+            // Controle de visibilidade dos botões de editar e excluir: somente para Admin
+            const btnEditar = document.getElementById('btn-detalhes-editar');
+            const btnExcluir = document.getElementById('btn-detalhes-excluir');
+
+            if (SOU_ADMIN) {
+                btnEditar.classList.remove('hidden');
+                btnExcluir.classList.remove('hidden');
+                btnEditar.onclick = () => habilitarEdicaoTarefa(id);
+                btnExcluir.onclick = () => excluirTarefa(id);
+            } else {
+                btnEditar.classList.add('hidden');
+                btnExcluir.classList.add('hidden');
+            }
 
             document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -884,6 +894,11 @@
         };
 
         window.habilitarEdicaoTarefa = (id) => {
+            if (!SOU_ADMIN) {
+                alert("Apenas administradores podem editar informações!");
+                return;
+            }
+
             const tarefa = tarefasCache.find(t => t.id === id);
             if (!tarefa) return;
 
@@ -998,6 +1013,11 @@
         };
 
         window.salvarEdicaoTarefa = async (id) => {
+            if (!SOU_ADMIN) {
+                alert("Apenas administradores podem salvar alterações!");
+                return;
+            }
+
             try {
                 const selectResultado = document.getElementById('edit_resultado_auditoria_select').value;
                 const outroResultado = document.getElementById('edit_resultado_auditoria_outro').value;
@@ -1037,6 +1057,11 @@
         };
 
         window.excluirTarefa = async (id) => {
+            if (!SOU_ADMIN) {
+                alert("Apenas administradores podem excluir tasks!");
+                return;
+            }
+
             if (confirm("Tem certeza de que deseja excluir esta task?")) {
                 try {
                     await deleteDoc(doc(db, "tarefas", id));
