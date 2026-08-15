@@ -777,6 +777,7 @@
                 sobrou_produto: sobrouProduto,
                 sobra_meli: sobraMeli || null,
                 sobra_qtd: sobraQtd || null,
+                registradoPor: usuarioAtual || 'Anônimo',
                 solicitadoPor: usuarioAtual || 'Anônimo',
                 status: 'Pendente',
                 status_fisico: 'Pendente',
@@ -839,13 +840,15 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
+            // Exibição do usuário que registrou para todas as tarefas
+            const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
+            htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
+
             if (tarefa.adicionadoPackingManual) {
                 htmlDetalhes += `
-                    <p><b>Login Auditoria Packing:</b> ${tarefa.registradoPor || '-'}</p>
                     <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
                 `;
             } else {
-                if (tarefa.solicitadoPor) htmlDetalhes += `<p><b>Login Solicitação:</b> ${tarefa.solicitadoPor}</p>`;
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
@@ -910,7 +913,9 @@
                 valorOutro = resAtual;
             }
 
-            // Formulário com campo Resultado Auditoria em Dropdown + campo Outros
+            const loginRegistrado = tarefa.registradoPor || tarefa.solicitadoPor || '';
+
+            // Formulário com campo Registrado por e Resultado Auditoria em Dropdown
             conteudo.innerHTML = `
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                     <div>
@@ -941,6 +946,10 @@
                     <div>
                         <label class="text-xs font-bold block dark:text-darkText">ETD:</label>
                         <input type="time" id="edit_etd" value="${tarefa.etd || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block dark:text-darkText">Registrado por (Login):</label>
+                        <input type="text" id="edit_registrado_por" value="${loginRegistrado}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
                         <label class="text-xs font-bold block dark:text-darkText">Resultado Auditoria:</label>
@@ -994,6 +1003,7 @@
                 const outroResultado = document.getElementById('edit_resultado_auditoria_outro').value;
                 
                 const resultadoFinal = (selectResultado === 'Outros') ? outroResultado : selectResultado;
+                const registradoPorVal = document.getElementById('edit_registrado_por').value;
 
                 const dadosAtualizados = {
                     tote: document.getElementById('edit_tote').value,
@@ -1002,6 +1012,8 @@
                     qtd: document.getElementById('edit_qtd').value,
                     status: document.getElementById('edit_status').value,
                     etd: document.getElementById('edit_etd').value,
+                    registradoPor: registradoPorVal,
+                    solicitadoPor: registradoPorVal,
                     resultado_auditoria: resultadoFinal,
                     colaborador: document.getElementById('edit_colaborador').value,
                     tl: document.getElementById('edit_tl').value,
@@ -1122,7 +1134,7 @@
                 card.innerHTML = `
                     <div class="space-y-1">
                         <p><b>TOTE:</b> ${d.tote || '-'} | <b>ID PEDIDO:</b> ${d.id_pedido || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'} | <b>Registrado por:</b> ${d.registradoPor || '-'}</p>
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
                 `;
@@ -1144,7 +1156,7 @@
                 card.innerHTML = `
                     <div class="space-y-1">
                         <p><b>TOTE:</b> ${d.tote || '-'} | <b>ID PEDIDO:</b> ${d.id_pedido || '-'} | <b>MELI:</b> ${d.meli || '-'} | <b>Qtd:</b> ${d.qtd || '-'} | <b>ETD:</b> ${d.etd || '-'} | <b>Data do ETD:</b> ${formatarDataBR(d.data)}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'} | <b>Colaborador:</b> ${d.colaborador || '-'} | <b>TL:</b> ${d.tl || '-'}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300"><b>Alternativa:</b> ${d.alternativa || '-'} | <b>Colaborador:</b> ${d.colaborador || '-'} | <b>TL:</b> ${d.tl || '-'} | <b>Registrado por:</b> ${d.registradoPor || '-'}</p>
                         ${d.observacao ? `<p class="text-xs text-gray-500 dark:text-gray-300"><b>Obs:</b> ${d.observacao}</p>` : ''}
                         <p class="text-xs text-gray-400"><b>Data do registro:</b> ${formatarDataHoraCriacao(d.criadoEm)}</p>
                     </div>
@@ -1555,7 +1567,7 @@
                 colaborador: document.getElementById('apk_colaborador').value,
                 tl: document.getElementById('apk_tl').value,
                 observacao: document.getElementById('apk_observacao').value,
-                registradoPor: usuarioAtual,
+                registradoPor: usuarioAtual || 'Anônimo',
                 auditadoPackingPor: usuarioAtual,
                 status: 'Auditado',
                 adicionadoPackingManual: true,
@@ -1589,7 +1601,7 @@
                 etd: document.getElementById('ls_etd').value,
                 data: document.getElementById('ls_data_etd').value,
                 alternativa,
-                registradoPor: usuarioAtual,
+                registradoPor: usuarioAtual || 'Anônimo',
                 status: 'Lost Salvo',
                 criadoEm: new Date()
             });
@@ -1625,7 +1637,7 @@
                 colaborador: document.getElementById('lnl_colaborador').value,
                 tl: document.getElementById('lnl_tl').value,
                 observacao: document.getElementById('lnl_observacao').value,
-                registradoPor: usuarioAtual,
+                registradoPor: usuarioAtual || 'Anônimo',
                 status: 'Lost não localizado',
                 criadoEm: new Date()
             });
