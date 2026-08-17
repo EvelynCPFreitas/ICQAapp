@@ -106,12 +106,23 @@
                             </div>
                         </div>
 
-                        <!-- CAMPOS EXTRAS CASO SIM -->
-                        <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
-                            <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
-                            <input type="text" id="sol_sobra_meli" placeholder="MELI" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                            <input type="number" id="sol_sobra_qtd" placeholder="QUANTIDADE" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                        </div>
+                       <!-- CAMPOS EXTRAS CASO SIM -->
+    <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
+        <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
+        
+        <!-- Contêiner dinâmico para múltiplos MELIs -->
+        <div id="container-melis" class="space-y-2">
+            <div class="row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2">
+                <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
+                <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
+            </div>
+        </div>
+
+        <!-- Botão Adicionar MeliSKU -->
+        <button type="button" class="mt-2 px-3 py-1.5 text-xs font-bold border border-orange-500 text-orange-600 rounded-full hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors" onclick="adicionarCampoMeli()">
+            + Adicionar MeliSKU
+        </button>
+    </div>
 
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
                     </form>
