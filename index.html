@@ -361,6 +361,7 @@
                         <div class="space-y-1.5">
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Meli divergente"> Meli divergente</label>
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Picking Massivo"> Picking Massivo</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Deixado no endereço / Encontrado na bin"> Deixado no endereço / Encontrado na bin</label>
                             <div class="flex items-center gap-2">
                                 <input type="radio" name="culpabilidade_picking" value="Outros" id="radio_outros_picking"> 
                                 <span class="text-sm">Outros:</span> 
@@ -915,6 +916,7 @@
             const opcoesPadrao = [
                 "Meli divergente",
                 "Picking Massivo",
+                "Deixado no endereço / Encontrado na bin",
                 "Tote finalizada pela bancada com produto",
                 "Troca de etiqueta ou produto (inversão de pedido)",
                 "Packing não bipou todas as unidades",
@@ -978,6 +980,7 @@
                         <select id="edit_resultado_auditoria_select" onchange="window.tratarResultadoAuditoriaEditSelect(this.value)" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                             <option value="Meli divergente" ${valorSelect === 'Meli divergente' ? 'selected' : ''}>Meli divergente</option>
                             <option value="Picking Massivo" ${valorSelect === 'Picking Massivo' ? 'selected' : ''}>Picking Massivo</option>
+                            <option value="Deixado no endereço / Encontrado na bin" ${valorSelect === 'Deixado no endereço / Encontrado na bin' ? 'selected' : ''}>Deixado no endereço / Encontrado na bin</option>
                             <option value="Tote finalizada pela bancada com produto" ${valorSelect === 'Tote finalizada pela bancada com produto' ? 'selected' : ''}>Tote finalizada pela bancada com produto</option>
                             <option value="Troca de etiqueta ou produto (inversão de pedido)" ${valorSelect === 'Troca de etiqueta ou produto (inversão de pedido)' ? 'selected' : ''}>Troca de etiqueta ou produto (inversão de pedido)</option>
                             <option value="Packing não bipou todas as unidades" ${valorSelect === 'Packing não bipou todas as unidades' ? 'selected' : ''}>Packing não bipou todas as unidades</option>
@@ -1662,7 +1665,7 @@
         window.salvarLostNaoLocalizadoManual = async () => {
             const altEl = document.querySelector('input[name="lnl_alt"]:checked');
             let alternativa = altEl ? altEl.value : '';
-            if(alternativa === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
+            if(altEl && altEl.value === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
 
             const meli = document.getElementById('lnl_meli').value;
             const qtd = document.getElementById('lnl_qtd').value;
