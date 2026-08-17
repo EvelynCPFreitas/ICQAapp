@@ -42,16 +42,7 @@
     <div>
         <header class="bg-lightCard dark:bg-darkCard border-b border-borderGray/30 shadow-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-                <!-- CABEÇALHO COM A BOLINHA DE NOTIFICAÇÃO -->
-                <div class="flex items-center gap-2">
-                    <h1 class="text-black dark:text-darkText font-bold text-xl">Portal LOST-FOUND</h1>
-                    <!-- Bolinha de Notificação Dinâmica -->
-                    <div id="notificacao-bolinha" class="hidden relative flex h-3 w-3" title="Novos casos pendentes!">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </div>
-                </div>
-
+                <h1 class="text-black dark:text-darkText font-bold text-xl">Portal LOST-FOUND</h1>
                 <nav class="flex items-center space-x-4">
                     <div class="flex space-x-1 bg-gray-300/50 dark:bg-black/20 p-1 rounded-lg" id="navbar">
                         <button data-tab="solicitacao" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold bg-primaryBtn text-white shadow">Solicitação</button>
@@ -620,10 +611,6 @@
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
 
-        // Controle para a bolinha de notificação de 3 minutos
-        let qtdPendentesAnterior = 0;
-        let temporizadorBolinha = null;
-
         // LÓGICA DE LOGIN E AUTENTICAÇÃO
         let usuarioAtual = null;
         let SOU_ADMIN = false;
@@ -637,7 +624,7 @@
                 inputNome.addEventListener('input', (e) => {
                     const containerSenha = document.getElementById('container-senha-admin');
                     const inputSenha = document.getElementById('login_senha');
-                    if (e.target.value.trim().toLowerCase() === 'evelyn') {
+                    if (e.target.value.trim().toLowerCase() === 'marigutinha') {
                         containerSenha.classList.remove('hidden');
                         inputSenha.setAttribute('required', 'true');
                     } else {
@@ -669,9 +656,9 @@
 
             if (!nomeInput) return;
 
-            if (nomeInput.toLowerCase() === 'evelyn') {
+            if (nomeInput.toLowerCase() === 'marigutinha') {
                 if (senhaInput === 'Jolyn26') {
-                    usuarioAtual = 'Evelyn';
+                    usuarioAtual = 'Marigutinha';
                     SOU_ADMIN = true;
                 } else {
                     alert('Senha incorreta para a conta de Administrador!');
@@ -754,38 +741,8 @@
             snapshot.forEach((docRef) => {
                 tarefasCache.push({ id: docRef.id, ...docRef.data() });
             });
-            
-            // Lógica da Bolinha de Notificação (Ativa por 3 minutos ao entrar novos casos)
-            verificarNovosCasosPendentes();
-
             renderizarTudo();
         });
-
-        // Função que gerencia a exibição e o sumiço da bolinha após 3 minutos
-        function verificarNovosCasosPendentes() {
-            const qtdPendentesAtual = tarefasCache.filter(t => t.status === 'Pendente').length;
-            const bolinha = document.getElementById('notificacao-bolinha');
-            if (!bolinha) return;
-
-            // Se houver mais casos pendentes do que antes (entrou caso novo)
-            if (qtdPendentesAtual > qtdPendentesAnterior) {
-                bolinha.classList.remove('hidden');
-
-                // Limpa temporizador anterior se houver
-                if (temporizadorBolinha) clearTimeout(temporizadorBolinha);
-
-                // Configura para sumir após 3 minutos (180000 milissegundos)
-                temporizadorBolinha = setTimeout(() => {
-                    bolinha.classList.add('hidden');
-                }, 3 * 60 * 1000); 
-            } else if (qtdPendentesAtual === 0) {
-                // Se não há pendentes, garante que a bolinha suma imediatamente
-                bolinha.classList.add('hidden');
-                if (temporizadorBolinha) clearTimeout(temporizadorBolinha);
-            }
-
-            qtdPendentesAnterior = qtdPendentesAtual;
-        }
 
         window.renderizarTudo = () => {
             renderizarAuditoriaPicking();
@@ -874,6 +831,7 @@
             const tarefa = tarefasCache.find(t => t.id === id);
             if (!tarefa) return;
             
+            // Oculta o botão "OK" de salvar ao visualizar normalmente
             document.getElementById('btn-detalhes-salvar').classList.add('hidden');
 
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
@@ -890,6 +848,7 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
+            // Exibição do usuário que registrou para todas as tarefas
             const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
             htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
 
@@ -919,6 +878,7 @@
 
             conteudo.innerHTML = htmlDetalhes;
 
+            // Controle de visibilidade dos botões de editar e excluir: somente para Admin
             const btnEditar = document.getElementById('btn-detalhes-editar');
             const btnExcluir = document.getElementById('btn-detalhes-excluir');
 
@@ -952,6 +912,7 @@
 
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
 
+            // Lista de opções padrão
             const opcoesPadrao = [
                 "Meli divergente",
                 "Picking Massivo",
@@ -978,6 +939,7 @@
 
             const loginRegistrado = tarefa.registradoPor || tarefa.solicitadoPor || '';
 
+            // Formulário com campo Registrado por e Resultado Auditoria em Dropdown
             conteudo.innerHTML = `
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                     <div>
@@ -1042,6 +1004,7 @@
                 </div>
             `;
 
+            // Exibe o botão "OK" para salvar
             const btnSalvar = document.getElementById('btn-detalhes-salvar');
             btnSalvar.classList.remove('hidden');
             btnSalvar.onclick = () => salvarEdicaoTarefa(id);
@@ -1247,6 +1210,7 @@
             let dadosFiltrados = tarefasCache.filter(t => {
                 if (filtroStatusAtivo && t.status !== filtroStatusAtivo) return false;
                 
+                // Filtro por Período de Datas (De / Até)
                 if (t.data) {
                     const dataTask = t.data.split('T')[0];
                     if (filtroDataInicio && dataTask < filtroDataInicio) return false;
