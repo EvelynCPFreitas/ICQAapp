@@ -1675,20 +1675,43 @@
             fecharModalLostSalvo();
             alert("Lost Salvo registrado com sucesso!");
         };
+window.salvarLostNaoLocalizadoManual = async () => {
+            // Tratamento correto do campo de alternativa (verificando se é rádio ou select)
+            const altElRadio = document.querySelector('input[name="lnl_alt"]:checked');
+            const altElSelect = document.getElementById('lnl_alternativa');
+            
+            let alternativa = '';
+            if (altElRadio) {
+                alternativa = altElRadio.value;
+            } else if (altElSelect) {
+                alternativa = altElSelect.value;
+            }
 
-        window.salvarLostNaoLocalizadoManual = async () => {
-            const altEl = document.querySelector('input[name="lnl_alt"]:checked');
-            let alternativa = altEl ? altEl.value : '';
-            if(altEl && altEl.value === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
+            if (alternativa === 'Outro') {
+                const outroTxt = document.getElementById('lnl_outro_texto');
+                if (outroTxt) alternativa = outroTxt.value;
+            }
 
-            const meli = document.getElementById('lnl_meli').value;
-            const qtd = document.getElementById('lnl_qtd').value;
+            // COLETA TODOS OS ITENS MELI E QUANTIDADE DINAMICAMENTE
+            const itensMelis = [];
+            document.querySelectorAll('.row-meli-item').forEach(bloco => {
+                const meliVal = bloco.querySelector('.input-meli').value.trim();
+                const qtdVal = bloco.querySelector('.input-qtd').value.trim();
+                if (meliVal) {
+                    itensMelis.push({ meli: meliVal, qtd: qtdVal });
+                }
+            });
+
+            // Cria um texto formatado com todas as melis para o registro
+            const meliFormatado = itensMelis.map(i => `${i.meli} (Qtd: ${i.qtd})`).join(', ');
+
             const tote = document.getElementById('lnl_tote').value;
             const idPedido = document.getElementById('lnl_id_pedido').value;
 
             await addDoc(collection(db, "tarefas"), {
-                meli: meli,
-                qtd: qtd,
+                meli: itensMelis.length > 0 ? itensMelis[0].meli : '', // Mantém o primeiro para compatibilidade
+                qtd: itensMelis.length > 0 ? itensMelis.reduce((acc, curr) => acc + Number(curr.qtd || 0), 0) : 0, // Soma total das quantidades
+                itens_melis: itensMelis, // Salva a lista completa estruturada
                 tote: tote,
                 id_pedido: idPedido,
                 etd: document.getElementById('lnl_etd').value,
@@ -1705,7 +1728,7 @@
             window.registrarNaPlanilha({
                 acao: "Lost Não Localizado",
                 usuario: usuarioAtual || 'Anônimo',
-                detalhes: `MELI: ${meli} | Qtd: ${qtd} | TOTE: ${tote} | ID Pedido: ${idPedido}`
+                detalhes: `MELIs: ${meliFormatado} | TOTE: ${tote} | ID Pedido: ${idPedido}`
             });
 
             fecharModalLostNaoLocalizado();
