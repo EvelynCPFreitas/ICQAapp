@@ -848,28 +848,31 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
-            // Exibição do usuário que registrou para todas as tarefas
-            const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
-            htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
+           // Exibição do usuário que registrou para todas as tarefas
+    const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
+    htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
 
-            if (tarefa.adicionadoPackingManual) {
-                htmlDetalhes += `
-                    <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
-                `;
-            } else {
-                if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
-                    htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
-                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
-                }
-                if (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência')) {
-                    htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || tarefa.auditadoPor || '-'}</p>`;
-                    htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
-                }
-            }
+    if (tarefa.adicionadoPackingManual) {
+        htmlDetalhes += `
+            <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
+        `;
+    } else {
+        // Exibe Picking apenas se houver registro de picking
+        if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
+            htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
+            htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
+        }
+        
+        // EXIBE PACKING APENAS SE HOUVER AUDITORIA DE PACKING EFETIVA
+        if (tarefa.auditadoPackingPor) {
+            htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor}</p>`;
+            htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
+        }
+    }
 
-            if (!ehLost && tarefa.resultado_auditoria && !tarefa.adicionadoPackingManual && !tarefa.auditadoPackingPor) {
-                htmlDetalhes += `<p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria}</p>`;
-            }
+    if (!ehLost && tarefa.resultado_auditoria && !tarefa.adicionadoPackingManual && !tarefa.auditadoPackingPor) {
+        htmlDetalhes += `<p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria}</p>`;
+    }
 
             if (tarefa.colaborador) htmlDetalhes += `<p><b>Colaborador:</b> ${tarefa.colaborador}</p>`;
             if (tarefa.tl) htmlDetalhes += `<p><b>Team Leader:</b> ${tarefa.tl}</p>`;
