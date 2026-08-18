@@ -373,6 +373,7 @@
                         <div class="space-y-1.5">
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Meli divergente"> Meli divergente</label>
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Picking Massivo"> Picking Massivo</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Deixado no endereço / Encontrado na bin"> Deixado no endereço / Encontrado na bin</label>
                             <div class="flex items-center gap-2">
                                 <input type="radio" name="culpabilidade_picking" value="Outros" id="radio_outros_picking"> 
                                 <span class="text-sm">Outros:</span> 
@@ -902,11 +903,13 @@
             if (tarefa.adicionadoPackingManual) {
                 htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
             } else {
+                // Exibe informações de Picking se houver registro
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || tarefa.resultado_auditoria || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
                 }
                 
+                // Só exibe informações de Packing se a tarefa REALMENTE passou pelo Packing (não teve divergência em Picking)
                 const teveDivergenciaPicking = (tarefa.status_fisico === 'Nao');
                 if (!teveDivergenciaPicking && (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência'))) {
                     htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || '-'}</p>`;
@@ -962,6 +965,7 @@
             const opcoesPadrao = [
                 "Meli divergente",
                 "Picking Massivo",
+                "Deixado no endereço / Encontrado na bin",
                 "Tote finalizada pela bancada com produto",
                 "Troca de etiqueta ou produto (inversão de pedido)",
                 "Packing não bipou todas as unidades",
@@ -1025,6 +1029,7 @@
                         <select id="edit_resultado_auditoria_select" onchange="window.tratarResultadoAuditoriaEditSelect(this.value)" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                             <option value="Meli divergente" ${valorSelect === 'Meli divergente' ? 'selected' : ''}>Meli divergente</option>
                             <option value="Picking Massivo" ${valorSelect === 'Picking Massivo' ? 'selected' : ''}>Picking Massivo</option>
+                            <option value="Deixado no endereço / Encontrado na bin" ${valorSelect === 'Deixado no endereço / Encontrado na bin' ? 'selected' : ''}>Deixado no endereço / Encontrado na bin</option>
                             <option value="Tote finalizada pela bancada com produto" ${valorSelect === 'Tote finalizada pela bancada com produto' ? 'selected' : ''}>Tote finalizada pela bancada com produto</option>
                             <option value="Troca de etiqueta ou produto (inversão de pedido)" ${valorSelect === 'Troca de etiqueta ou produto (inversão de pedido)' ? 'selected' : ''}>Troca de etiqueta ou produto (inversão de pedido)</option>
                             <option value="Packing não bipou todas as unidades" ${valorSelect === 'Packing não bipou todas as unidades' ? 'selected' : ''}>Packing não bipou todas as unidades</option>
@@ -1414,6 +1419,13 @@
                     auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Picking Divergência",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
                 fecharModalAuditoria();
                 alert("Divergência de Picking salva com sucesso! Status final: Auditado.");
             }
