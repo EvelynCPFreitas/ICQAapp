@@ -884,12 +884,12 @@
             });
         };
 
-        // Renderiza o quadrado com fundo Hex #dc6601 e texto em negrito quando o Picking indicar divergência
+        // Renderiza a badge CYCLE em rosa claro com letras escuras (estilo do modelo)
         const obterAcoesTabela = (d) => {
             const id = d.id;
             const ehCycle = d.status_fisico === 'Nao';
             const badgeCycle = ehCycle 
-                ? `<span class="px-2.5 py-1 rounded font-extrabold text-white uppercase text-[10px] tracking-wider shadow-sm shrink-0" style="background-color: #dc6601;">CYCLE</span>` 
+                ? `<span class="px-2.5 py-0.5 rounded font-bold bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-200 uppercase text-[10px] tracking-wider shrink-0">CYCLE</span>` 
                 : '';
 
             return `
