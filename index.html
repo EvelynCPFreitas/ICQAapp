@@ -109,8 +109,20 @@
                         <!-- CAMPOS EXTRAS CASO SIM -->
                         <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
                             <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
-                            <input type="text" id="sol_sobra_meli" placeholder="MELI" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                            <input type="number" id="sol_sobra_qtd" placeholder="QUANTIDADE" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                            
+                            <!-- Contêiner dinâmico para múltiplos MELIs -->
+                            <div id="container-melis" class="space-y-2">
+                                <div class="row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2">
+                                    <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
+                                    <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
+                                    <button type="button" class="text-red-500 text-xs font-bold underline block text-right w-full mt-1" onclick="removerCampoMeli(this)">Remover</button>
+                                </div>
+                            </div>
+
+                            <!-- Botão Adicionar Meli -->
+                            <button type="button" onclick="adicionarCampoMeli()" class="mt-2 px-3 py-1.5 text-xs font-bold border border-orange-500 text-orange-600 rounded-full hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors">
+                                + Adicionar Meli
+                            </button>
                         </div>
 
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
@@ -761,18 +773,66 @@
                 container.classList.remove('hidden');
             } else {
                 container.classList.add('hidden');
-                document.getElementById('sol_sobra_meli').value = '';
-                document.getElementById('sol_sobra_qtd').value = '';
+                const containerMelis = document.getElementById('container-melis');
+                if (containerMelis) {
+                    containerMelis.innerHTML = `
+                        <div class="row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2">
+                            <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
+                            <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
+                            <button type="button" class="text-red-500 text-xs font-bold underline block text-right w-full mt-1" onclick="removerCampoMeli(this)">Remover</button>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        window.adicionarCampoMeli = function() {
+            const container = document.getElementById('container-melis');
+            if (!container) return;
+            
+            const novoBloco = document.createElement('div');
+            novoBloco.className = 'row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2 mt-2';
+            novoBloco.innerHTML = `
+                <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
+                <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
+                <button type="button" class="text-red-500 text-xs font-bold underline block text-right w-full mt-1" onclick="removerCampoMeli(this)">Remover</button>
+            `;
+            container.appendChild(novoBloco);
+        };
+
+        window.removerCampoMeli = function(botao) {
+            const bloco = botao.closest('.row-meli-item');
+            if (document.querySelectorAll('.row-meli-item').length > 1) {
+                bloco.remove();
+            } else {
+                alert("Você precisa manter ao menos um produto sobrando cadastrado.");
             }
         };
 
         window.salvarSolicitacao = async () => {
             const sobraRadio = document.querySelector('input[name="sol_sobra_radio"]:checked');
             const sobrouProduto = sobraRadio ? sobraRadio.value : 'Nao';
-            const sobraMeli = document.getElementById('sol_sobra_meli').value;
-            const sobraQtd = document.getElementById('sol_sobra_qtd').value;
             const tote = document.getElementById('sol_tote').value;
             const meli = document.getElementById('sol_meli').value;
+
+            let sobrasArr = [];
+            if (sobrouProduto === 'Sim') {
+                const linhas = document.querySelectorAll('#container-melis .row-meli-item');
+                for (const row of linhas) {
+                    const m = row.querySelector('.input-meli')?.value.trim();
+                    const q = row.querySelector('.input-qtd')?.value.trim();
+                    if (!m || !q) {
+                        alert("Por favor, preencha o MELI e a QUANTIDADE de todos os itens de produto sobrando adicionados.");
+                        return;
+                    }
+                    sobrasArr.push({ meli: m, qtd: q });
+                }
+
+                if (sobrasArr.length === 0) {
+                    alert("Você deve adicionar pelo menos 1 MELI e quantidade do produto sobrando.");
+                    return;
+                }
+            }
 
             await addDoc(collection(db, "tarefas"), { 
                 mz: document.getElementById('sol_mz').value, 
@@ -782,8 +842,9 @@
                 data: document.getElementById('sol_data').value,
                 etd: document.getElementById('sol_etd').value,
                 sobrou_produto: sobrouProduto,
-                sobra_meli: sobraMeli || null,
-                sobra_qtd: sobraQtd || null,
+                sobras_detalhes: sobrasArr,
+                sobra_meli: sobrasArr.length > 0 ? sobrasArr[0].meli : null,
+                sobra_qtd: sobrasArr.length > 0 ? sobrasArr[0].qtd : null,
                 registradoPor: usuarioAtual || 'Anônimo',
                 solicitadoPor: usuarioAtual || 'Anônimo',
                 status: 'Pendente',
@@ -1104,9 +1165,14 @@
                 
                 let infoSobraHTML = '';
                 if (d.sobrou_produto === 'Sim') {
+                    let textoSobras = '';
+                    if (d.sobras_detalhes && d.sobras_detalhes.length > 0) {
+                        textoSobras = d.sobras_detalhes.map(s => `MELI: <b>${s.meli}</b> | Qtd: <b>${s.qtd}</b>`).join(' <span class="mx-1">|</span> ');
+                    } else {
+                        textoSobras = `MELI: <b>${d.sobra_meli || '-'}</b> | Quantidade: <b>${d.sobra_qtd || '-'}</b>`;
+                    }
                     infoSobraHTML = `<div class="w-full mt-2 p-2 bg-blue-50/40 dark:bg-black/30 rounded border border-blue-200 dark:border-borderGray text-xs">
-                        <span class="font-bold text-primaryBtn dark:text-blue-400">Produto Sobrando na Caixa:</span> 
-                        MELI: <b>${d.sobra_meli || '-'}</b> | Quantidade: <b>${d.sobra_qtd || '-'}</b>
+                        <span class="font-bold text-primaryBtn dark:text-blue-400">Produto Sobrando na Caixa:</span> ${textoSobras}
                     </div>`;
                 }
 
@@ -1280,7 +1346,13 @@
             `;
 
             if (tarefa.sobrou_produto === 'Sim') {
-                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}</p>`;
+                let textoSobras = '';
+                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
+                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: ${s.meli} | Qtd: ${s.qtd}`).join(' | ');
+                } else {
+                    textoSobras = `MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}`;
+                }
+                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> ${textoSobras}</p>`;
             }
 
             document.getElementById('modal-content').innerHTML = htmlDetalhes;
