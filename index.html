@@ -106,23 +106,12 @@
                             </div>
                         </div>
 
-                       <!-- CAMPOS EXTRAS CASO SIM -->
-    <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
-        <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
-        
-        <!-- Contêiner dinâmico para múltiplos MELIs -->
-        <div id="container-melis" class="space-y-2">
-            <div class="row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2">
-                <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
-                <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
-            </div>
-        </div>
-
-        <!-- Botão Adicionar Meli -->
-        <button type="button" onclick="adicionarCampoMeli()" class="mt-2 px-3 py-1.5 text-xs font-bold border border-orange-500 text-orange-600 rounded-full hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors" onclick="adicionarCampoMeli()">
-            + Adicionar Meli
-        </button>
-    </div>
+                        <!-- CAMPOS EXTRAS CASO SIM -->
+                        <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
+                            <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
+                            <input type="text" id="sol_sobra_meli" placeholder="MELI" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                            <input type="number" id="sol_sobra_qtd" placeholder="QUANTIDADE" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                        </div>
 
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
                     </form>
@@ -372,7 +361,6 @@
                         <div class="space-y-1.5">
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Meli divergente"> Meli divergente</label>
                             <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Picking Massivo"> Picking Massivo</label>
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="culpabilidade_picking" value="Deixado no endereço / Encontrado na bin"> Deixado no endereço / Encontrado na bin</label>
                             <div class="flex items-center gap-2">
                                 <input type="radio" name="culpabilidade_picking" value="Outros" id="radio_outros_picking"> 
                                 <span class="text-sm">Outros:</span> 
@@ -635,7 +623,7 @@
                 inputNome.addEventListener('input', (e) => {
                     const containerSenha = document.getElementById('container-senha-admin');
                     const inputSenha = document.getElementById('login_senha');
-                    if (e.target.value.trim().toLowerCase() === 'marigutinha') {
+                    if (e.target.value.trim().toLowerCase() === 'evelyn') {
                         containerSenha.classList.remove('hidden');
                         inputSenha.setAttribute('required', 'true');
                     } else {
@@ -667,9 +655,9 @@
 
             if (!nomeInput) return;
 
-            if (nomeInput.toLowerCase() === 'marigutinha') {
+            if (nomeInput.toLowerCase() === 'evelyn') {
                 if (senhaInput === 'Jolyn26') {
-                    usuarioAtual = 'Marigutinha';
+                    usuarioAtual = 'Evelyn';
                     SOU_ADMIN = true;
                 } else {
                     alert('Senha incorreta para a conta de Administrador!');
@@ -859,31 +847,28 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
-           // Exibição do usuário que registrou para todas as tarefas
-    const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
-    htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
+            // Exibição do usuário que registrou para todas as tarefas
+            const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
+            htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
 
-    if (tarefa.adicionadoPackingManual) {
-        htmlDetalhes += `
-            <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
-        `;
-    } else {
-        // Exibe Picking apenas se houver registro de picking
-        if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
-            htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
-            htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
-        }
-        
-        // EXIBE PACKING APENAS SE HOUVER AUDITORIA DE PACKING EFETIVA
-        if (tarefa.auditadoPackingPor) {
-            htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor}</p>`;
-            htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
-        }
-    }
+            if (tarefa.adicionadoPackingManual) {
+                htmlDetalhes += `
+                    <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
+                `;
+            } else {
+                if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
+                    htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
+                }
+                if (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência')) {
+                    htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || tarefa.auditadoPor || '-'}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
+                }
+            }
 
-    if (!ehLost && tarefa.resultado_auditoria && !tarefa.adicionadoPackingManual && !tarefa.auditadoPackingPor) {
-        htmlDetalhes += `<p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria}</p>`;
-    }
+            if (!ehLost && tarefa.resultado_auditoria && !tarefa.adicionadoPackingManual && !tarefa.auditadoPackingPor) {
+                htmlDetalhes += `<p><b>Resultado Auditoria:</b> ${tarefa.resultado_auditoria}</p>`;
+            }
 
             if (tarefa.colaborador) htmlDetalhes += `<p><b>Colaborador:</b> ${tarefa.colaborador}</p>`;
             if (tarefa.tl) htmlDetalhes += `<p><b>Team Leader:</b> ${tarefa.tl}</p>`;
@@ -930,7 +915,6 @@
             const opcoesPadrao = [
                 "Meli divergente",
                 "Picking Massivo",
-                "Deixado no endereço / Encontrado na bin",
                 "Tote finalizada pela bancada com produto",
                 "Troca de etiqueta ou produto (inversão de pedido)",
                 "Packing não bipou todas as unidades",
@@ -994,7 +978,6 @@
                         <select id="edit_resultado_auditoria_select" onchange="window.tratarResultadoAuditoriaEditSelect(this.value)" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                             <option value="Meli divergente" ${valorSelect === 'Meli divergente' ? 'selected' : ''}>Meli divergente</option>
                             <option value="Picking Massivo" ${valorSelect === 'Picking Massivo' ? 'selected' : ''}>Picking Massivo</option>
-                            <option value="Deixado no endereço / Encontrado na bin" ${valorSelect === 'Deixado no endereço / Encontrado na bin' ? 'selected' : ''}>Deixado no endereço / Encontrado na bin</option>
                             <option value="Tote finalizada pela bancada com produto" ${valorSelect === 'Tote finalizada pela bancada com produto' ? 'selected' : ''}>Tote finalizada pela bancada com produto</option>
                             <option value="Troca de etiqueta ou produto (inversão de pedido)" ${valorSelect === 'Troca de etiqueta ou produto (inversão de pedido)' ? 'selected' : ''}>Troca de etiqueta ou produto (inversão de pedido)</option>
                             <option value="Packing não bipou todas as unidades" ${valorSelect === 'Packing não bipou todas as unidades' ? 'selected' : ''}>Packing não bipou todas as unidades</option>
@@ -1675,43 +1658,20 @@
             fecharModalLostSalvo();
             alert("Lost Salvo registrado com sucesso!");
         };
-window.salvarLostNaoLocalizadoManual = async () => {
-            // Tratamento correto do campo de alternativa (verificando se é rádio ou select)
-            const altElRadio = document.querySelector('input[name="lnl_alt"]:checked');
-            const altElSelect = document.getElementById('lnl_alternativa');
-            
-            let alternativa = '';
-            if (altElRadio) {
-                alternativa = altElRadio.value;
-            } else if (altElSelect) {
-                alternativa = altElSelect.value;
-            }
 
-            if (alternativa === 'Outro') {
-                const outroTxt = document.getElementById('lnl_outro_texto');
-                if (outroTxt) alternativa = outroTxt.value;
-            }
+        window.salvarLostNaoLocalizadoManual = async () => {
+            const altEl = document.querySelector('input[name="lnl_alt"]:checked');
+            let alternativa = altEl ? altEl.value : '';
+            if(alternativa === 'Outro') alternativa = document.getElementById('lnl_outro_texto').value;
 
-            // COLETA TODOS OS ITENS MELI E QUANTIDADE DINAMICAMENTE
-            const itensMelis = [];
-            document.querySelectorAll('.row-meli-item').forEach(bloco => {
-                const meliVal = bloco.querySelector('.input-meli').value.trim();
-                const qtdVal = bloco.querySelector('.input-qtd').value.trim();
-                if (meliVal) {
-                    itensMelis.push({ meli: meliVal, qtd: qtdVal });
-                }
-            });
-
-            // Cria um texto formatado com todas as melis para o registro
-            const meliFormatado = itensMelis.map(i => `${i.meli} (Qtd: ${i.qtd})`).join(', ');
-
+            const meli = document.getElementById('lnl_meli').value;
+            const qtd = document.getElementById('lnl_qtd').value;
             const tote = document.getElementById('lnl_tote').value;
             const idPedido = document.getElementById('lnl_id_pedido').value;
 
             await addDoc(collection(db, "tarefas"), {
-                meli: itensMelis.length > 0 ? itensMelis[0].meli : '', // Mantém o primeiro para compatibilidade
-                qtd: itensMelis.length > 0 ? itensMelis.reduce((acc, curr) => acc + Number(curr.qtd || 0), 0) : 0, // Soma total das quantidades
-                itens_melis: itensMelis, // Salva a lista completa estruturada
+                meli: meli,
+                qtd: qtd,
                 tote: tote,
                 id_pedido: idPedido,
                 etd: document.getElementById('lnl_etd').value,
@@ -1728,34 +1688,12 @@ window.salvarLostNaoLocalizadoManual = async () => {
             window.registrarNaPlanilha({
                 acao: "Lost Não Localizado",
                 usuario: usuarioAtual || 'Anônimo',
-                detalhes: `MELIs: ${meliFormatado} | TOTE: ${tote} | ID Pedido: ${idPedido}`
+                detalhes: `MELI: ${meli} | Qtd: ${qtd} | TOTE: ${tote} | ID Pedido: ${idPedido}`
             });
 
             fecharModalLostNaoLocalizado();
             alert("Lost não localizado registrado com sucesso!");
         };
-        window.adicionarCampoMeli = function() {
-    const container = document.getElementById('container-melis');
-    if (!container) return;
-    
-    const novoBloco = document.createElement('div');
-    novoBloco.className = 'row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2 mt-2';
-    novoBloco.innerHTML = `
-        <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
-        <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
-        <button type="button" class="text-red-500 text-xs font-bold underline block text-right w-full mt-1" onclick="removerCampoMeli(this)">Remover</button>
-    `;
-    container.appendChild(novoBloco);
-};
-
-window.removerCampoMeli = function(botao) {
-    const bloco = botao.closest('.row-meli-item');
-    if (document.querySelectorAll('.row-meli-item').length > 1) {
-        bloco.remove();
-    } else {
-        alert("Você precisa manter ao menos um item.");
-    }
-};
     </script>
 </body>
 </html>
