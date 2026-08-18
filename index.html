@@ -234,7 +234,6 @@
                 <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 mb-4 flex flex-wrap gap-3 items-center">
                     <span class="text-xs font-bold dark:text-darkText uppercase">Filtros:</span>
                     
-                    <!-- NOVO FILTRO DE PERÍODO DE DATA (DE / ATÉ) -->
                     <div class="flex items-center gap-1.5">
                         <input type="date" id="filtro-data-inicio" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Inicial">
                         <span class="text-xs font-bold dark:text-darkText">até</span>
@@ -243,6 +242,7 @@
 
                     <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     <button onclick="setFiltroStatus('Pendente')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Pendente">Pendente</button>
+                    <button onclick="setFiltroStatus('Aguardando Auditoria Packing')" class="px-3 py-1.5 text-xs rounded border font-bold bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 btn-filtro" data-status="Aguardando Auditoria Packing">Aguardando Packing</button>
                     <button onclick="setFiltroStatus('Auditado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Auditado">Auditado</button>
                     <button onclick="setFiltroStatus('Lost Salvo')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost Salvo">Lost Salvos</button>
                     <button onclick="setFiltroStatus('Lost não localizado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost não localizado">Lost não localizado</button>
@@ -514,7 +514,6 @@
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
             <form class="space-y-3" onsubmit="event.preventDefault(); salvarLostNaoLocalizadoManual();">
-                <!-- NOVA ORDEM DOS CAMPOS -->
                 <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="number" id="lnl_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                 <input type="text" id="lnl_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -566,14 +565,9 @@
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
             <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes Task</h2>
-            <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4">
-                <!-- Informações detalhadas inseridas via JS -->
-            </div>
-            <!-- Ações no rodapé do modal -->
+            <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4"></div>
             <div class="flex justify-between items-center pt-3 border-t border-borderGray/30">
-                <div class="flex items-center gap-2">
-                    <!-- Reservado se necessário -->
-                </div>
+                <div class="flex items-center gap-2"></div>
                 <div class="flex items-center gap-2">
                     <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded">
                         <i data-lucide="pencil" class="w-4 h-4"></i>
@@ -592,22 +586,17 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE E LÓGICA GERAL + INTEGRAÇÃO GOOGLE SHEETS -->
+    <!-- SCRIPT FIREBASE E LÓGICA GERAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
-        // INTEGRAÇÃO COM A PLANILHA DO GOOGLE SHEETS
         window.registrarNaPlanilha = async function(dados) {
             const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
-            
             try {
-                const resposta = await fetch(urlWebAppData, {
-                    method: 'POST',
-                    body: JSON.stringify(dados)
-                });
+                const resposta = await fetch(urlWebAppData, { method: 'POST', body: JSON.stringify(dados) });
                 const resultado = await resposta.json();
                 console.log("Salvo na planilha com sucesso:", resultado);
             } catch (erro) {
@@ -622,7 +611,6 @@
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
 
-        // LÓGICA DE LOGIN E AUTENTICAÇÃO
         let usuarioAtual = null;
         let SOU_ADMIN = false;
 
@@ -891,9 +879,7 @@
             const tarefa = tarefasCache.find(t => t.id === id);
             if (!tarefa) return;
             
-            // Oculta o botão "OK" de salvar ao visualizar normalmente
             document.getElementById('btn-detalhes-salvar').classList.add('hidden');
-
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
             
             let htmlDetalhes = `
@@ -908,14 +894,11 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
-            // Exibição do usuário que registrou para todas as tarefas
             const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
             htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
 
             if (tarefa.adicionadoPackingManual) {
-                htmlDetalhes += `
-                    <p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>
-                `;
+                htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
             } else {
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
@@ -938,7 +921,6 @@
 
             conteudo.innerHTML = htmlDetalhes;
 
-            // Controle de visibilidade dos botões de editar e excluir: somente para Admin
             const btnEditar = document.getElementById('btn-detalhes-editar');
             const btnExcluir = document.getElementById('btn-detalhes-excluir');
 
@@ -972,7 +954,6 @@
 
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
 
-            // Lista de opções padrão
             const opcoesPadrao = [
                 "Meli divergente",
                 "Picking Massivo",
@@ -998,7 +979,6 @@
 
             const loginRegistrado = tarefa.registradoPor || tarefa.solicitadoPor || '';
 
-            // Formulário com campo Registrado por e Resultado Auditoria em Dropdown
             conteudo.innerHTML = `
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                     <div>
@@ -1021,6 +1001,7 @@
                         <label class="text-xs font-bold block dark:text-darkText">Status:</label>
                         <select id="edit_status" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                             <option value="Pendente" ${tarefa.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Aguardando Auditoria Packing" ${tarefa.status === 'Aguardando Auditoria Packing' ? 'selected' : ''}>Aguardando Auditoria Packing</option>
                             <option value="Auditado" ${tarefa.status === 'Auditado' ? 'selected' : ''}>Auditado</option>
                             <option value="Lost Salvo" ${tarefa.status === 'Lost Salvo' ? 'selected' : ''}>Lost Salvo</option>
                             <option value="Lost não localizado" ${tarefa.status === 'Lost não localizado' ? 'selected' : ''}>Lost não localizado</option>
@@ -1062,7 +1043,6 @@
                 </div>
             `;
 
-            // Exibe o botão "OK" para salvar
             const btnSalvar = document.getElementById('btn-detalhes-salvar');
             btnSalvar.classList.remove('hidden');
             btnSalvar.onclick = () => salvarEdicaoTarefa(id);
@@ -1192,11 +1172,12 @@
             });
         };
 
+        // Renderiza apenas tarefas que aguardam especificamente a auditoria do packing
         window.renderizarAuditoriaPacking = () => {
             const container = document.getElementById('lista-auditoria-packing');
             if (!container) return;
             container.innerHTML = "";
-            const pendentes = tarefasCache.filter(t => t.status === 'Auditado' && t.resultado_auditoria === 'Sem divergência');
+            const pendentes = tarefasCache.filter(t => t.status === 'Aguardando Auditoria Packing');
             ordenarTarefasPorPrioridadeData(pendentes);
             if(pendentes.length === 0) {
                 container.innerHTML = `<p class="text-sm dark:text-darkText italic">Nenhum caso pendente para Auditoria Packing.</p>`;
@@ -1273,7 +1254,6 @@
             let dadosFiltrados = tarefasCache.filter(t => {
                 if (filtroStatusAtivo && t.status !== filtroStatusAtivo) return false;
                 
-                // Filtro por Período de Datas (De / Até)
                 if (t.data) {
                     const dataTask = t.data.split('T')[0];
                     if (filtroDataInicio && dataTask < filtroDataInicio) return false;
@@ -1303,8 +1283,10 @@
                     statusClass = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
                 } else if (statusNormalizado === 'pendente') {
                     statusClass = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                } else if (statusNormalizado === 'aguardando auditoria packing') {
+                    statusClass = "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200";
                 } else if (statusNormalizado.includes('não localizado') || statusNormalizado.includes('nao localizado')) {
-                    statusClass = "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+                    statusClass = "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
                 } else if (statusNormalizado === 'lost salvo') {
                     statusClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
                 }
@@ -1392,21 +1374,23 @@
         window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
         window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
 
+        // SE O PICKING CONFERIR "SEM DIVERGÊNCIA", VAI PARA "Aguardando Auditoria Packing"
         window.confirmarSemDivergenciaEnvio = async () => {
             fecharConfirmacaoSemDivergencia();
             fecharModalAuditoria();
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', 
+                    status: 'Aguardando Auditoria Packing', 
                     status_fisico: 'Sim', 
                     resultado_auditoria: 'Sem divergência',
                     auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
-                alert("Auditado com sucesso!");
+                alert("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
             }
         };
 
+        // SE O PICKING PREENCHER DIVERGÊNCIA (COM CULPABILIDADE), ENCERRA O FLUXO E VAI DIRETO PARA "Auditado"
         window.salvarAuditoriaPickingNao = async () => {
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -1423,16 +1407,17 @@
                     colaborador, 
                     tl, 
                     observacao, 
-                    resultado_auditoria: 'Com divergência',
+                    resultado_auditoria: culpabilidade,
                     resultado_picking: culpabilidade,
                     auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
-                alert("Divergência salva com sucesso!");
+                alert("Divergência de Picking salva com sucesso! Status final: Auditado.");
             }
         };
 
+        // QUANDO O PACKING PREENCHE A CULPABILIDADE, MUDA O STATUS PARA "Auditado"
         window.salvarAuditoriaModal = async () => {
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -1453,7 +1438,7 @@
                     auditadoPor: usuarioAtual
                 });
                 fecharModalAuditoria();
-                alert("Auditoria Packing salva com sucesso!");
+                alert("Auditoria Packing salva com sucesso! Status final: Auditado.");
             }
         };
 
