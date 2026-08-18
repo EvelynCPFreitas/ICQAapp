@@ -1734,6 +1734,28 @@ window.salvarLostNaoLocalizadoManual = async () => {
             fecharModalLostNaoLocalizado();
             alert("Lost não localizado registrado com sucesso!");
         };
+        window.adicionarCampoMeli = function() {
+    const container = document.getElementById('container-melis');
+    if (!container) return;
+    
+    const novoBloco = document.createElement('div');
+    novoBloco.className = 'row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2 mt-2';
+    novoBloco.innerHTML = `
+        <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
+        <input type="number" class="input-qtd w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="QUANTIDADE">
+        <button type="button" class="text-red-500 text-xs font-bold underline block text-right w-full mt-1" onclick="removerCampoMeli(this)">Remover</button>
+    `;
+    container.appendChild(novoBloco);
+};
+
+window.removerCampoMeli = function(botao) {
+    const bloco = botao.closest('.row-meli-item');
+    if (document.querySelectorAll('.row-meli-item').length > 1) {
+        bloco.remove();
+    } else {
+        alert("Você precisa manter ao menos um item.");
+    }
+};
     </script>
 </body>
 </html>
