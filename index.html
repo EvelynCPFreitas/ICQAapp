@@ -904,7 +904,7 @@
             } else {
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
-                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || tarefa.resultado_auditoria || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
                 }
                 if (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência')) {
                     htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || tarefa.auditadoPor || '-'}</p>`;
