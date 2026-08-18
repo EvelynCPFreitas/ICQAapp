@@ -235,12 +235,12 @@
                     <span class="text-xs font-bold dark:text-darkText uppercase">Filtros:</span>
                     
                     <div class="flex items-center gap-1.5">
-                        <input type="date" id="filtro-data-inicio" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Inicial">
+                        <input type="date" id="filtro-data-inicio" onchange="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Inicial">
                         <span class="text-xs font-bold dark:text-darkText">até</span>
-                        <input type="date" id="filtro-data-fim" onchange="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Final">
+                        <input type="date" id="filtro-data-fim" onchange="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Final">
                     </div>
 
-                    <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     <button onclick="setFiltroStatus('Pendente')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Pendente">Pendente</button>
                     <button onclick="setFiltroStatus('Aguardando Auditoria Packing')" class="px-3 py-1.5 text-xs rounded border font-bold bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 btn-filtro" data-status="Aguardando Auditoria Packing">Aguardando Packing</button>
                     <button onclick="setFiltroStatus('Auditado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Auditado">Auditado</button>
@@ -266,6 +266,20 @@
                         </thead>
                         <tbody id="tabela-body"></tbody>
                     </table>
+
+                    <!-- CONTROLES DE PAGINAÇÃO (20 REGISTROS POR PÁGINA) -->
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-borderGray/30 text-xs dark:text-white">
+                        <span id="info-paginacao" class="text-gray-500 dark:text-darkText font-medium">Exibindo 0 de 0 registros</span>
+                        <div class="flex items-center gap-3">
+                            <button id="btn-pagina-anterior" onclick="mudarPagina(-1)" class="px-3 py-1.5 border rounded font-bold bg-gray-100 hover:bg-gray-200 dark:bg-black/20 dark:border-borderGray dark:hover:bg-black/40 disabled:opacity-40 disabled:cursor-not-allowed">
+                                &lt; Anterior
+                            </button>
+                            <span id="texto-pagina-atual" class="font-bold">Página 1 de 1</span>
+                            <button id="btn-pagina-proxima" onclick="mudarPagina(1)" class="px-3 py-1.5 border rounded font-bold bg-gray-100 hover:bg-gray-200 dark:bg-black/20 dark:border-borderGray dark:hover:bg-black/40 disabled:opacity-40 disabled:cursor-not-allowed">
+                                Próximo &gt;
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -611,6 +625,8 @@
         let currentModalId = null;
         let currentModalTipo = null;
         let filtroStatusAtivo = null;
+        let paginaAtualDashboard = 1;
+        const ITENS_POR_PAGINA = 20;
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
 
@@ -1281,7 +1297,18 @@
             document.getElementById('stat-volume-salvos').innerText = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
             document.getElementById('stat-volume-nao-localizado').innerText = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
 
-            dadosFiltrados.forEach(d => {
+            // PAGINAÇÃO: Lógica para limitar a 20 registros por página
+            const totalRegistros = dadosFiltrados.length;
+            const totalPaginas = Math.ceil(totalRegistros / ITENS_POR_PAGINA) || 1;
+
+            if (paginaAtualDashboard > totalPaginas) paginaAtualDashboard = totalPaginas;
+            if (paginaAtualDashboard < 1) paginaAtualDashboard = 1;
+
+            const inicio = (paginaAtualDashboard - 1) * ITENS_POR_PAGINA;
+            const fim = inicio + ITENS_POR_PAGINA;
+            const dadosPagina = dadosFiltrados.slice(inicio, fim);
+
+            dadosPagina.forEach(d => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-borderGray/20 text-xs";
                 
@@ -1318,7 +1345,31 @@
                 tbody.appendChild(tr);
             });
 
+            // Atualiza os controles visuais de paginação
+            const infoPaginacao = document.getElementById('info-paginacao');
+            const textoPaginaAtual = document.getElementById('texto-pagina-atual');
+            const btnAnterior = document.getElementById('btn-pagina-anterior');
+            const btnProximo = document.getElementById('btn-pagina-proxima');
+
+            if (infoPaginacao) {
+                const regInicio = totalRegistros === 0 ? 0 : inicio + 1;
+                const regFim = Math.min(fim, totalRegistros);
+                infoPaginacao.innerText = `Exibindo ${regInicio} - ${regFim} de ${totalRegistros} registros`;
+            }
+
+            if (textoPaginaAtual) {
+                textoPaginaAtual.innerText = `Página ${paginaAtualDashboard} de ${totalPaginas}`;
+            }
+
+            if (btnAnterior) btnAnterior.disabled = paginaAtualDashboard <= 1;
+            if (btnProximo) btnProximo.disabled = paginaAtualDashboard >= totalPaginas;
+
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.mudarPagina = (delta) => {
+            paginaAtualDashboard += delta;
+            renderizarDashboard();
         };
 
         window.abrirModalAuditoria = (id, tipo) => {
@@ -1504,9 +1555,10 @@
             }
         };
 
-        window.setFiltroStatus = (status) => { filtroStatusAtivo = status; renderizarDashboard(); };
+        window.setFiltroStatus = (status) => { filtroStatusAtivo = status; paginaAtualDashboard = 1; renderizarDashboard(); };
         window.limparFiltros = () => {
             filtroStatusAtivo = null;
+            paginaAtualDashboard = 1;
             document.getElementById('filtro-data-inicio').value = '';
             document.getElementById('filtro-data-fim').value = '';
             document.getElementById('filtro-etd').value = '';
