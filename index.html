@@ -396,7 +396,7 @@
                 </div>
             </div>
 
-            <!-- FLUXO PACKING -->
+            <!-- FLUXO PACKING COM OS DOIS BOTÕES SOLICITADOS -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
                 <div>
                     <label class="text-xs font-bold block mb-2">Culpabilidade:</label>
@@ -440,7 +440,11 @@
                     <textarea id="packing_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
                 </div>
 
-                <button type="button" onclick="salvarAuditoriaModal()" class="w-full bg-primaryBtn text-white py-2.5 rounded font-bold text-sm shadow">Salvar Auditoria</button>
+                <!-- BOTÕES DE AÇÃO DO PACKING -->
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="incluirEmLostSalvoModal()" class="flex-1 border-2 border-black dark:border-white text-black dark:text-white font-bold py-2.5 rounded text-xs hover:bg-gray-100 dark:hover:bg-black/30 transition-colors shadow">Incluir em lost Salvo</button>
+                    <button type="button" onclick="salvarAuditoriaModal()" class="flex-1 bg-primaryBtn text-white font-bold py-2.5 rounded text-xs shadow hover:opacity-90">Salvar Auditoria</button>
+                </div>
             </div>
 
             <div class="mt-4 pt-3 border-t border-borderGray/30 flex justify-end">
@@ -466,9 +470,7 @@
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
             <button onclick="fecharModalDetalhesTl()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
             <h2 id="modal-tl-titulo" class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Colaboradores do TL</h2>
-            <div id="modal-tl-conteudo" class="max-h-60 overflow-y-auto space-y-2 mb-4 text-sm">
-                <!-- Lista de colaboradores inserida dinamicamente -->
-            </div>
+            <div id="modal-tl-conteudo" class="max-h-60 overflow-y-auto space-y-2 mb-4 text-sm"></div>
             <div class="flex justify-end pt-3 border-t border-borderGray/30">
                 <button onclick="fecharModalDetalhesTl()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
             </div>
@@ -1172,7 +1174,6 @@
             });
         };
 
-        // Renderiza apenas tarefas que aguardam especificamente a auditoria do packing
         window.renderizarAuditoriaPacking = () => {
             const container = document.getElementById('lista-auditoria-packing');
             if (!container) return;
@@ -1374,7 +1375,6 @@
         window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
         window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
 
-        // SE O PICKING CONFERIR "SEM DIVERGÊNCIA", VAI PARA "Aguardando Auditoria Packing"
         window.confirmarSemDivergenciaEnvio = async () => {
             fecharConfirmacaoSemDivergencia();
             fecharModalAuditoria();
@@ -1390,7 +1390,6 @@
             }
         };
 
-        // SE O PICKING PREENCHER DIVERGÊNCIA (COM CULPABILIDADE), ENCERRA O FLUXO E VAI DIRETO PARA "Auditado"
         window.salvarAuditoriaPickingNao = async () => {
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -1417,8 +1416,10 @@
             }
         };
 
-        // QUANDO O PACKING PREENCHE A CULPABILIDADE, MUDA O STATUS PARA "Auditado"
+        // BOTAO SALVAR AUDITORIA DO PACKING COM CONFIRMAÇÃO
         window.salvarAuditoriaModal = async () => {
+            if (!confirm("Tem certeza de que deseja salvar esta auditoria de Packing?")) return;
+
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
             if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
@@ -1437,8 +1438,54 @@
                     auditadoPackingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
                 fecharModalAuditoria();
                 alert("Auditoria Packing salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        // BOTAO INCLUIR EM LOST SALVO DO MODAL DE PACKING COM CONFIRMAÇÃO E REDIRECIONAMENTO
+        window.incluirEmLostSalvoModal = async () => {
+            if (!confirm("Tem certeza de que deseja mover esta solicitação para Lost Salvo?")) return;
+
+            if(currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+                
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Lost Salvo', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId}`
+                });
+
+                fecharModalAuditoria();
+                
+                // Direciona o usuário diretamente para a aba Lost Salvo
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                alert("Solicitação movida para Lost Salvo com sucesso!");
             }
         };
 
