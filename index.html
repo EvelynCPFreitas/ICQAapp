@@ -241,12 +241,21 @@
                     </div>
 
                     <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                    <button onclick="setFiltroStatus('Pendente')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Pendente">Pendente</button>
-                    <button onclick="setFiltroStatus('Aguardando Auditoria Packing')" class="px-3 py-1.5 text-xs rounded border font-bold bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 btn-filtro" data-status="Aguardando Auditoria Packing">Aguardando Packing</button>
-                    <button onclick="setFiltroStatus('Auditado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Auditado">Auditado</button>
-                    <button onclick="setFiltroStatus('Lost Salvo')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost Salvo">Lost Salvos</button>
-                    <button onclick="setFiltroStatus('Lost não localizado')" class="px-3 py-1.5 text-xs rounded border font-bold bg-gray-200 dark:bg-black/20 dark:text-white btn-filtro" data-status="Lost não localizado">Lost não localizado</button>
-                    <button onclick="limparFiltros()" class="px-3 py-1.5 text-xs rounded border bg-red-500 text-white font-bold">Limpar Filtros</button>
+                    
+                    <!-- MENU DROPDOWN DE SELEÇÃO DE STATUS -->
+                    <div class="relative inline-block">
+                        <select id="select-filtro-status" onchange="selecionarFiltroStatusDropdown(this.value)" class="p-1.5 text-xs border rounded font-bold dark:bg-black/20 dark:text-white dark:border-borderGray focus:border-primaryBtn outline-none cursor-pointer">
+                            <option value="" selected>Todos os Status</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Auditado">Auditado</option>
+                            <option value="Aguardando Auditoria Packing">Aguardando Packing</option>
+                            <option value="Lost Salvo">Lost Salvos</option>
+                            <option value="Lost não localizado">Lost não localizado</option>
+                            <option value="Cycle">Cycle</option>
+                        </select>
+                    </div>
+
+                    <button onclick="limparFiltros()" class="px-3 py-1.5 text-xs rounded border bg-red-500 text-white font-bold hover:bg-red-600 transition-colors">Limpar Filtros</button>
                 </div>
 
                 <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30 overflow-x-auto">
@@ -1379,7 +1388,13 @@
             const filtroEtd = document.getElementById('filtro-etd').value.toLowerCase();
 
             let dadosFiltrados = tarefasCache.filter(t => {
-                if (filtroStatusAtivo && t.status !== filtroStatusAtivo) return false;
+                if (filtroStatusAtivo) {
+                    if (filtroStatusAtivo === 'Cycle') {
+                        if (t.status_fisico !== 'Nao') return false;
+                    } else if (t.status !== filtroStatusAtivo) {
+                        return false;
+                    }
+                }
                 
                 if (t.data) {
                     const dataTask = t.data.split('T')[0];
@@ -1593,7 +1608,7 @@
             }
         };
 
-        // BOTAO SALVAR AUDITORIA DO PACKING
+        // BOTAO SALVAR AUDITORIA DO PACKING COM CONFIRMAÇÃO
         window.salvarAuditoriaModal = async () => {
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -1623,6 +1638,44 @@
 
                 fecharModalAuditoria();
                 mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        // BOTAO INCLUIR EM LOST SALVO DO MODAL DE PACKING COM CONFIRMAÇÃO E REDIRECIONAMENTO
+        window.incluirEmLostSalvoModal = async () => {
+            if(currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+                
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Lost Salvo', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId}`
+                });
+
+                fecharModalAuditoria();
+                
+                // Direciona o usuário diretamente para a aba Lost Salvo
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
             }
         };
 
@@ -1677,13 +1730,26 @@
             }
         };
 
-        window.setFiltroStatus = (status) => { filtroStatusAtivo = status; paginaAtualDashboard = 1; renderizarDashboard(); };
+        window.selecionarFiltroStatusDropdown = (status) => {
+            filtroStatusAtivo = status || null;
+            paginaAtualDashboard = 1;
+            renderizarDashboard();
+        };
+        window.setFiltroStatus = (status) => { 
+            filtroStatusAtivo = status; 
+            paginaAtualDashboard = 1; 
+            const select = document.getElementById('select-filtro-status');
+            if (select) select.value = status || '';
+            renderizarDashboard(); 
+        };
         window.limparFiltros = () => {
             filtroStatusAtivo = null;
             paginaAtualDashboard = 1;
             document.getElementById('filtro-data-inicio').value = '';
             document.getElementById('filtro-data-fim').value = '';
             document.getElementById('filtro-etd').value = '';
+            const select = document.getElementById('select-filtro-status');
+            if (select) select.value = '';
             renderizarDashboard();
         };
 
