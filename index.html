@@ -419,54 +419,84 @@
                 </div>
             </div>
 
-            <!-- FLUXO PACKING COM OS DOIS BOTÕES SOLICITADOS -->
+            <!-- FLUXO PACKING -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
-                <div>
-                    <label class="text-xs font-bold block mb-2">Culpabilidade:</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="radio" name="culpabilidade_packing" value="Tote finalizada pela bancada com produto" checked> 
-                            <span>Tote finalizada pela bancada com produto</span>
-                        </label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="radio" name="culpabilidade_packing" value="Troca de etiqueta ou produto (inversão de pedido)"> 
-                            <span>Troca de etiqueta ou produto (inversão de pedido)</span>
-                        </label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="radio" name="culpabilidade_packing" value="Packing não bipou todas as unidades"> 
-                            <span>Packing não bipou todas as unidades</span>
-                        </label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="radio" name="culpabilidade_packing" value="Inconclusivo"> 
-                            <span>Inconclusivo</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <input type="radio" name="culpabilidade_packing" value="Outros" id="radio_outros_packing"> 
-                            <span class="text-sm shrink-0">Outros:</span> 
-                            <input type="text" id="packing_outro_texto" placeholder="Escreva..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray">
+                <div id="packing-campos-principais" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold block mb-2">Culpabilidade:</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="culpabilidade_packing" value="Tote finalizada pela bancada com produto" checked> 
+                                <span>Tote finalizada pela bancada com produto</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="culpabilidade_packing" value="Troca de etiqueta ou produto (inversão de pedido)"> 
+                                <span>Troca de etiqueta ou produto (inversão de pedido)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="culpabilidade_packing" value="Packing não bipou todas as unidades"> 
+                                <span>Packing não bipou todas as unidades</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="culpabilidade_packing" value="Inconclusivo"> 
+                                <span>Inconclusivo</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="radio" name="culpabilidade_packing" value="Outros" id="radio_outros_packing"> 
+                                <span class="text-sm shrink-0">Outros:</span> 
+                                <input type="text" id="packing_outro_texto" placeholder="Escreva..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray">
+                            </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
+                        <input type="text" id="packing_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
+                        <input type="text" id="packing_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
+                        <textarea id="packing_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
+                    </div>
+
+                    <!-- BOTÕES DE AÇÃO DO PACKING -->
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="mostrarOpcoesLostSalvoPacking()" class="flex-1 border-2 border-black dark:border-white text-black dark:text-white font-bold py-2.5 rounded text-xs hover:bg-gray-100 dark:hover:bg-black/30 transition-colors shadow">Incluir em lost Salvo</button>
+                        <button type="button" onclick="salvarAuditoriaModal()" class="flex-1 bg-primaryBtn text-white font-bold py-2.5 rounded text-xs shadow hover:opacity-90">Salvar Auditoria</button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
-                    <input type="text" id="packing_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                    <input type="text" id="packing_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
-                    <textarea id="packing_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
-                </div>
-
-                <!-- BOTÕES DE AÇÃO DO PACKING -->
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="incluirEmLostSalvoModal()" class="flex-1 border-2 border-black dark:border-white text-black dark:text-white font-bold py-2.5 rounded text-xs hover:bg-gray-100 dark:hover:bg-black/30 transition-colors shadow">Incluir em lost Salvo</button>
-                    <button type="button" onclick="salvarAuditoriaModal()" class="flex-1 bg-primaryBtn text-white font-bold py-2.5 rounded text-xs shadow hover:opacity-90">Salvar Auditoria</button>
+                <!-- SUB-TELA PARA SELEÇÃO DE ALTERNATIVAS DO LOST SALVO NO PACKING -->
+                <div id="packing-opcoes-lost-salvo" class="hidden space-y-3 pt-2 border-t border-borderGray/30">
+                    <label class="text-xs font-bold block dark:text-darkText">Alternativas de Lost Salvo:</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="ls_packing_alt" value="Encontrado no Packing/Inventário" checked>
+                            <span>Encontrado no Packing/Inventário</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="ls_packing_alt" value="Encontrado no Shipping">
+                            <span>Encontrado no Shipping</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="ls_packing_alt" value="Caído na Mecanização">
+                            <span>Caído na Mecanização</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="ls_packing_alt" value="Outro" id="ls_packing_radio_outro">
+                            <span class="text-sm shrink-0">Outro:</span>
+                            <input type="text" id="ls_packing_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-3">
+                        <button type="button" onclick="confirmarEIncluirLostSalvoPacking()" class="flex-1 bg-primaryBtn text-white font-bold py-2.5 rounded text-xs shadow hover:opacity-90">Salvar</button>
+                        <button type="button" onclick="voltarFormularioPacking()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded text-xs font-bold">Voltar</button>
+                    </div>
                 </div>
             </div>
 
@@ -1468,6 +1498,8 @@
             } else {
                 document.getElementById('container-picking-fluxo').classList.add('hidden');
                 document.getElementById('container-packing-fluxo').classList.remove('hidden');
+                document.getElementById('packing-campos-principais').classList.remove('hidden');
+                document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
                 
                 const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
                 if(radioDefault) radioDefault.checked = true;
@@ -1475,6 +1507,10 @@
                 document.getElementById('packing_colaborador').value = '';
                 document.getElementById('packing_tl').value = '';
                 document.getElementById('packing_observacao').value = '';
+
+                const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
+                if(altDefault) altDefault.checked = true;
+                if(document.getElementById('ls_packing_outro_texto')) document.getElementById('ls_packing_outro_texto').value = '';
             }
             document.getElementById('modal-auditoria').classList.remove('hidden');
         };
@@ -1578,19 +1614,33 @@
             }
         };
 
-        // BOTAO INCLUIR EM LOST SALVO DO MODAL DE PACKING
-        window.incluirEmLostSalvoModal = async () => {
-            if(currentModalId) {
+        window.mostrarOpcoesLostSalvoPacking = () => {
+            document.getElementById('packing-campos-principais').classList.add('hidden');
+            document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
+        };
+
+        window.voltarFormularioPacking = () => {
+            document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
+            document.getElementById('packing-campos-principais').classList.remove('hidden');
+        };
+
+        window.confirmarEIncluirLostSalvoPacking = async () => {
+            if (currentModalId) {
                 const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
                 let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-                
+                if (culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+
+                const altEl = document.querySelector('input[name="ls_packing_alt"]:checked');
+                let alternativa = altEl ? altEl.value : '';
+                if (alternativa === 'Outro') alternativa = document.getElementById('ls_packing_outro_texto').value;
+
                 const colaborador = document.getElementById('packing_colaborador').value;
                 const tl = document.getElementById('packing_tl').value;
                 const observacao = document.getElementById('packing_observacao').value;
 
-                await updateDoc(doc(db, "tarefas", currentModalId), { 
-                    status: 'Lost Salvo', 
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Lost Salvo',
+                    alternativa: alternativa,
                     resultado_auditoria: culpabilidade,
                     colaborador: colaborador,
                     tl: tl,
@@ -1603,12 +1653,11 @@
                 window.registrarNaPlanilha({
                     acao: "Movido para Lost Salvo via Packing",
                     usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId}`
+                    detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
                 });
 
                 fecharModalAuditoria();
-                
-                // Direciona o usuário diretamente para a aba Lost Salvo
+
                 const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
                 if (btnTabLostSalvo) btnTabLostSalvo.click();
 
