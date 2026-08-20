@@ -1529,6 +1529,13 @@
                 document.getElementById('container-picking-fluxo').classList.remove('hidden');
                 document.getElementById('container-packing-fluxo').classList.add('hidden');
                 document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
+                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
+                
+                if(document.getElementById('picking_outro_texto')) document.getElementById('picking_outro_texto').value = '';
+                if(document.getElementById('picking_colaborador')) document.getElementById('picking_colaborador').value = '';
+                if(document.getElementById('picking_tl')) document.getElementById('picking_tl').value = '';
+                if(document.getElementById('picking_observacao')) document.getElementById('picking_observacao').value = '';
+
                 document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
                 document.getElementById('div-campos-divergencia').classList.add('hidden');
             } else {
@@ -1539,10 +1546,10 @@
                 
                 const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
                 if(radioDefault) radioDefault.checked = true;
-                document.getElementById('packing_outro_texto').value = '';
-                document.getElementById('packing_colaborador').value = '';
-                document.getElementById('packing_tl').value = '';
-                document.getElementById('packing_observacao').value = '';
+                if(document.getElementById('packing_outro_texto')) document.getElementById('packing_outro_texto').value = '';
+                if(document.getElementById('packing_colaborador')) document.getElementById('packing_colaborador').value = '';
+                if(document.getElementById('packing_tl')) document.getElementById('packing_tl').value = '';
+                if(document.getElementById('packing_observacao')) document.getElementById('packing_observacao').value = '';
 
                 const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
                 if(altDefault) altDefault.checked = true;
