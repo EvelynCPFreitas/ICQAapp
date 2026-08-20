@@ -285,6 +285,14 @@
         </main>
     </div>
 
+    <!-- NOTIFICAÇÃO TOAST FLUTUANTE (PARTE INFERIOR) -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform opacity-0 translate-y-4">
+        <div class="bg-gray-900/90 text-white px-5 py-3 rounded-lg shadow-2xl border border-gray-700/50 flex items-center gap-3 text-xs font-semibold backdrop-blur-md max-w-md text-center">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-green-400 shrink-0"></i>
+            <span id="toast-mensagem">Notificação realizada!</span>
+        </div>
+    </div>
+
     <!-- BOTÕES FLUTUANTES -->
     <button id="btn-floating-auditoria-packing" onclick="abrirModalAuditoriaPackingManual()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
@@ -610,6 +618,24 @@
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
+        // SISTEMA DE NOTIFICAÇÃO TOAST FLUTUANTE
+        let toastTimeout = null;
+        window.mostrarToast = function(mensagem) {
+            const container = document.getElementById('toast-container');
+            const msgEl = document.getElementById('toast-mensagem');
+            if (!container || !msgEl) return;
+
+            msgEl.innerText = mensagem;
+            container.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+            container.classList.add('opacity-100', 'translate-y-0');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                container.classList.remove('opacity-100', 'translate-y-0');
+                container.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }, 3000);
+        };
+
         window.registrarNaPlanilha = async function(dados) {
             const urlWebAppData = "https://script.google.com/macros/s/AKfycbzIzfk9eBBsvVJmzQmQGMcO64pc6XoQq8fRy4OcOZb_AoYAw85ieGX9Ovlsx50eaRzg/exec";
             try {
@@ -679,7 +705,7 @@
                     usuarioAtual = 'Evelyn';
                     SOU_ADMIN = true;
                 } else {
-                    alert('Senha incorreta para a conta de Administrador!');
+                    mostrarToast('Senha incorreta para a conta de Administrador!');
                     return;
                 }
             } else {
@@ -812,7 +838,7 @@
             if (document.querySelectorAll('.row-meli-item').length > 1) {
                 bloco.remove();
             } else {
-                alert("Você precisa manter ao menos um produto sobrando cadastrado.");
+                mostrarToast("Você precisa manter ao menos um produto sobrando cadastrado.");
             }
         };
 
@@ -829,14 +855,14 @@
                     const m = row.querySelector('.input-meli')?.value.trim();
                     const q = row.querySelector('.input-qtd')?.value.trim();
                     if (!m || !q) {
-                        alert("Por favor, preencha o MELI e a QUANTIDADE de todos os itens de produto sobrando adicionados.");
+                        mostrarToast("Por favor, preencha o MELI e a QUANTIDADE de todos os itens de produto sobrando adicionados.");
                         return;
                     }
                     sobrasArr.push({ meli: m, qtd: q });
                 }
 
                 if (sobrasArr.length === 0) {
-                    alert("Você deve adicionar pelo menos 1 MELI e quantidade do produto sobrando.");
+                    mostrarToast("Você deve adicionar pelo menos 1 MELI e quantidade do produto sobrando.");
                     return;
                 }
             }
@@ -866,7 +892,7 @@
                 detalhes: `TOTE: ${tote} | MELI: ${meli} | Sobrou Produto: ${sobrouProduto}`
             });
 
-            alert("Solicitação enviada com sucesso!");
+            mostrarToast("Solicitação enviada com sucesso!");
             document.getElementById('form-solicitacao').reset();
             tratarSobraProduto('Nao');
         };
@@ -991,7 +1017,7 @@
 
         window.habilitarEdicaoTarefa = (id) => {
             if (!SOU_ADMIN) {
-                alert("Apenas administradores podem editar informações!");
+                mostrarToast("Apenas administradores podem editar informações!");
                 return;
             }
 
@@ -1110,7 +1136,7 @@
 
         window.salvarEdicaoTarefa = async (id) => {
             if (!SOU_ADMIN) {
-                alert("Apenas administradores podem salvar alterações!");
+                mostrarToast("Apenas administradores podem salvar alterações!");
                 return;
             }
 
@@ -1144,17 +1170,17 @@
                     detalhes: `ID: ${id} | TOTE: ${dadosAtualizados.tote}`
                 });
 
-                alert("Informações atualizadas com sucesso!");
+                mostrarToast("Informações atualizadas com sucesso!");
                 abrirDetalhesTarefa(id);
             } catch (erro) {
                 console.error("Erro ao atualizar task:", erro);
-                alert("Erro ao salvar alterações.");
+                mostrarToast("Erro ao salvar alterações.");
             }
         };
 
         window.excluirTarefa = async (id) => {
             if (!SOU_ADMIN) {
-                alert("Apenas administradores podem excluir tasks!");
+                mostrarToast("Apenas administradores podem excluir tasks!");
                 return;
             }
 
@@ -1169,10 +1195,10 @@
                     });
 
                     fecharModalDetalhesTarefa();
-                    alert("Task excluída com sucesso!");
+                    mostrarToast("Task excluída com sucesso!");
                 } catch (erro) {
                     console.error("Erro ao excluir task:", erro);
-                    alert("Erro ao tentar excluir a task.");
+                    mostrarToast("Erro ao tentar excluir a task.");
                 }
             }
         };
@@ -1469,7 +1495,7 @@
                     auditadoPickingEm: new Date(),
                     auditadoPor: usuarioAtual
                 });
-                alert("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
+                mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
             }
         };
 
@@ -1503,7 +1529,7 @@
                 });
 
                 fecharModalAuditoria();
-                alert("Divergência de Picking salva com sucesso! Status final: Auditado.");
+                mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
             }
         };
 
@@ -1538,7 +1564,7 @@
                 });
 
                 fecharModalAuditoria();
-                alert("Auditoria Packing salva com sucesso! Status final: Auditado.");
+                mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
             }
         };
 
@@ -1578,7 +1604,7 @@
                 const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
                 if (btnTabLostSalvo) btnTabLostSalvo.click();
 
-                alert("Solicitação movida para Lost Salvo com sucesso!");
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
             }
         };
 
@@ -1823,7 +1849,7 @@
             });
 
             fecharModalAuditoriaPackingManual();
-            alert("Auditoria Packing salva com sucesso!");
+            mostrarToast("Auditoria Packing salva com sucesso!");
         };
 
         window.salvarLostSalvoManual = async () => {
@@ -1855,7 +1881,7 @@
             });
 
             fecharModalLostSalvo();
-            alert("Lost Salvo registrado com sucesso!");
+            mostrarToast("Lost Salvo registrado com sucesso!");
         };
 
         window.salvarLostNaoLocalizadoManual = async () => {
@@ -1891,7 +1917,7 @@
             });
 
             fecharModalLostNaoLocalizado();
-            alert("Lost não localizado registrado com sucesso!");
+            mostrarToast("Lost não localizado registrado com sucesso!");
         };
     </script>
 </body>
