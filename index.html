@@ -1703,10 +1703,14 @@
 
             const mapCulp = {};
             dados.forEach(t => {
-                const k = t.resultado_auditoria || 'Aguardando';
-                mapCulp[k] = (mapCulp[k] || 0) + 1;
+                const k = t.resultado_auditoria;
+                if (k && k !== 'Aguardando') {
+                    mapCulp[k] = (mapCulp[k] || 0) + 1;
+                }
             });
-            destruirOuCriarGrafico('chartCulpabilidade', 'pie', Object.keys(mapCulp), Object.values(mapCulp), ['#002147', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']);
+            const labelsCulp = Object.keys(mapCulp);
+            const dataCulp = Object.values(mapCulp);
+            destruirOuCriarGrafico('chartCulpabilidade', 'pie', labelsCulp.length ? labelsCulp : ['Nenhum'], dataCulp.length ? dataCulp : [1], labelsCulp.length ? ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#002147', '#3B82F6'] : ['#E5E7EB']);
 
             const mapSalvos = {};
             dados.filter(t => t.status === 'Lost Salvo').forEach(t => {
