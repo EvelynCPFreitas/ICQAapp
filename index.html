@@ -353,7 +353,7 @@
 
                 <div>
                     <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                    <input type="text" id="apk_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    <input type="text" id="apk_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                 </div>
 
                 <div>
@@ -409,7 +409,13 @@
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                        <input type="text" id="picking_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                        <input type="text" id="picking_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+<datalist id="lista-team-leaders">
+                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                    </datalist>
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
@@ -456,7 +462,13 @@
 
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                        <input type="text" id="packing_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                        <input type="text" id="packing_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+<datalist id="lista-team-leaders">
+                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                    </datalist>
                     </div>
 
                     <div>
@@ -599,7 +611,7 @@
 
                 <div>
                     <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                    <input type="text" id="lnl_tl" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    <input type="text" id="lnl_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                 </div>
 
                 <div>
@@ -804,7 +816,7 @@
             if (isNaN(dataObj.getTime())) return '-';
             const dia = String(dataObj.getDate()).padStart(2, '0');
             const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-            const ano = String(dataObj.getFullYear()).slice(-2);
+            const ano = dataObj.getFullYear();
             const hora = String(dataObj.getHours()).padStart(2, '0');
             const min = String(dataObj.getMinutes()).padStart(2, '0');
             return `${dia}/${mes}/${ano} ${hora}:${min}`;
