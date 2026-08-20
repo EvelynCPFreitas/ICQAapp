@@ -1913,23 +1913,33 @@
 
             titulo.innerText = `Colaboradores do TL: ${nomeTl}`;
             
-            const colaboradoresSet = new Set();
+            const contagemColaboradores = {};
+            let totalErrosTl = 0;
+
             dadosFiltradosGraficoCache.forEach(t => {
                 const tlTask = t.tl || 'Não informado';
-                if(tlTask === nomeTl && t.colaborador) {
-                    colaboradoresSet.add(t.colaborador);
+                if (tlTask === nomeTl && t.colaborador) {
+                    const colabNome = t.colaborador.trim();
+                    contagemColaboradores[colabNome] = (contagemColaboradores[colabNome] || 0) + 1;
+                    totalErrosTl += 1;
                 }
             });
 
-            const colaboradores = Array.from(colaboradoresSet);
+            // Ordenar colaboradores do maior para o menor ofensor
+            const listaOrdenada = Object.entries(contagemColaboradores).sort((a, b) => b[1] - a[1]);
 
-            if(colaboradores.length === 0) {
+            if (listaOrdenada.length === 0) {
                 conteudo.innerHTML = `<p class="italic text-gray-400">Nenhum colaborador registrado especificamente para este Team Leader no período.</p>`;
             } else {
                 let htmlList = `<ul class="divide-y divide-borderGray/30">`;
-                colaboradores.forEach(colab => {
+                listaOrdenada.forEach(([colab, qtd]) => {
+                    const porcentagem = totalErrosTl > 0 ? ((qtd / totalErrosTl) * 100).toFixed(1) : 0;
                     htmlList += `<li class="py-2 px-3 bg-gray-50 dark:bg-black/20 rounded mb-1 flex items-center justify-between">
-                        <span class="font-medium dark:text-white">${colab}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium dark:text-white">${colab}</span>
+                            <span class="text-xs opacity-60 font-semibold dark:text-white">(${porcentagem}%)</span>
+                        </div>
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText">${qtd} ${qtd === 1 ? 'registro' : 'registros'}</span>
                     </li>`;
                 });
                 htmlList += `</ul>`;
