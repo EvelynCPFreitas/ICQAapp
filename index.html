@@ -927,10 +927,13 @@
             if (tarefa.adicionadoPackingManual) {
                 htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
             } else {
-                // Exibe informações de Picking se houver registro
+                // Exibe informações de Picking se houver registro (se bateu ou se teve divergência)
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
+                    const resPicking = (tarefa.status_fisico === 'Sim') 
+                        ? 'Sem divergência' 
+                        : (tarefa.resultado_picking || tarefa.culpabilidade || 'Com divergência');
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
-                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${tarefa.resultado_picking || tarefa.resultado_auditoria || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : 'Com divergência')}</p>`;
+                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${resPicking}</p>`;
                 }
                 
                 // Só exibe informações de Packing se a tarefa REALMENTE passou pelo Packing (não teve divergência em Picking)
@@ -1450,6 +1453,7 @@
                     status: 'Aguardando Auditoria Packing', 
                     status_fisico: 'Sim', 
                     resultado_auditoria: 'Sem divergência',
+                    resultado_picking: 'Sem divergência',
                     auditadoPickingPor: usuarioAtual,
                     auditadoPor: usuarioAtual
                 });
