@@ -748,7 +748,7 @@
             if (isNaN(dataObj.getTime())) return '-';
             const dia = String(dataObj.getDate()).padStart(2, '0');
             const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-            const ano = dataObj.getFullYear();
+            const ano = String(dataObj.getFullYear()).slice(-2);
             const hora = String(dataObj.getHours()).padStart(2, '0');
             const min = String(dataObj.getMinutes()).padStart(2, '0');
             return `${dia}/${mes}/${ano} ${hora}:${min}`;
@@ -921,25 +921,36 @@
             const statusAtual = (tarefa.status || '').toLowerCase();
             const ehLost = statusAtual.includes('lost');
 
+            // Data/Hora do Registro
             const loginRegistro = tarefa.registradoPor || tarefa.solicitadoPor || '-';
-            htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}</p>`;
+            const dataRegistroFormatada = tarefa.criadoEm ? formatarDataHoraCriacao(tarefa.criadoEm) : '';
+            const dataRegistroHTML = dataRegistroFormatada ? ` <span class="opacity-50 text-xs">(${dataRegistroFormatada})</span>` : '';
+            htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}${dataRegistroHTML}</p>`;
 
             if (tarefa.adicionadoPackingManual) {
-                htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
+                const dataPackingFormatada = tarefa.criadoEm ? formatarDataHoraCriacao(tarefa.criadoEm) : '';
+                const dataPackingHTML = dataPackingFormatada ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
+                htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}${dataPackingHTML}</p>`;
             } else {
-                // Exibe informações de Picking se houver registro (se bateu ou se teve divergência)
+                // Exibe informações de Picking se houver registro
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
+                    const dataPickingFormatada = tarefa.auditadoPickingEm ? formatarDataHoraCriacao(tarefa.auditadoPickingEm) : '';
+                    const dataPickingHTML = dataPickingFormatada ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
                     const resPicking = (tarefa.status_fisico === 'Sim') 
                         ? 'Sem divergência' 
                         : (tarefa.resultado_picking || tarefa.culpabilidade || 'Com divergência');
-                    htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}</p>`;
+                    
+                    htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}${dataPickingHTML}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${resPicking}</p>`;
                 }
                 
                 // Só exibe informações de Packing se a tarefa REALMENTE passou pelo Packing (não teve divergência em Picking)
                 const teveDivergenciaPicking = (tarefa.status_fisico === 'Nao');
                 if (!teveDivergenciaPicking && (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência'))) {
-                    htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || '-'}</p>`;
+                    const dataPackingFormatada = tarefa.auditadoPackingEm ? formatarDataHoraCriacao(tarefa.auditadoPackingEm) : '';
+                    const dataPackingHTML = dataPackingFormatada ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
+                    
+                    htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || '-'}${dataPackingHTML}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
                 }
             }
@@ -1455,6 +1466,7 @@
                     resultado_auditoria: 'Sem divergência',
                     resultado_picking: 'Sem divergência',
                     auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
                     auditadoPor: usuarioAtual
                 });
                 alert("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
@@ -1480,6 +1492,7 @@
                     resultado_auditoria: culpabilidade,
                     resultado_picking: culpabilidade,
                     auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
                     auditadoPor: usuarioAtual
                 });
 
@@ -1514,6 +1527,7 @@
                     tl: tl,
                     observacao: observacao,
                     auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
                     auditadoPor: usuarioAtual
                 });
 
@@ -1548,6 +1562,7 @@
                     tl: tl,
                     observacao: observacao,
                     auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
                     auditadoPor: usuarioAtual
                 });
 
@@ -1795,6 +1810,7 @@
                 observacao: document.getElementById('apk_observacao').value,
                 registradoPor: usuarioAtual || 'Anônimo',
                 auditadoPackingPor: usuarioAtual,
+                auditadoPackingEm: new Date(),
                 status: 'Auditado',
                 adicionadoPackingManual: true,
                 criadoEm: new Date()
