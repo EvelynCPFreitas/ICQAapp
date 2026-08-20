@@ -1688,7 +1688,7 @@
             }
         };
 
-                window.mostrarOpcoesLostSalvoPacking = () => {
+        window.mostrarOpcoesLostSalvoPacking = () => {
             document.getElementById('packing-campos-principais').classList.add('hidden');
             document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
         };
@@ -1842,7 +1842,10 @@
                 const k = t.tl || 'Não informado';
                 mapTls[k] = (mapTls[k] || 0) + 1;
             });
-            destruirOuCriarGraficoTl('chartTls', Object.keys(mapTls), Object.values(mapTls));
+            const tlsOrdenados = Object.entries(mapTls).sort((a, b) => b[1] - a[1]);
+            const labelsTls = tlsOrdenados.map(item => item[0]);
+            const dataTls = tlsOrdenados.map(item => item[1]);
+            destruirOuCriarGraficoTl('chartTls', labelsTls, dataTls);
         };
 
         function destruirOuCriarGrafico(canvasId, tipo, labels, data, cores) {
