@@ -671,6 +671,21 @@
         </div>
     </div>
 
+    <!-- MODAL DUPLICIDADE DE SOLICITAÇÃO -->
+    <div id="modal-duplicidade-solicitacao" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Registro Duplicado Detectado</h3>
+            <p class="text-xs text-gray-600 dark:text-darkText mb-6">Já existe um registro salvo igual a esse no dia de hoje. Deseja salvar e enviar a solicitação mesmo assim?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="confirmarEnvioDuplicado()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-xs shadow">Sim, salvar mesmo assim</button>
+                <button onclick="recusarEnvioDuplicado()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 rounded font-bold text-xs shadow">Não, cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT FIREBASE E LÓGICA GERAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -902,11 +917,17 @@
             }
         };
 
+        let dadosSolicitacaoPendente = null;
+
         window.salvarSolicitacao = async () => {
             const sobraRadio = document.querySelector('input[name="sol_sobra_radio"]:checked');
             const sobrouProduto = sobraRadio ? sobraRadio.value : 'Nao';
-            const tote = document.getElementById('sol_tote').value;
-            const meli = document.getElementById('sol_meli').value;
+            const tote = document.getElementById('sol_tote').value.trim();
+            const meli = document.getElementById('sol_meli').value.trim();
+            const mz = document.getElementById('sol_mz').value.trim();
+            const qtd = document.getElementById('sol_qtd').value.trim();
+            const dataVal = document.getElementById('sol_data').value;
+            const etd = document.getElementById('sol_etd').value;
 
             let sobrasArr = [];
             if (sobrouProduto === 'Sim') {
@@ -927,14 +948,9 @@
                 }
             }
 
-            await addDoc(collection(db, "tarefas"), { 
-                mz: document.getElementById('sol_mz').value, 
-                meli: meli, 
-                qtd: document.getElementById('sol_qtd').value,
-                tote: tote,
-                data: document.getElementById('sol_data').value,
-                etd: document.getElementById('sol_etd').value,
-                sobrou_produto: sobrouProduto,
+            // Mapeamento completo dos dados a serem verificados/salvos
+            dadosSolicitacaoPendente = {
+                mz, meli, qtd, tote, data: dataVal, etd, sobrou_produto: sobrouProduto,
                 sobras_detalhes: sobrasArr,
                 sobra_meli: sobrasArr.length > 0 ? sobrasArr[0].meli : null,
                 sobra_qtd: sobrasArr.length > 0 ? sobrasArr[0].qtd : null,
@@ -943,18 +959,71 @@
                 status: 'Pendente',
                 status_fisico: 'Pendente',
                 resultado_auditoria: 'Aguardando',
-                criadoEm: new Date() 
+                criadoEm: new Date()
+            };
+
+            // VERIFICAÇÃO DE DUPLICIDADE (Mesmo dia, MELI, TOTE, ETD, QUANTIDADE, MZ, SOBROU PRODUTO + ITENS SOBRANDO)
+            const jaExiste = tarefasCache.some(t => {
+                const dataIgual = t.data === dataVal;
+                const meliIgual = (t.meli || '').trim().toLowerCase() === meli.toLowerCase();
+                const toteIgual = (t.tote || '').trim().toLowerCase() === tote.toLowerCase();
+                const etdIgual = (t.etd || '').trim() === etd;
+                const qtdIgual = String(t.qtd || '').trim() === String(qtd).trim();
+                const mzIgual = (t.mz || '').trim().toLowerCase() === mz.toLowerCase();
+                const sobrouIgual = (t.sobrou_produto || 'Nao') === sobrouProduto;
+
+                let sobrasIguais = true;
+                if (sobrouProduto === 'Sim') {
+                    const arrT = t.sobras_detalhes || [];
+                    if (arrT.length !== sobrasArr.length) {
+                        sobrasIguais = false;
+                    } else {
+                        sobrasIguais = sobrasArr.every((item, idx) => {
+                            const itemT = arrT[idx];
+                            return itemT && itemT.meli?.trim().toLowerCase() === item.meli?.trim().toLowerCase() && String(itemT.qtd).trim() === String(item.qtd).trim();
+                        });
+                    }
+                }
+
+                return dataIgual && meliIgual && toteIgual && etdIgual && qtdIgual && mzIgual && sobrouIgual && sobrasIguais;
             });
+
+            if (jaExiste) {
+                document.getElementById('modal-duplicidade-solicitacao').classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            await executarEnvioSolicitacao();
+        };
+
+        window.executarEnvioSolicitacao = async () => {
+            if (!dadosSolicitacaoPendente) return;
+            await addDoc(collection(db, "tarefas"), dadosSolicitacaoPendente);
 
             window.registrarNaPlanilha({
                 acao: "Nova Solicitação",
                 usuario: usuarioAtual || 'Anônimo',
-                detalhes: `TOTE: ${tote} | MELI: ${meli} | Sobrou Produto: ${sobrouProduto}`
+                detalhes: `TOTE: ${dadosSolicitacaoPendente.tote} | MELI: ${dadosSolicitacaoPendente.meli} | Sobrou Produto: ${dadosSolicitacaoPendente.sobrou_produto}`
             });
 
             mostrarToast("Solicitação enviada com sucesso!");
             document.getElementById('form-solicitacao').reset();
             tratarSobraProduto('Nao');
+            dadosSolicitacaoPendente = null;
+        };
+
+        window.confirmarEnvioDuplicado = async () => {
+            document.getElementById('modal-duplicidade-solicitacao').classList.add('hidden');
+            await executarEnvioSolicitacao();
+        };
+
+        window.recusarEnvioDuplicado = () => {
+            document.getElementById('modal-duplicidade-solicitacao').classList.add('hidden');
+            document.getElementById('form-solicitacao').reset();
+            tratarSobraProduto('Nao');
+            dadosSolicitacaoPendente = null;
+            mostrarToast("Solicitação duplicada cancelada.");
         };
 
         const ordenarTarefasPorPrioridadeData = (lista) => {
