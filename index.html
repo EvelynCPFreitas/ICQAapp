@@ -928,14 +928,14 @@
             htmlDetalhes += `<p><b>Registrado por (Login):</b> ${loginRegistro}${dataRegistroHTML}</p>`;
 
             if (tarefa.adicionadoPackingManual) {
-                const dataPackingFormatada = tarefa.criadoEm ? formatarDataHoraCriacao(tarefa.criadoEm) : '';
-                const dataPackingHTML = dataPackingFormatada ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
+                const dataPackingFormatada = formatarDataHoraCriacao(tarefa.auditadoPackingEm || tarefa.criadoEm);
+                const dataPackingHTML = dataPackingFormatada && dataPackingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
                 htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}${dataPackingHTML}</p>`;
             } else {
                 // Exibe informações de Picking se houver registro
                 if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
-                    const dataPickingFormatada = tarefa.auditadoPickingEm ? formatarDataHoraCriacao(tarefa.auditadoPickingEm) : '';
-                    const dataPickingHTML = dataPickingFormatada ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
+                    const dataPickingFormatada = formatarDataHoraCriacao(tarefa.auditadoPickingEm || tarefa.auditadoEm || tarefa.criadoEm);
+                    const dataPickingHTML = dataPickingFormatada && dataPickingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
                     const resPicking = (tarefa.status_fisico === 'Sim') 
                         ? 'Sem divergência' 
                         : (tarefa.resultado_picking || tarefa.culpabilidade || 'Com divergência');
@@ -947,8 +947,8 @@
                 // Só exibe informações de Packing se a tarefa REALMENTE passou pelo Packing (não teve divergência em Picking)
                 const teveDivergenciaPicking = (tarefa.status_fisico === 'Nao');
                 if (!teveDivergenciaPicking && (tarefa.auditadoPackingPor || (tarefa.status === 'Auditado' && tarefa.resultado_auditoria && tarefa.resultado_auditoria !== 'Aguardando' && tarefa.resultado_auditoria !== 'Sem divergência'))) {
-                    const dataPackingFormatada = tarefa.auditadoPackingEm ? formatarDataHoraCriacao(tarefa.auditadoPackingEm) : '';
-                    const dataPackingHTML = dataPackingFormatada ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
+                    const dataPackingFormatada = formatarDataHoraCriacao(tarefa.auditadoPackingEm || tarefa.auditadoEm || tarefa.criadoEm);
+                    const dataPackingHTML = dataPackingFormatada && dataPackingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
                     
                     htmlDetalhes += `<p><b>Login Auditoria Packing:</b> ${tarefa.auditadoPackingPor || '-'}${dataPackingHTML}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}</p>`;
