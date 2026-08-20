@@ -285,7 +285,7 @@
         </main>
     </div>
 
-    <!-- NOTIFICAÇÃO TOAST FLUTUANTE (PARTE INFERIOR) -->
+    <!-- NOTIFICAÇÃO TOAST FLUTUANTE (PARTE INFERIOR - SEM INTERRUPÇÃO) -->
     <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform opacity-0 translate-y-4">
         <div class="bg-gray-900/90 text-white px-5 py-3 rounded-lg shadow-2xl border border-gray-700/50 flex items-center gap-3 text-xs font-semibold backdrop-blur-md max-w-md text-center">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-green-400 shrink-0"></i>
@@ -1184,22 +1184,20 @@
                 return;
             }
 
-            if (confirm("Tem certeza de que deseja excluir esta task?")) {
-                try {
-                    await deleteDoc(doc(db, "tarefas", id));
+            try {
+                await deleteDoc(doc(db, "tarefas", id));
 
-                    window.registrarNaPlanilha({
-                        acao: "Exclusão de Task",
-                        usuario: usuarioAtual || 'Anônimo',
-                        detalhes: `ID Excluído: ${id}`
-                    });
+                window.registrarNaPlanilha({
+                    acao: "Exclusão de Task",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID Excluído: ${id}`
+                });
 
-                    fecharModalDetalhesTarefa();
-                    mostrarToast("Task excluída com sucesso!");
-                } catch (erro) {
-                    console.error("Erro ao excluir task:", erro);
-                    mostrarToast("Erro ao tentar excluir a task.");
-                }
+                fecharModalDetalhesTarefa();
+                mostrarToast("Task excluída com sucesso!");
+            } catch (erro) {
+                console.error("Erro ao excluir task:", erro);
+                mostrarToast("Erro ao tentar excluir a task.");
             }
         };
 
@@ -1533,10 +1531,8 @@
             }
         };
 
-        // BOTAO SALVAR AUDITORIA DO PACKING COM CONFIRMAÇÃO
+        // BOTAO SALVAR AUDITORIA DO PACKING
         window.salvarAuditoriaModal = async () => {
-            if (!confirm("Tem certeza de que deseja salvar esta auditoria de Packing?")) return;
-
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
             if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
@@ -1568,10 +1564,8 @@
             }
         };
 
-        // BOTAO INCLUIR EM LOST SALVO DO MODAL DE PACKING COM CONFIRMAÇÃO E REDIRECIONAMENTO
+        // BOTAO INCLUIR EM LOST SALVO DO MODAL DE PACKING
         window.incluirEmLostSalvoModal = async () => {
-            if (!confirm("Tem certeza de que deseja mover esta solicitação para Lost Salvo?")) return;
-
             if(currentModalId) {
                 const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
                 let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
