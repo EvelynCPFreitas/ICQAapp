@@ -940,6 +940,20 @@
                 <p><b>MZ:</b> ${tarefa.mz || '-'}</p>
                 <p><b>MELI:</b> ${tarefa.meli || '-'}</p>
                 <p><b>Quantidade:</b> ${tarefa.qtd || '-'}</p>
+            `;
+
+            // Exibição dos produtos sobrando cadastrados na solicitação
+            if (tarefa.sobrou_produto === 'Sim') {
+                let textoSobras = '';
+                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
+                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: <b>${s.meli}</b> | Qtd: <b>${s.qtd}</b>`).join(' <span class="mx-1">|</span> ');
+                } else {
+                    textoSobras = `MELI: <b>${tarefa.sobra_meli || '-'}</b> | Qtd: <b>${tarefa.sobra_qtd || '-'}</b>`;
+                }
+                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 my-1"><b>Produto Sobrando na Caixa:</b> ${textoSobras}</p>`;
+            }
+
+            htmlDetalhes += `
                 <p><b>Status:</b> ${tarefa.status || '-'}</p>
                 <p><b>ETD:</b> ${tarefa.etd || '-'}</p>
             `;
