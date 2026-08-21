@@ -264,18 +264,20 @@
                         </select>
                     </div>
 
-                    <!-- CAMPO DE PESQUISA MULTI-TAGS E BOTÃO BUSCAR -->
-                    <div class="flex items-center gap-2 flex-1 min-w-[280px]">
-                        <button onclick="executarBuscaTags()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow transition-all shrink-0">
-                            Buscar
-                        </button>
-                        <div class="flex items-center flex-wrap gap-1.5 p-1 border rounded-xl dark:bg-black/20 dark:border-borderGray bg-white flex-1 min-h-[34px]">
-                            <div id="container-tags-busca" class="flex items-center flex-wrap gap-1.5"></div>
-                            <input type="text" id="input-tag-busca" onkeydown="tratarKeyDownInputTag(event)" placeholder="Digite MZ, MELI ou TOTE e aperte Enter..." class="bg-transparent border-none outline-none text-xs dark:text-white p-1 flex-1 min-w-[140px]">
-                        </div>
+                    <!-- CAMPO DE PESQUISA MULTI-TAGS -->
+                    <div class="flex items-center flex-wrap gap-1.5 p-1 border rounded-lg dark:bg-black/20 dark:border-borderGray bg-white flex-1 min-w-[220px] min-h-[34px]">
+                        <div id="container-tags-busca" class="flex items-center flex-wrap gap-1.5"></div>
+                        <input type="text" id="input-tag-busca" onkeydown="tratarKeyDownInputTag(event)" placeholder="Digite MZ, MELI ou TOTE e aperte Enter..." class="bg-transparent border-none outline-none text-xs dark:text-white p-1 flex-1 min-w-[120px]">
                     </div>
 
-                    <button onclick="limparFiltros()" class="px-3 py-1.5 text-xs rounded border bg-red-500 text-white font-bold hover:bg-red-600 transition-colors">Limpar Filtros</button>
+                    <!-- BOTÕES REORDENADOS COM O MESMO FORMATO (ROUNDED-LG) -->
+                    <button onclick="executarBuscaTags()" class="px-4 py-1.5 text-xs rounded-lg border border-blue-600 bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-sm">
+                        Buscar
+                    </button>
+
+                    <button onclick="limparFiltros()" class="px-4 py-1.5 text-xs rounded-lg border border-red-500 bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-sm">
+                        Limpar Filtros
+                    </button>
                 </div>
 
                 <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow border border-borderGray/30 overflow-x-auto">
@@ -1781,6 +1783,35 @@
             renderizarDashboard();
         };
 
+        window.selecionarFiltroStatusDropdown = (status) => {
+            filtroStatusAtivo = status || null;
+            paginaAtualDashboard = 1;
+            renderizarDashboard();
+        };
+
+        window.setFiltroStatus = (status) => { 
+            filtroStatusAtivo = status; 
+            paginaAtualDashboard = 1; 
+            const select = document.getElementById('select-filtro-status');
+            if (select) select.value = status || '';
+            renderizarDashboard(); 
+        };
+
+        window.limparFiltros = () => {
+            filtroStatusAtivo = null;
+            tagsBuscaAtivas = [];
+            paginaAtualDashboard = 1;
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
+            document.getElementById('filtro-etd').value = '';
+            const inputTag = document.getElementById('input-tag-busca');
+            if (inputTag) inputTag.value = '';
+            renderizarTagsBusca();
+            const select = document.getElementById('select-filtro-status');
+            if (select) select.value = '';
+            renderizarDashboard();
+        };
+
         window.renderizarDashboard = () => {
             const tbody = document.getElementById('tabela-body');
             tbody.innerHTML = "";
@@ -1807,7 +1838,6 @@
 
                 if (filtroEtd && !(t.etd && t.etd.toLowerCase().includes(filtroEtd))) return false;
 
-                // FILTRO MULTI-TAGS (MZ, MELI, TOTE, ID PEDIDO, SOBRA MELI)
                 if (tagsBuscaAtivas.length > 0) {
                     const tote = (t.tote || '').toLowerCase();
                     const mz = (t.mz || '').toLowerCase();
@@ -1902,280 +1932,6 @@
 
         window.mudarPagina = (delta) => {
             paginaAtualDashboard += delta;
-            renderizarDashboard();
-        };
-
-        window.abrirModalAuditoria = (id, tipo) => {
-            currentModalId = id;
-            currentModalTipo = tipo;
-            const tarefa = tarefasCache.find(t => t.id === id);
-            if(!tarefa) return;
-
-            document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
-            
-            let htmlDetalhes = `
-                <p><b>TOTE:</b> ${tarefa.tote}</p>
-                <p><b>MELI:</b> ${tarefa.meli}</p>
-                <p><b>MZ:</b> ${tarefa.mz}</p>
-                <p><b>Qtd:</b> ${tarefa.qtd}</p>
-            `;
-
-            if (tarefa.sobrou_produto === 'Sim') {
-                let textoSobras = '';
-                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
-                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: ${s.meli} | Qtd: ${s.qtd}`).join(' | ');
-                } else {
-                    textoSobras = `MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}`;
-                }
-                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> ${textoSobras}</p>`;
-            }
-
-            document.getElementById('modal-content').innerHTML = htmlDetalhes;
-
-            if(tipo === 'picking') {
-                document.getElementById('container-picking-fluxo').classList.remove('hidden');
-                document.getElementById('container-packing-fluxo').classList.add('hidden');
-                document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
-                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
-                
-                if(document.getElementById('picking_outro_texto')) document.getElementById('picking_outro_texto').value = '';
-                if(document.getElementById('picking_colaborador')) document.getElementById('picking_colaborador').value = '';
-                if(document.getElementById('picking_tl')) document.getElementById('picking_tl').value = '';
-                if(document.getElementById('picking_observacao')) document.getElementById('picking_observacao').value = '';
-
-                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
-                document.getElementById('div-campos-divergencia').classList.add('hidden');
-            } else {
-                document.getElementById('container-picking-fluxo').classList.add('hidden');
-                document.getElementById('container-packing-fluxo').classList.remove('hidden');
-                document.getElementById('packing-campos-principais').classList.remove('hidden');
-                document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
-                
-                const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
-                if(radioDefault) radioDefault.checked = true;
-                if(document.getElementById('packing_outro_texto')) document.getElementById('packing_outro_texto').value = '';
-                if(document.getElementById('packing_colaborador')) document.getElementById('packing_colaborador').value = '';
-                if(document.getElementById('packing_tl')) document.getElementById('packing_tl').value = '';
-                if(document.getElementById('packing_observacao')) document.getElementById('packing_observacao').value = '';
-
-                const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
-                if(altDefault) altDefault.checked = true;
-                if(document.getElementById('ls_packing_outro_texto')) document.getElementById('ls_packing_outro_texto').value = '';
-            }
-            document.getElementById('modal-auditoria').classList.remove('hidden');
-        };
-
-        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
-
-        window.tratarFisicoSistemico = (valor) => {
-            if(valor === 'Sim') {
-                document.getElementById('div-btn-sem-divergencia').classList.remove('hidden');
-                document.getElementById('div-campos-divergencia').classList.add('hidden');
-            } else {
-                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
-                document.getElementById('div-campos-divergencia').classList.remove('hidden');
-            }
-        };
-
-        window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
-        window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
-
-        window.confirmarSemDivergenciaEnvio = async () => {
-            fecharConfirmacaoSemDivergencia();
-            fecharModalAuditoria();
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Aguardando Auditoria Packing', 
-                    status_fisico: 'Sim', 
-                    resultado_auditoria: 'Sem divergência',
-                    resultado_picking: 'Sem divergência',
-                    auditadoPickingPor: usuarioAtual,
-                    auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-                mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
-            }
-        };
-
-        window.salvarAuditoriaPickingNao = async () => {
-            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
-            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('picking_outro_texto').value;
-            const colaborador = document.getElementById('picking_colaborador').value;
-            const tl = document.getElementById('picking_tl').value;
-            const observacao = document.getElementById('picking_observacao').value;
-
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', 
-                    status_fisico: 'Nao', 
-                    culpabilidade, 
-                    colaborador, 
-                    tl, 
-                    observacao, 
-                    resultado_auditoria: culpabilidade,
-                    resultado_picking: culpabilidade,
-                    auditadoPickingPor: usuarioAtual,
-                    auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    comportamento: "Salvar Auditoria Picking Divergência",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
-                });
-
-                fecharModalAuditoria();
-                mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
-            }
-        };
-
-        window.salvarAuditoriaModal = async () => {
-            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-            
-            const colaborador = document.getElementById('packing_colaborador').value;
-            const tl = document.getElementById('packing_tl').value;
-            const observacao = document.getElementById('packing_observacao').value;
-
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), { 
-                    status: 'Auditado', 
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    comportamento: "Salvar Auditoria Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
-                });
-
-                fecharModalAuditoria();
-                mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
-            }
-        };
-
-        window.incluirEmLostSalvoModal = async () => {
-            if(currentModalId) {
-                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-                
-                const colaborador = document.getElementById('packing_colaborador').value;
-                const tl = document.getElementById('packing_tl').value;
-                const observacao = document.getElementById('packing_observacao').value;
-
-                await updateDoc(doc(db, "tarefas", currentModalId), { 
-                    status: 'Lost Salvo', 
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    acao: "Movido para Lost Salvo via Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId}`
-                });
-
-                fecharModalAuditoria();
-                
-                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
-                if (btnTabLostSalvo) btnTabLostSalvo.click();
-
-                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
-            }
-        };
-
-        window.mostrarOpcoesLostSalvoPacking = () => {
-            document.getElementById('packing-campos-principais').classList.add('hidden');
-            document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
-        };
-
-        window.voltarFormularioPacking = () => {
-            document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
-            document.getElementById('packing-campos-principais').classList.remove('hidden');
-        };
-
-        window.confirmarEIncluirLostSalvoPacking = async () => {
-            if (currentModalId) {
-                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-                if (culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-
-                const altEl = document.querySelector('input[name="ls_packing_alt"]:checked');
-                let alternativa = altEl ? altEl.value : '';
-                if (alternativa === 'Outro') alternativa = document.getElementById('ls_packing_outro_texto').value;
-
-                const colaborador = document.getElementById('packing_colaborador').value;
-                const tl = document.getElementById('packing_tl').value;
-                const observacao = document.getElementById('packing_observacao').value;
-
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Lost Salvo',
-                    alternativa: alternativa,
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    acao: "Movido para Lost Salvo via Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
-                });
-
-                fecharModalAuditoria();
-
-                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
-                if (btnTabLostSalvo) btnTabLostSalvo.click();
-
-                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
-            }
-        };
-
-        window.selecionarFiltroStatusDropdown = (status) => {
-            filtroStatusAtivo = status || null;
-            paginaAtualDashboard = 1;
-            renderizarDashboard();
-        };
-
-        window.setFiltroStatus = (status) => { 
-            filtroStatusAtivo = status; 
-            paginaAtualDashboard = 1; 
-            const select = document.getElementById('select-filtro-status');
-            if (select) select.value = status || '';
-            renderizarDashboard(); 
-        };
-
-        window.limparFiltros = () => {
-            filtroStatusAtivo = null;
-            tagsBuscaAtivas = [];
-            paginaAtualDashboard = 1;
-            document.getElementById('filtro-data-inicio').value = '';
-            document.getElementById('filtro-data-fim').value = '';
-            document.getElementById('filtro-etd').value = '';
-            const inputTag = document.getElementById('input-tag-busca');
-            if (inputTag) inputTag.value = '';
-            renderizarTagsBusca();
-            const select = document.getElementById('select-filtro-status');
-            if (select) select.value = '';
             renderizarDashboard();
         };
 
