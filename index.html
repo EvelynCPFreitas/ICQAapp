@@ -170,31 +170,14 @@
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Total</span>
                         <span id="stat-volume-total" class="text-3xl font-extrabold text-black dark:text-white">0</span>
                     </div>
-                    
-                    <!-- CARD PENDENTE X AUDITADO ATUALIZADO -->
-                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center flex flex-col items-center justify-center">
+                    <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Pendente x Auditado</span>
-                        <div class="flex justify-center items-center gap-2 mb-3">
-                            <span id="stat-volume-pendente" class="text-2xl font-extrabold text-red-600 dark:text-red-400" title="Pendentes Total">0</span>
+                        <div class="flex justify-center items-center gap-2">
+                            <span id="stat-volume-pendente" class="text-2xl font-extrabold text-red-600 dark:text-red-400" title="Pendentes">0</span>
                             <span class="text-xl font-bold text-gray-400">/</span>
-                            <span id="stat-volume-auditado" class="text-2xl font-extrabold text-green-600 dark:text-green-400" title="Auditados Total">0</span>
-                        </div>
-                        <div class="w-full pt-3 border-t border-borderGray/30 text-xs font-medium space-y-1 text-gray-700 dark:text-gray-200">
-                            <div class="flex items-center justify-center gap-1">
-                                <span>📦</span>
-                                <span>PENDENTE EM PICKING: <strong id="stat-pendente-picking">0</strong></span>
-                            </div>
-                            <div class="flex items-center justify-center gap-1">
-                                <span>📦</span>
-                                <span>PENDENTE EM PACKING: <strong id="stat-pendente-packing">0</strong></span>
-                            </div>
-                            <div class="flex items-center justify-center gap-1">
-                                <span>📋</span>
-                                <span>AUDITADO: <strong id="stat-auditado-detalhe">0</strong></span>
-                            </div>
+                            <span id="stat-volume-auditado" class="text-2xl font-extrabold text-green-600 dark:text-green-400" title="Auditados">0</span>
                         </div>
                     </div>
-
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume de Lost Salvos</span>
                         <span id="stat-volume-salvos" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400">0</span>
@@ -459,12 +442,12 @@
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="picking_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                        <datalist id="lista-team-leaders">
-                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                        </datalist>
+<datalist id="lista-team-leaders">
+                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                    </datalist>
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
@@ -512,12 +495,12 @@
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="packing_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                        <datalist id="lista-team-leaders">
-                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                        </datalist>
+<datalist id="lista-team-leaders">
+                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                    </datalist>
                     </div>
 
                     <div>
@@ -1907,24 +1890,9 @@
                 return true;
             });
 
-            // ATUALIZAÇÃO DOS ESTATÍSTICOS DOS CARDS
-            const pendentePickingCount = tarefasCache.filter(t => t.status === 'Pendente').length;
-            const pendentePackingCount = tarefasCache.filter(t => t.status === 'Aguardando Auditoria Packing').length;
-            const auditadoCount = tarefasCache.filter(t => t.status === 'Auditado').length;
-            const pendentesTotal = pendentePickingCount + pendentePackingCount;
-
             document.getElementById('stat-volume-total').innerText = tarefasCache.length;
-            document.getElementById('stat-volume-pendente').innerText = pendentesTotal;
-            document.getElementById('stat-volume-auditado').innerText = auditadoCount;
-            
-            // Sub-detalhes do Card Pendente x Auditado
-            const elemPicking = document.getElementById('stat-pendente-picking');
-            const elemPacking = document.getElementById('stat-pendente-packing');
-            const elemAuditadoDet = document.getElementById('stat-auditado-detalhe');
-            if (elemPicking) elemPicking.innerText = pendentePickingCount;
-            if (elemPacking) elemPacking.innerText = pendentePackingCount;
-            if (elemAuditadoDet) elemAuditadoDet.innerText = auditadoCount;
-
+            document.getElementById('stat-volume-pendente').innerText = tarefasCache.filter(t => t.status === 'Pendente').length;
+            document.getElementById('stat-volume-auditado').innerText = tarefasCache.filter(t => t.status === 'Auditado').length;
             document.getElementById('stat-volume-salvos').innerText = tarefasCache.filter(t => t.status === 'Lost Salvo').length;
             document.getElementById('stat-volume-nao-localizado').innerText = tarefasCache.filter(t => t.status === 'Lost não localizado').length;
 
