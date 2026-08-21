@@ -2304,6 +2304,27 @@
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
+            // CORREÇÃO AQUI: GERAR E RENDERIZAR O GRÁFICO PICKING X PACKING
+            let totalPicking = 0;
+            let totalPacking = 0;
+
+            dados.forEach(t => {
+                if (t.auditadoPickingPor || (t.status_fisico && t.status_fisico !== 'Pendente')) {
+                    totalPicking++;
+                }
+                if (t.auditadoPackingPor || t.adicionadoPackingManual) {
+                    totalPacking++;
+                }
+            });
+
+            destruirOuCriarGrafico(
+                'chartPickingPacking', 
+                'pie', 
+                ['Picking', 'Packing'], 
+                [totalPicking, totalPacking], 
+                ['#002147', '#3B82F6']
+            );
+
             const mapTls = {};
             dados.forEach(t => {
                 const k = t.tl || 'Não informado';
@@ -2342,7 +2363,6 @@
             });
         }
 
-        // FUNÇÃO ATUALIZADA DO GRÁFICO DE TL (OCULTANDO NOME EMBAIXO E MANTENDO TOOLTIP)
         function destruirOuCriarGraficoTl(canvasId, labels, data) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
@@ -2373,14 +2393,13 @@
                     },
                     scales: {
                         x: {
-                            display: false // OCULTA OS NOMES EMBAIXO DO GRÁFICO RESUMIDO
+                            display: false
                         }
                     }
                 }
             });
         }
 
-        // NOVO: ABRIR MODAL EXPANDIDO COM OS GRÁFICOS DO TEAM LEADER
         window.abrirModalGraficoTlExpandido = () => {
             const mapTls = {};
             dadosFiltradosGraficoCache.forEach(t => {
@@ -2417,7 +2436,7 @@
                         x: {
                             display: true,
                             ticks: {
-                                font: { size: 9 }, // FONTE MENOR PARA CABEREM TODOS
+                                font: { size: 9 },
                                 autoSkip: false,
                                 maxRotation: 45,
                                 minRotation: 45
