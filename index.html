@@ -761,6 +761,29 @@
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
+        // GERENCIAMENTO DE TIMEOUT DE 2 HORAS (7.200.000 MILISSEGUNDOS) POR INATIVIDADE
+        const TEMPO_INATIVIDADE = 2 * 60 * 60 * 1000;
+        let timerInatividade = null;
+
+        window.reiniciarTimerInatividade = () => {
+            if (timerInatividade) clearTimeout(timerInatividade);
+            if (usuarioAtual) {
+                // Atualiza o carimbo de data/hora do último acesso
+                localStorage.setItem("user_last_activity", Date.now());
+                timerInatividade = setTimeout(() => {
+                    mostrarToast("Sessão expirada por inatividade (2 horas). Faça login novamente.");
+                    fazerLogout();
+                }, TEMPO_INATIVIDADE);
+            }
+        };
+
+        // Escuta eventos de interação do usuário para manter a sessão ativa
+        ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach(evento => {
+            document.addEventListener(evento, () => {
+                if (usuarioAtual) reiniciarTimerInatividade();
+            }, { passive: true });
+        });
+
         // PROTEÇÃO GLOBAL CONTRA SUBMIT AUTOMÁTICO VIA TECLA ENTER (BIPADOR)
         document.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "submit" && e.target.type !== "button") {
@@ -911,8 +934,18 @@
         };
 
         window.verificarSessaoLogin = () => {
-            const sessao = sessionStorage.getItem("user_session");
-            if (sessao) {
+            // Utilização do localStorage para persistir a sessão entre F5 e atualizações de página
+            const sessao = localStorage.getItem("user_session");
+            const ultimaAtividade = localStorage.getItem("user_last_activity");
+
+            if (sessao && ultimaAtividade) {
+                const tempoDecorrido = Date.now() - parseInt(ultimaAtividade, 10);
+                if (tempoDecorrido > TEMPO_INATIVIDADE) {
+                    mostrarToast("Sessão expirada por inatividade. Faça login novamente.");
+                    fazerLogout();
+                    return;
+                }
+
                 const dados = JSON.parse(sessao);
                 usuarioAtual = dados.nome;
                 SOU_ADMIN = dados.isAdmin;
@@ -920,6 +953,7 @@
                 document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
                 renderizarTudo();
                 atualizarIndicadorNotificacoesAdmin();
+                reiniciarTimerInatividade();
             } else {
                 document.getElementById('modal-login').classList.remove('hidden');
             }
@@ -944,7 +978,9 @@
                 SOU_ADMIN = false;
             }
 
-            sessionStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
+            // Gravação no localStorage
+            localStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
+            localStorage.setItem("user_last_activity", Date.now());
             
             window.registrarNaPlanilha({
                 acao: "Login",
@@ -956,6 +992,7 @@
             document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
             renderizarTudo();
             atualizarIndicadorNotificacoesAdmin();
+            reiniciarTimerInatividade();
         };
 
         window.fazerLogout = () => {
@@ -966,7 +1003,9 @@
                     detalhes: "Sessão encerrada"
                 });
             }
-            sessionStorage.removeItem("user_session");
+            if (timerInatividade) clearTimeout(timerInatividade);
+            localStorage.removeItem("user_session");
+            localStorage.removeItem("user_last_activity");
             usuarioAtual = null;
             SOU_ADMIN = false;
             document.getElementById('form-login').reset();
