@@ -650,19 +650,35 @@
     <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
-            <h2 class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes Task</h2>
+            
+            <!-- ÁREA DO BOTÃO SELETOR NO TOPO (INICIALMENTE OCULTA) -->
+            <div id="container-selecao-pedido-topo" class="hidden mb-4 pb-3 border-b border-borderGray/30 flex justify-center gap-3">
+                <button id="btn-seletor-exclusao" onclick="selecionarTipoPedido('Exclusão')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-primaryBtn text-white shadow transition-all">Exclusão</button>
+                <button id="btn-seletor-edicao" onclick="selecionarTipoPedido('Edição')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-gray-200 dark:bg-black/30 text-gray-700 dark:text-gray-300 transition-all">Edição</button>
+            </div>
+
+            <h2 id="titulo-modal-detalhes" class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes Task</h2>
             <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4"></div>
+            
             <div class="flex justify-between items-center pt-3 border-t border-borderGray/30">
-                <div class="flex items-center gap-2"></div>
+                <div id="container-btn-pedido-abrir">
+                    <button onclick="abrirSubtelaPedidoEdicaoExclusao()" class="bg-primaryBtn text-white px-3 py-2 rounded-xl text-[11px] font-bold shadow hover:opacity-90 leading-tight text-center">
+                        Pedido de exclusão<br>edição
+                    </button>
+                </div>
+                
                 <div class="flex items-center gap-2">
-                    <button id="btn-detalhes-editar" title="Editar" class="p-2 text-blue-500 hover:bg-black/10 rounded">
+                    <button id="btn-detalhes-editar" title="Editar" class="hidden p-2 text-blue-500 hover:bg-black/10 rounded">
                         <i data-lucide="pencil" class="w-4 h-4"></i>
                     </button>
-                    <button id="btn-detalhes-excluir" title="Excluir" class="p-2 text-red-500 hover:bg-black/10 rounded">
+                    <button id="btn-detalhes-excluir" title="Excluir" class="hidden p-2 text-red-500 hover:bg-black/10 rounded">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                     <button id="btn-detalhes-salvar" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-xs font-bold transition-all shadow">
                         OK
+                    </button>
+                    <button id="btn-enviar-pedido" onclick="enviarPedidoEdicaoExclusao()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow transition-all">
+                        Enviar
                     </button>
                     <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">
                         Fechar
@@ -702,6 +718,26 @@
                     <button type="button" onclick="fecharModalCycleManual()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded text-xs font-bold">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ÍCONE FLUTUANTE DE NOTIFICAÇÕES PARA O ADMIN (CANTO ESQUERDO) -->
+    <div id="btn-notificacao-admin" onclick="abrirModalNotificacoesAdmin()" class="hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer flex flex-col items-center gap-1 bg-white/80 dark:bg-darkCard/80 p-2 rounded-lg border border-borderGray/40 shadow-xl hover:scale-110 transition-transform">
+        <i data-lucide="chevrons-right" class="w-6 h-6 text-primaryBtn dark:text-blue-400 animate-pulse"></i>
+        <span id="badge-notificacoes-qtd" class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow">0</span>
+    </div>
+
+    <!-- MODAL DE NOTIFICAÇÕES DO ADMIN (PEDIDOS DE EDIÇÃO E EXCLUSÃO) -->
+    <div id="modal-notificacoes-admin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-lg w-full dark:text-white shadow-2xl border border-borderGray/30 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="fecharModalNotificacoesAdmin()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400 flex items-center gap-2">
+                <i data-lucide="bell" class="w-5 h-5"></i> Solicitantes Pendentes (Edição/Exclusão)
+            </h2>
+            <div id="lista-pedidos-admin" class="space-y-3"></div>
+            <div class="flex justify-end pt-4 border-t border-borderGray/30 mt-4">
+                <button onclick="fecharModalNotificacoesAdmin()" class="bg-primaryBtn text-white px-5 py-2 rounded-xl text-xs font-bold">Fechar</button>
+            </div>
         </div>
     </div>
 
@@ -759,27 +795,98 @@
 
         let usuarioAtual = null;
         let SOU_ADMIN = false;
+        let tipoPedidoAtual = 'Exclusão';
 
-        document.addEventListener("DOMContentLoaded", () => {
-            verificarSessaoLogin();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+        let pedidosAlteracaoCache = [];
+
+        onSnapshot(query(collection(db, "pedidos_alteracao"), orderBy("criadoEm", "desc")), (snapshot) => {
+            pedidosAlteracaoCache = [];
+            snapshot.forEach((docRef) => {
+                pedidosAlteracaoCache.push({ id: docRef.id, ...docRef.data() });
+            });
+            atualizarIndicadorNotificacoesAdmin();
+        });
+
+        window.atualizarIndicadorNotificacoesAdmin = () => {
+            const btnNotif = document.getElementById('btn-notificacao-admin');
+            const badge = document.getElementById('badge-notificacoes-qtd');
             
-            const inputNome = document.getElementById('login_nome');
-            if (inputNome) {
-                inputNome.addEventListener('input', (e) => {
-                    const containerSenha = document.getElementById('container-senha-admin');
-                    const inputSenha = document.getElementById('login_senha');
-                    if (e.target.value.trim().toLowerCase() === 'evelyn') {
-                        containerSenha.classList.remove('hidden');
-                        inputSenha.setAttribute('required', 'true');
-                    } else {
-                        containerSenha.classList.add('hidden');
-                        inputSenha.removeAttribute('required');
-                        inputSenha.value = '';
+            if (SOU_ADMIN && pedidosAlteracaoCache.length > 0) {
+                btnNotif.classList.remove('hidden');
+                badge.innerText = pedidosAlteracaoCache.length;
+            } else {
+                btnNotif.classList.add('hidden');
+            }
+        };
+
+        window.abrirModalNotificacoesAdmin = () => {
+            const container = document.getElementById('lista-pedidos-admin');
+            container.innerHTML = '';
+
+            if (pedidosAlteracaoCache.length === 0) {
+                container.innerHTML = `<p class="italic text-gray-400 text-center py-4">Nenhuma solicitação pendente no momento.</p>`;
+            } else {
+                pedidosAlteracaoCache.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = "p-4 bg-gray-50 dark:bg-black/20 rounded-xl border border-borderGray/30 space-y-2 text-xs relative";
+                    
+                    let detalhesPedidoHTML = '';
+                    if (p.tipo === 'Edição') {
+                        detalhesPedidoHTML = `<p><b>O que deseja editar:</b> <span class="text-blue-600 dark:text-blue-300 font-bold">${p.campoEditar || '-'}</span></p>`;
                     }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-borderGray/20 pb-2">
+                            <span class="px-2 py-0.5 rounded font-extrabold text-[10px] uppercase ${p.tipo === 'Exclusão' ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200'}">
+                                Pedido de ${p.tipo}
+                            </span>
+                            <span class="text-[10px] text-gray-400">${formatarDataHoraCriacao(p.criadoEm)}</span>
+                        </div>
+                        <div class="space-y-1 dark:text-white">
+                            <p><b>Solicitado por:</b> ${p.usuario || '-'}</p>
+                            <p><b>TOTE:</b> ${p.tote || '-'} | <b>MZ:</b> ${p.mz || '-'} | <b>MELI:</b> ${p.meli || '-'}</p>
+                            ${detalhesPedidoHTML}
+                            <p class="text-gray-600 dark:text-gray-300"><b>Motivo:</b> ${p.motivo || '-'}</p>
+                        </div>
+                        <div class="flex gap-2 pt-2 border-t border-borderGray/20 justify-end">
+                            <button onclick="atenderPedidoAdmin('${p.id}', '${p.taskId}', '${p.tipo}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold text-[11px] shadow">
+                                Ir para Task / Concluir
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
                 });
             }
-        });
+
+            document.getElementById('modal-notificacoes-admin').classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.fecharModalNotificacoesAdmin = () => {
+            document.getElementById('modal-notificacoes-admin').classList.add('hidden');
+        };
+
+        window.atenderPedidoAdmin = async (pedidoId, taskId, tipo) => {
+            fecharModalNotificacoesAdmin();
+            // Abre o modal de edição diretamente para o Admin tomar a ação
+            const tarefa = tarefasCache.find(t => t.id === taskId);
+            if (tarefa) {
+                abrirDetalhesTarefa(taskId);
+                if (tipo === 'Edição') {
+                    habilitarEdicaoTarefa(taskId);
+                } else if (tipo === 'Exclusão') {
+                    // Direcionado para os detalhes da tarefa com permissões
+                }
+            } else {
+                mostrarToast("Esta task não foi encontrada no banco de dados.");
+            }
+            // Deletar o pedido resolvido
+            try {
+                await deleteDoc(doc(db, "pedidos_alteracao", pedidoId));
+            } catch (err) {
+                console.error("Erro ao remover notificação:", err);
+            }
+        };
 
         window.verificarSessaoLogin = () => {
             const sessao = sessionStorage.getItem("user_session");
@@ -790,6 +897,7 @@
                 document.getElementById('modal-login').classList.add('hidden');
                 document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
                 renderizarTudo();
+                atualizarIndicadorNotificacoesAdmin();
             } else {
                 document.getElementById('modal-login').classList.remove('hidden');
             }
@@ -825,6 +933,7 @@
             document.getElementById('modal-login').classList.add('hidden');
             document.getElementById('user-display-name').innerText = `${usuarioAtual} ${SOU_ADMIN ? '(Admin)' : ''}`;
             renderizarTudo();
+            atualizarIndicadorNotificacoesAdmin();
         };
 
         window.fazerLogout = () => {
@@ -1087,7 +1196,15 @@
             const tarefa = tarefasCache.find(t => t.id === id);
             if (!tarefa) return;
             
+            currentModalId = id;
+            
+            // Oculta área de botões do topo e restaura estado inicial do modal
+            document.getElementById('container-selecao-pedido-topo').classList.add('hidden');
+            document.getElementById('titulo-modal-detalhes').classList.remove('hidden');
+            document.getElementById('container-btn-pedido-abrir').classList.remove('hidden');
+            document.getElementById('btn-enviar-pedido').classList.add('hidden');
             document.getElementById('btn-detalhes-salvar').classList.add('hidden');
+
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
             
             let htmlDetalhes = `
@@ -1177,6 +1294,121 @@
 
             document.getElementById('modal-detalhes-tarefa').classList.remove('hidden');
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.abrirSubtelaPedidoEdicaoExclusao = () => {
+            tipoPedidoAtual = 'Exclusão';
+            document.getElementById('container-selecao-pedido-topo').classList.remove('hidden');
+            document.getElementById('titulo-modal-detalhes').classList.add('hidden');
+            document.getElementById('container-btn-pedido-abrir').classList.add('hidden');
+            document.getElementById('btn-enviar-pedido').classList.remove('hidden');
+            
+            atualizarFormularioPedido();
+        };
+
+        window.selecionarTipoPedido = (tipo) => {
+            tipoPedidoAtual = tipo;
+            const btnExclusao = document.getElementById('btn-seletor-exclusao');
+            const btnEdicao = document.getElementById('btn-seletor-edicao');
+
+            if (tipo === 'Exclusão') {
+                btnExclusao.className = "px-8 py-2.5 rounded-xl font-bold text-sm bg-primaryBtn text-white shadow transition-all";
+                btnEdicao.className = "px-8 py-2.5 rounded-xl font-bold text-sm bg-gray-200 dark:bg-black/30 text-gray-700 dark:text-gray-300 transition-all";
+            } else {
+                btnEdicao.className = "px-8 py-2.5 rounded-xl font-bold text-sm bg-primaryBtn text-white shadow transition-all";
+                btnExclusao.className = "px-8 py-2.5 rounded-xl font-bold text-sm bg-gray-200 dark:bg-black/30 text-gray-700 dark:text-gray-300 transition-all";
+            }
+
+            atualizarFormularioPedido();
+        };
+
+        window.atualizarFormularioPedido = () => {
+            const tarefa = tarefasCache.find(t => t.id === currentModalId);
+            if (!tarefa) return;
+
+            const conteudo = document.getElementById('conteudo-detalhes-tarefa');
+            
+            let htmlBase = `
+                <p><b>TOTE:</b> ${tarefa.tote || '-'}</p>
+                <p><b>MZ:</b> ${tarefa.mz || '-'}</p>
+                <p><b>MELI:</b> ${tarefa.meli || '-'}</p>
+                <p><b>Quantidade:</b> ${tarefa.qtd || '-'}</p>
+            `;
+
+            if (tarefa.sobrou_produto === 'Sim') {
+                let textoSobras = '';
+                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
+                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: <b>${s.meli}</b> | Qtd: <b>${s.qtd}</b>`).join(' | ');
+                } else {
+                    textoSobras = `MELI: <b>${tarefa.sobra_meli || '-'}</b> | Qtd: <b>${tarefa.sobra_qtd || '-'}</b>`;
+                }
+                htmlBase += `<p class="text-blue-600 dark:text-blue-400 my-1"><b>Produto Sobrando na Caixa:</b> ${textoSobras}</p>`;
+            }
+
+            if (tipoPedidoAtual === 'Exclusão') {
+                htmlBase += `
+                    <div class="pt-3 border-t border-borderGray/30 space-y-1 mt-2">
+                        <label class="text-xs font-bold block text-black dark:text-white">Motivo:</label>
+                        <textarea id="pedido_motivo" placeholder="Escreva o motivo do pedido de exclusão..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn h-20"></textarea>
+                    </div>
+                `;
+            } else {
+                htmlBase += `
+                    <div class="pt-3 border-t border-borderGray/30 space-y-2 mt-2">
+                        <div>
+                            <label class="text-xs font-bold block text-black dark:text-white mb-1">O que deseja editar?</label>
+                            <input type="text" id="pedido_campo_editar" placeholder="Ex: Quantidade, MELI, Tote..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold block text-black dark:text-white mb-1">Motivo:</label>
+                            <textarea id="pedido_motivo" placeholder="Escreva o motivo da alteração..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn h-16"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            conteudo.innerHTML = htmlBase;
+        };
+
+        window.enviarPedidoEdicaoExclusao = async () => {
+            const motivo = document.getElementById('pedido_motivo')?.value.trim();
+            if (!motivo) {
+                mostrarToast("Por favor, preencha o motivo do pedido.");
+                return;
+            }
+
+            let campoEditar = "";
+            if (tipoPedidoAtual === 'Edição') {
+                campoEditar = document.getElementById('pedido_campo_editar')?.value.trim();
+                if (!campoEditar) {
+                    mostrarToast("Por favor, informe o que deseja editar.");
+                    return;
+                }
+            }
+
+            const tarefa = tarefasCache.find(t => t.id === currentModalId);
+
+            // Grava o pedido no Firebase para que o Admin receba a notificação
+            await addDoc(collection(db, "pedidos_alteracao"), {
+                taskId: currentModalId,
+                tipo: tipoPedidoAtual,
+                tote: tarefa?.tote || '-',
+                mz: tarefa?.mz || '-',
+                meli: tarefa?.meli || '-',
+                motivo: motivo,
+                campoEditar: campoEditar || null,
+                usuario: usuarioAtual || 'Anônimo',
+                criadoEm: new Date()
+            });
+
+            window.registrarNaPlanilha({
+                acao: `Solicitação de ${tipoPedidoAtual}`,
+                usuario: usuarioAtual || 'Anônimo',
+                detalhes: `ID Task: ${currentModalId} | TOTE: ${tarefa?.tote || '-'} | O que editar: ${campoEditar || 'N/A'} | Motivo: ${motivo}`
+            });
+
+            fecharModalDetalhesTarefa();
+            mostrarToast(`Pedido de ${tipoPedidoAtual.toLowerCase()} enviado com sucesso ao Administrador!`);
         };
 
         window.fecharModalDetalhesTarefa = () => {
