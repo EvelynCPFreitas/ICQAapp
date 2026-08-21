@@ -233,8 +233,8 @@
                         </div>
 
                         <!-- LINHA 3: TEAM LEADERS (SOZINHO EMBAIXO) -->
-                        <div class="col-span-6 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
-                            <span class="text-xs font-bold mb-2 dark:text-darkText">Team Leaders (TLs) - <span class="text-[10px] text-blue-500 font-normal">Clique em uma barra para ver os colaboradores</span></span>
+                        <div onclick="abrirModalGraficoTlExpandido()" class="col-span-6 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center cursor-pointer hover:border-primaryBtn transition-all group">
+                            <span class="text-xs font-bold mb-2 dark:text-darkText group-hover:text-primaryBtn dark:group-hover:text-blue-400">Team Leaders (TLs) - <span class="text-[10px] text-blue-500 font-normal">Clique aqui para abrir os gráficos em tela cheia</span></span>
                             <div class="w-full h-48 flex justify-center"><canvas id="chartTls"></canvas></div>
                         </div>
                     </div>
@@ -442,12 +442,12 @@
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="picking_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-<datalist id="lista-team-leaders">
-                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                    </datalist>
+                        <datalist id="lista-team-leaders">
+                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                        </datalist>
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
@@ -495,12 +495,12 @@
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="packing_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-<datalist id="lista-team-leaders">
-                        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                    </datalist>
+                        <datalist id="lista-team-leaders">
+                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+                        </datalist>
                     </div>
 
                     <div>
@@ -570,6 +570,23 @@
             <div id="modal-tl-conteudo" class="max-h-60 overflow-y-auto space-y-2 mb-4 text-sm"></div>
             <div class="flex justify-end pt-3 border-t border-borderGray/30">
                 <button onclick="fecharModalDetalhesTl()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DO GRÁFICO DE TL EXPANDIDO -->
+    <div id="modal-grafico-tl-expandido" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-5xl w-full dark:text-white shadow-2xl border border-borderGray/30 relative flex flex-col items-center">
+            <button onclick="fecharModalGraficoTlExpandido()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+            <h2 class="text-xl font-bold mb-1 text-primaryBtn dark:text-blue-400">Desempenho por Team Leader (TLs)</h2>
+            <p class="text-xs text-gray-500 dark:text-darkText mb-4">Clique na barra de qualquer TL para visualizar a relação detalhada dos colaboradores.</p>
+            
+            <div class="w-full h-96 flex justify-center bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray">
+                <canvas id="chartTlsExpandido"></canvas>
+            </div>
+
+            <div class="flex justify-end w-full pt-4 mt-2">
+                <button onclick="fecharModalGraficoTlExpandido()" class="bg-primaryBtn text-white px-6 py-2 rounded text-xs font-bold shadow">Fechar</button>
             </div>
         </div>
     </div>
@@ -2325,6 +2342,7 @@
             });
         }
 
+        // FUNÇÃO ATUALIZADA DO GRÁFICO DE TL (OCULTANDO NOME EMBAIXO E MANTENDO TOOLTIP)
         function destruirOuCriarGraficoTl(canvasId, labels, data) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
@@ -2335,7 +2353,57 @@
                 data: {
                     labels: labels,
                     datasets: [{
+                        label: 'Registros',
                         data: data,
+                        backgroundColor: ['#002147']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false // OCULTA OS NOMES EMBAIXO DO GRÁFICO RESUMIDO
+                        }
+                    }
+                }
+            });
+        }
+
+        // NOVO: ABRIR MODAL EXPANDIDO COM OS GRÁFICOS DO TEAM LEADER
+        window.abrirModalGraficoTlExpandido = () => {
+            const mapTls = {};
+            dadosFiltradosGraficoCache.forEach(t => {
+                const k = t.tl || 'Não informado';
+                mapTls[k] = (mapTls[k] || 0) + 1;
+            });
+            const tlsOrdenados = Object.entries(mapTls).sort((a, b) => b[1] - a[1]);
+            const labelsTls = tlsOrdenados.map(item => item[0]);
+            const dataTls = tlsOrdenados.map(item => item[1]);
+
+            document.getElementById('modal-grafico-tl-expandido').classList.remove('hidden');
+
+            const canvas = document.getElementById('chartTlsExpandido');
+            if(!canvas) return;
+            if(chartsInstance['chartTlsExpandido']) chartsInstance['chartTlsExpandido'].destroy();
+
+            chartsInstance['chartTlsExpandido'] = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labelsTls,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: dataTls,
                         backgroundColor: ['#002147']
                     }]
                 },
@@ -2345,16 +2413,32 @@
                     plugins: {
                         legend: { display: false }
                     },
+                    scales: {
+                        x: {
+                            display: true,
+                            ticks: {
+                                font: { size: 9 }, // FONTE MENOR PARA CABEREM TODOS
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
                     onClick: (event, elements) => {
                         if(elements.length > 0) {
                             const index = elements[0].index;
-                            const nomeTl = labels[index];
+                            const nomeTl = labelsTls[index];
+                            fecharModalGraficoTlExpandido();
                             abrirModalDetalhesTl(nomeTl);
                         }
                     }
                 }
             });
-        }
+        };
+
+        window.fecharModalGraficoTlExpandido = () => {
+            document.getElementById('modal-grafico-tl-expandido').classList.add('hidden');
+        };
 
         window.abrirModalDetalhesTl = (nomeTl) => {
             const modal = document.getElementById('modal-detalhes-tl');
@@ -2587,59 +2671,5 @@
         };
 
     </script>
-
-    <!-- MODAL DUPLICIDADE DE SOLICITAÇÃO -->
-    <div id="modal-duplicidade-solicitacao" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
-            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold mb-2">Registro Duplicado Detectado</h3>
-            <p class="text-xs text-gray-600 dark:text-darkText mb-6">Já existe um registro salvo igual a esse no dia de hoje. Deseja salvar e enviar a solicitação mesmo assim?</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="confirmarEnvioDuplicado()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-xs shadow">Sim, salvar mesmo assim</button>
-                <button onclick="recusarEnvioDuplicado()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 rounded font-bold text-xs shadow">Não, cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE CADASTRO MANUAL DE CYCLE (PICKING) -->
-    <div id="modal-flutuante-cycle" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 relative">
-            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400">Adicionar Cycle (Picking)</h2>
-            <form class="space-y-4" onsubmit="event.preventDefault();">
-                <div>
-                    <label class="text-xs font-bold block mb-1 dark:text-darkText">MZ:</label>
-                    <input type="text" id="cycle_mz" placeholder="Digite o MZ..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
-                </div>
-
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="salvarCycleManual()" class="flex-1 bg-primaryBtn text-white py-2.5 rounded font-bold text-xs shadow hover:opacity-90">Salvar Cycle</button>
-                    <button type="button" onclick="fecharModalCycleManual()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded text-xs font-bold">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ÍCONE FLUTUANTE DE NOTIFICAÇÕES PARA O ADMIN (CANTO ESQUERDO) -->
-    <div id="btn-notificacao-admin" onclick="abrirModalNotificacoesAdmin()" class="hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer flex flex-col items-center gap-1 bg-white/80 dark:bg-darkCard/80 p-2 rounded-lg border border-borderGray/40 shadow-xl hover:scale-110 transition-transform">
-        <i data-lucide="chevrons-right" class="w-6 h-6 text-primaryBtn dark:text-blue-400 animate-pulse"></i>
-        <span id="badge-notificacoes-qtd" class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow">0</span>
-    </div>
-
-    <!-- MODAL DE NOTIFICAÇÕES DO ADMIN (PEDIDOS DE EDIÇÃO E EXCLUSÃO) -->
-    <div id="modal-notificacoes-admin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-lg w-full dark:text-white shadow-2xl border border-borderGray/30 relative max-h-[85vh] overflow-y-auto">
-            <button onclick="fecharModalNotificacoesAdmin()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
-            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400 flex items-center gap-2">
-                <i data-lucide="bell" class="w-5 h-5"></i> Solicitantes Pendentes (Edição/Exclusão)
-            </h2>
-            <div id="lista-pedidos-admin" class="space-y-3"></div>
-            <div class="flex justify-end pt-4 border-t border-borderGray/30 mt-4">
-                <button onclick="fecharModalNotificacoesAdmin()" class="bg-primaryBtn text-white px-5 py-2 rounded-xl text-xs font-bold">Fechar</button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
