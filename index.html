@@ -1977,6 +1977,251 @@
             renderizarDashboard();
         };
 
+        window.abrirModalAuditoria = (id, tipo) => {
+            currentModalId = id;
+            currentModalTipo = tipo;
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if(!tarefa) return;
+
+            document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
+            
+            let htmlDetalhes = `
+                <p><b>TOTE:</b> ${tarefa.tote}</p>
+                <p><b>MELI:</b> ${tarefa.meli}</p>
+                <p><b>MZ:</b> ${tarefa.mz}</p>
+                <p><b>Qtd:</b> ${tarefa.qtd}</p>
+            `;
+
+            if (tarefa.sobrou_produto === 'Sim') {
+                let textoSobras = '';
+                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
+                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: ${s.meli} | Qtd: ${s.qtd}`).join(' | ');
+                } else {
+                    textoSobras = `MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}`;
+                }
+                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> ${textoSobras}</p>`;
+            }
+
+            document.getElementById('modal-content').innerHTML = htmlDetalhes;
+
+            if(tipo === 'picking') {
+                document.getElementById('container-picking-fluxo').classList.remove('hidden');
+                document.getElementById('container-packing-fluxo').classList.add('hidden');
+                document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
+                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
+                
+                if(document.getElementById('picking_outro_texto')) document.getElementById('picking_outro_texto').value = '';
+                if(document.getElementById('picking_colaborador')) document.getElementById('picking_colaborador').value = '';
+                if(document.getElementById('picking_tl')) document.getElementById('picking_tl').value = '';
+                if(document.getElementById('picking_observacao')) document.getElementById('picking_observacao').value = '';
+
+                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
+                document.getElementById('div-campos-divergencia').classList.add('hidden');
+            } else {
+                document.getElementById('container-picking-fluxo').classList.add('hidden');
+                document.getElementById('container-packing-fluxo').classList.remove('hidden');
+                document.getElementById('packing-campos-principais').classList.remove('hidden');
+                document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
+                
+                const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
+                if(radioDefault) radioDefault.checked = true;
+                if(document.getElementById('packing_outro_texto')) document.getElementById('packing_outro_texto').value = '';
+                if(document.getElementById('packing_colaborador')) document.getElementById('packing_colaborador').value = '';
+                if(document.getElementById('packing_tl')) document.getElementById('packing_tl').value = '';
+                if(document.getElementById('packing_observacao')) document.getElementById('packing_observacao').value = '';
+
+                const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
+                if(altDefault) altDefault.checked = true;
+                if(document.getElementById('ls_packing_outro_texto')) document.getElementById('ls_packing_outro_texto').value = '';
+            }
+            document.getElementById('modal-auditoria').classList.remove('hidden');
+        };
+
+        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
+
+        window.tratarFisicoSistemico = (valor) => {
+            if(valor === 'Sim') {
+                document.getElementById('div-btn-sem-divergencia').classList.remove('hidden');
+                document.getElementById('div-campos-divergencia').classList.add('hidden');
+            } else {
+                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
+                document.getElementById('div-campos-divergencia').classList.remove('hidden');
+            }
+        };
+
+        window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
+        window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
+
+        window.confirmarSemDivergenciaEnvio = async () => {
+            fecharConfirmacaoSemDivergencia();
+            fecharModalAuditoria();
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Aguardando Auditoria Packing', 
+                    status_fisico: 'Sim', 
+                    resultado_auditoria: 'Sem divergência',
+                    resultado_picking: 'Sem divergência',
+                    auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+                mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
+            }
+        };
+
+        window.salvarAuditoriaPickingNao = async () => {
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('picking_outro_texto').value;
+            const colaborador = document.getElementById('picking_colaborador').value;
+            const tl = document.getElementById('picking_tl').value;
+            const observacao = document.getElementById('picking_observacao').value;
+
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Auditado', 
+                    status_fisico: 'Nao', 
+                    culpabilidade, 
+                    colaborador, 
+                    tl, 
+                    observacao, 
+                    resultado_auditoria: culpabilidade,
+                    resultado_picking: culpabilidade,
+                    auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Picking Divergência",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
+                fecharModalAuditoria();
+                mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        window.salvarAuditoriaModal = async () => {
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+            
+            const colaborador = document.getElementById('packing_colaborador').value;
+            const tl = document.getElementById('packing_tl').value;
+            const observacao = document.getElementById('packing_observacao').value;
+
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Auditado', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
+                fecharModalAuditoria();
+                mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        window.incluirEmLostSalvoModal = async () => {
+            if(currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+                
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Lost Salvo', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId}`
+                });
+
+                fecharModalAuditoria();
+                
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
+            }
+        };
+
+        window.mostrarOpcoesLostSalvoPacking = () => {
+            document.getElementById('packing-campos-principais').classList.add('hidden');
+            document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
+        };
+
+        window.voltarFormularioPacking = () => {
+            document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
+            document.getElementById('packing-campos-principais').classList.remove('hidden');
+        };
+
+        window.confirmarEIncluirLostSalvoPacking = async () => {
+            if (currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if (culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+
+                const altEl = document.querySelector('input[name="ls_packing_alt"]:checked');
+                let alternativa = altEl ? altEl.value : '';
+                if (alternativa === 'Outro') alternativa = document.getElementById('ls_packing_outro_texto').value;
+
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Lost Salvo',
+                    alternativa: alternativa,
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
+                });
+
+                fecharModalAuditoria();
+
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
+            }
+        };
+
         window.toggleGraficosPainel = () => {
             const painel = document.getElementById('painel-graficos');
             painel.classList.toggle('hidden');
@@ -2041,15 +2286,6 @@
             const dataEtd = Object.values(mapEtd);
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
-
-            const qtdPicking = dados.filter(t => t.status_fisico === 'Nao').length;
-            const qtdPacking = dados.filter(t => t.adicionadoPackingManual || t.auditadoPackingPor || (t.status === 'Auditado' && t.status_fisico === 'Sim')).length;
-            
-            const totalPickPack = qtdPicking + qtdPacking;
-            const labelsPickPack = totalPickPack > 0 ? ['Picking', 'Packing'] : ['Nenhum'];
-            const dataPickPack = totalPickPack > 0 ? [qtdPicking, qtdPacking] : [1];
-            const coresPickPack = totalPickPack > 0 ? ['#3B82F6', '#002147'] : ['#E5E7EB'];
-            destruirOuCriarGrafico('chartPickingPacking', 'pie', labelsPickPack, dataPickPack, coresPickPack);
 
             const mapTls = {};
             dados.forEach(t => {
@@ -2191,50 +2427,6 @@
             });
         });
 
-        window.abrirModalCycleManual = () => {
-            document.getElementById('cycle_mz').value = '';
-            document.getElementById('modal-flutuante-cycle').classList.remove('hidden');
-        };
-
-        window.fecharModalCycleManual = () => {
-            document.getElementById('modal-flutuante-cycle').classList.add('hidden');
-        };
-
-        window.salvarCycleManual = async () => {
-            const mz = document.getElementById('cycle_mz').value.trim();
-            if (!mz) {
-                mostrarToast("Por favor, preencha o MZ.");
-                return;
-            }
-
-            const hojeStr = new Date().toISOString().split('T')[0];
-
-            await addDoc(collection(db, "tarefas"), {
-                mz: mz,
-                tote: '-',
-                meli: '-',
-                qtd: '1',
-                etd: '-',
-                data: hojeStr,
-                status: 'Auditado',
-                status_fisico: 'Nao',
-                resultado_auditoria: 'Cycle',
-                registradoPor: usuarioAtual || 'Anônimo',
-                auditadoPickingPor: usuarioAtual,
-                auditadoPickingEm: new Date(),
-                criadoEm: new Date()
-            });
-
-            window.registrarNaPlanilha({
-                acao: "Cadastro Manual Cycle",
-                usuario: usuarioAtual || 'Anônimo',
-                detalhes: `MZ: ${mz} | Status: Auditado (Cycle)`
-            });
-
-            fecharModalCycleManual();
-            mostrarToast("Cycle registrado com sucesso!");
-        };
-
         window.abrirModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.remove('hidden');
         window.fecharModalAuditoriaPackingManual = () => document.getElementById('modal-flutuante-auditoria-packing').classList.add('hidden');
 
@@ -2349,6 +2541,105 @@
             fecharModalLostNaoLocalizado();
             mostrarToast("Lost não localizado registrado com sucesso!");
         };
+    
+        window.abrirModalCycleManual = () => {
+            document.getElementById('cycle_mz').value = '';
+            document.getElementById('modal-flutuante-cycle').classList.remove('hidden');
+        };
+
+        window.fecharModalCycleManual = () => {
+            document.getElementById('modal-flutuante-cycle').classList.add('hidden');
+        };
+
+        window.salvarCycleManual = async () => {
+            const mz = document.getElementById('cycle_mz').value.trim();
+            if (!mz) {
+                mostrarToast("Por favor, preencha o MZ.");
+                return;
+            }
+
+            const hojeStr = new Date().toISOString().split('T')[0];
+
+            await addDoc(collection(db, "tarefas"), {
+                mz: mz,
+                tote: '-',
+                meli: '-',
+                qtd: '1',
+                etd: '-',
+                data: hojeStr,
+                status: 'Auditado',
+                status_fisico: 'Nao',
+                resultado_auditoria: 'Cycle',
+                registradoPor: usuarioAtual || 'Anônimo',
+                auditadoPickingPor: usuarioAtual,
+                auditadoPickingEm: new Date(),
+                criadoEm: new Date()
+            });
+
+            window.registrarNaPlanilha({
+                acao: "Cadastro Manual Cycle",
+                usuario: usuarioAtual || 'Anônimo',
+                detalhes: `MZ: ${mz} | Status: Auditado (Cycle)`
+            });
+
+            fecharModalCycleManual();
+            mostrarToast("Cycle registrado com sucesso!");
+        };
+
     </script>
+
+    <!-- MODAL DUPLICIDADE DE SOLICITAÇÃO -->
+    <div id="modal-duplicidade-solicitacao" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Registro Duplicado Detectado</h3>
+            <p class="text-xs text-gray-600 dark:text-darkText mb-6">Já existe um registro salvo igual a esse no dia de hoje. Deseja salvar e enviar a solicitação mesmo assim?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="confirmarEnvioDuplicado()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-xs shadow">Sim, salvar mesmo assim</button>
+                <button onclick="recusarEnvioDuplicado()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 rounded font-bold text-xs shadow">Não, cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO MANUAL DE CYCLE (PICKING) -->
+    <div id="modal-flutuante-cycle" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 relative">
+            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400">Adicionar Cycle (Picking)</h2>
+            <form class="space-y-4" onsubmit="event.preventDefault();">
+                <div>
+                    <label class="text-xs font-bold block mb-1 dark:text-darkText">MZ:</label>
+                    <input type="text" id="cycle_mz" placeholder="Digite o MZ..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="salvarCycleManual()" class="flex-1 bg-primaryBtn text-white py-2.5 rounded font-bold text-xs shadow hover:opacity-90">Salvar Cycle</button>
+                    <button type="button" onclick="fecharModalCycleManual()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded text-xs font-bold">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ÍCONE FLUTUANTE DE NOTIFICAÇÕES PARA O ADMIN (CANTO ESQUERDO) -->
+    <div id="btn-notificacao-admin" onclick="abrirModalNotificacoesAdmin()" class="hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer flex flex-col items-center gap-1 bg-white/80 dark:bg-darkCard/80 p-2 rounded-lg border border-borderGray/40 shadow-xl hover:scale-110 transition-transform">
+        <i data-lucide="chevrons-right" class="w-6 h-6 text-primaryBtn dark:text-blue-400 animate-pulse"></i>
+        <span id="badge-notificacoes-qtd" class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow">0</span>
+    </div>
+
+    <!-- MODAL DE NOTIFICAÇÕES DO ADMIN (PEDIDOS DE EDIÇÃO E EXCLUSÃO) -->
+    <div id="modal-notificacoes-admin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-lg w-full dark:text-white shadow-2xl border border-borderGray/30 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="fecharModalNotificacoesAdmin()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400 flex items-center gap-2">
+                <i data-lucide="bell" class="w-5 h-5"></i> Solicitantes Pendentes (Edição/Exclusão)
+            </h2>
+            <div id="lista-pedidos-admin" class="space-y-3"></div>
+            <div class="flex justify-end pt-4 border-t border-borderGray/30 mt-4">
+                <button onclick="fecharModalNotificacoesAdmin()" class="bg-primaryBtn text-white px-5 py-2 rounded-xl text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
