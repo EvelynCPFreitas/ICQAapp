@@ -2294,7 +2294,7 @@
             const dataNaoLoc = Object.values(mapNaoLoc);
             destruirOuCriarGrafico('chartLostNaoLocalizado', 'pie', labelsNaoLoc.length ? labelsNaoLoc : ['Nenhum'], dataNaoLoc.length ? dataNaoLoc : [1], labelsNaoLoc.length ? ['#002147', '#EF4444', '#F59E0B', '#6366F1'] : ['#E5E7EB']);
 
-            // AJUSTE AQUI: IGNORA ETD REGISTRADO COMO '-' OU VAZIO (EX: CYCLES)
+            // ORDENAÇÃO DECRESCENTE DO ETD (DO MAIOR PARA O MENOR VOLUME DE REGISTROS)
             const mapEtd = {};
             dados.forEach(t => {
                 const k = (t.etd || '').trim();
@@ -2302,9 +2302,10 @@
                     mapEtd[k] = (mapEtd[k] || 0) + 1;
                 }
             });
-            const labelsEtd = Object.keys(mapEtd);
-            const dataEtd = Object.values(mapEtd);
-            const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
+            const etdOrdenado = Object.entries(mapEtd).sort((a, b) => b[1] - a[1]);
+            const labelsEtd = etdOrdenado.map(item => item[0]);
+            const dataEtd = etdOrdenado.map(item => item[1]);
+            const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899', '#14B8A6', '#6366F1', '#F43F5E'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
             let totalPicking = 0;
