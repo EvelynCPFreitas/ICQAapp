@@ -768,7 +768,6 @@
         window.reiniciarTimerInatividade = () => {
             if (timerInatividade) clearTimeout(timerInatividade);
             if (usuarioAtual) {
-                // Atualiza o carimbo de data/hora do último acesso
                 localStorage.setItem("user_last_activity", Date.now());
                 timerInatividade = setTimeout(() => {
                     mostrarToast("Sessão expirada por inatividade (2 horas). Faça login novamente.");
@@ -777,7 +776,6 @@
             }
         };
 
-        // Escuta eventos de interação do usuário para manter a sessão ativa
         ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach(evento => {
             document.addEventListener(evento, () => {
                 if (usuarioAtual) reiniciarTimerInatividade();
@@ -934,7 +932,6 @@
         };
 
         window.verificarSessaoLogin = () => {
-            // Utilização do localStorage para persistir a sessão entre F5 e atualizações de página
             const sessao = localStorage.getItem("user_session");
             const ultimaAtividade = localStorage.getItem("user_last_activity");
 
@@ -978,7 +975,6 @@
                 SOU_ADMIN = false;
             }
 
-            // Gravação no localStorage
             localStorage.setItem("user_session", JSON.stringify({ nome: usuarioAtual, isAdmin: SOU_ADMIN }));
             localStorage.setItem("user_last_activity", Date.now());
             
@@ -1300,15 +1296,22 @@
                 const dataPackingHTML = dataPackingFormatada && dataPackingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
                 htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}${dataPackingHTML}</p>`;
             } else {
-                if (tarefa.auditadoPickingPor || tarefa.status_fisico) {
-                    const dataPickingFormatada = formatarDataHoraCriacao(tarefa.auditadoPickingEm || tarefa.auditadoEm || tarefa.criadoEm);
-                    const dataPickingHTML = dataPickingFormatada && dataPickingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
-                    const resPicking = (tarefa.status_fisico === 'Sim') 
-                        ? 'Sem divergência' 
-                        : (tarefa.resultado_picking || tarefa.culpabilidade || 'Com divergência');
+                // Exibe informações de Picking apenas se a task realmente tiver sido auditada no Picking
+                if (tarefa.auditadoPickingPor || (tarefa.status_fisico && tarefa.status_fisico !== 'Pendente')) {
+                    const dataPickingFormatada = formatarDataHoraCriacao(tarefa.auditadoPickingEm || tarefa.auditadoEm);
+                    const dataPickingHTML = (dataPickingFormatada && dataPickingFormatada !== '-') ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
                     
+                    let resPicking = 'Aguardando';
+                    if (tarefa.status_fisico === 'Sim') {
+                        resPicking = 'Sem divergência';
+                    } else if (tarefa.status_fisico === 'Nao') {
+                        resPicking = tarefa.resultado_picking || tarefa.culpabilidade || 'Com divergência';
+                    }
+
                     htmlDetalhes += `<p><b>Login Auditoria Picking:</b> ${tarefa.auditadoPickingPor || tarefa.auditadoPor || '-'}${dataPickingHTML}</p>`;
                     htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> ${resPicking}</p>`;
+                } else if (statusAtual === 'pendente') {
+                    htmlDetalhes += `<p><b>Resultado Auditoria Picking:</b> Aguardando</p>`;
                 }
                 
                 const teveDivergenciaPicking = (tarefa.status_fisico === 'Nao');
