@@ -2265,16 +2265,18 @@
 
             dadosFiltradosGraficoCache = dados;
 
+            // AJUSTE AQUI: IGNORA 'Cycle', 'Sem divergência' E 'Aguardando' NO GRÁFICO DE CULPABILIDADE
             const mapCulp = {};
             dados.forEach(t => {
-                const k = t.resultado_auditoria;
-                if (k && k !== 'Aguardando') {
+                const k = (t.resultado_auditoria || '').trim();
+                const kNorm = k.toLowerCase();
+                if (k && kNorm !== 'aguardando' && kNorm !== 'sem divergência' && kNorm !== 'sem divergencia' && kNorm !== 'cycle') {
                     mapCulp[k] = (mapCulp[k] || 0) + 1;
                 }
             });
             const labelsCulp = Object.keys(mapCulp);
             const dataCulp = Object.values(mapCulp);
-            destruirOuCriarGrafico('chartCulpabilidade', 'pie', labelsCulp.length ? labelsCulp : ['Nenhum'], dataCulp.length ? dataCulp : [1], labelsCulp.length ? ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#002147', '#3B82F6'] : ['#E5E7EB']);
+            destruirOuCriarGrafico('chartCulpabilidade', 'pie', labelsCulp.length ? labelsCulp : ['Nenhum'], dataCulp.length ? dataCulp : [1], labelsCulp.length ? ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#002147', '#3B82F6', '#EC4899'] : ['#E5E7EB']);
 
             const mapSalvos = {};
             dados.filter(t => t.status === 'Lost Salvo').forEach(t => {
@@ -2294,7 +2296,6 @@
             const dataNaoLoc = Object.values(mapNaoLoc);
             destruirOuCriarGrafico('chartLostNaoLocalizado', 'pie', labelsNaoLoc.length ? labelsNaoLoc : ['Nenhum'], dataNaoLoc.length ? dataNaoLoc : [1], labelsNaoLoc.length ? ['#002147', '#EF4444', '#F59E0B', '#6366F1'] : ['#E5E7EB']);
 
-            // ORDENAÇÃO DECRESCENTE DO ETD (DO MAIOR PARA O MENOR VOLUME DE REGISTROS)
             const mapEtd = {};
             dados.forEach(t => {
                 const k = (t.etd || '').trim();
