@@ -264,6 +264,17 @@
                         </select>
                     </div>
 
+                    <!-- CAMPO DE PESQUISA MULTI-TAGS E BOTÃO BUSCAR -->
+                    <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+                        <button onclick="executarBuscaTags()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow transition-all shrink-0">
+                            Buscar
+                        </button>
+                        <div class="flex items-center flex-wrap gap-1.5 p-1 border rounded-xl dark:bg-black/20 dark:border-borderGray bg-white flex-1 min-h-[34px]">
+                            <div id="container-tags-busca" class="flex items-center flex-wrap gap-1.5"></div>
+                            <input type="text" id="input-tag-busca" onkeydown="tratarKeyDownInputTag(event)" placeholder="Digite MZ, MELI ou TOTE e aperte Enter..." class="bg-transparent border-none outline-none text-xs dark:text-white p-1 flex-1 min-w-[140px]">
+                        </div>
+                    </div>
+
                     <button onclick="limparFiltros()" class="px-3 py-1.5 text-xs rounded border bg-red-500 text-white font-bold hover:bg-red-600 transition-colors">Limpar Filtros</button>
                 </div>
 
@@ -1717,6 +1728,59 @@
             });
         };
 
+        let tagsBuscaAtivas = [];
+
+        window.tratarKeyDownInputTag = (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                adicionarTagBusca();
+            } else if (e.key === 'Backspace' && e.target.value === '' && tagsBuscaAtivas.length > 0) {
+                tagsBuscaAtivas.pop();
+                renderizarTagsBusca();
+            }
+        };
+
+        window.adicionarTagBusca = () => {
+            const input = document.getElementById('input-tag-busca');
+            const valor = input.value.trim();
+            if (valor) {
+                const itens = valor.split(/[\s,]+/);
+                itens.forEach(item => {
+                    const itemLimpo = item.trim();
+                    if (itemLimpo && !tagsBuscaAtivas.includes(itemLimpo)) {
+                        tagsBuscaAtivas.push(itemLimpo);
+                    }
+                });
+                input.value = '';
+                renderizarTagsBusca();
+            }
+        };
+
+        window.removerTagBusca = (index) => {
+            tagsBuscaAtivas.splice(index, 1);
+            renderizarTagsBusca();
+            paginaAtualDashboard = 1;
+            renderizarDashboard();
+        };
+
+        window.renderizarTagsBusca = () => {
+            const container = document.getElementById('container-tags-busca');
+            if (!container) return;
+            container.innerHTML = '';
+            tagsBuscaAtivas.forEach((tag, idx) => {
+                const tagEl = document.createElement('span');
+                tagEl.className = "bg-gray-100 dark:bg-black/40 text-black dark:text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-borderGray/40 shadow-sm";
+                tagEl.innerHTML = `${tag} <button type="button" onclick="removerTagBusca(${idx})" class="text-gray-400 hover:text-red-500 font-bold leading-none">&times;</button>`;
+                container.appendChild(tagEl);
+            });
+        };
+
+        window.executarBuscaTags = () => {
+            adicionarTagBusca();
+            paginaAtualDashboard = 1;
+            renderizarDashboard();
+        };
+
         window.renderizarDashboard = () => {
             const tbody = document.getElementById('tabela-body');
             tbody.innerHTML = "";
@@ -1742,6 +1806,23 @@
                 }
 
                 if (filtroEtd && !(t.etd && t.etd.toLowerCase().includes(filtroEtd))) return false;
+
+                // FILTRO MULTI-TAGS (MZ, MELI, TOTE, ID PEDIDO, SOBRA MELI)
+                if (tagsBuscaAtivas.length > 0) {
+                    const tote = (t.tote || '').toLowerCase();
+                    const mz = (t.mz || '').toLowerCase();
+                    const meli = (t.meli || '').toLowerCase();
+                    const idPedido = (t.id_pedido || '').toLowerCase();
+                    const sobraMeli = (t.sobra_meli || '').toLowerCase();
+
+                    const bateAlgumaTag = tagsBuscaAtivas.some(tag => {
+                        const tagNorm = tag.toLowerCase();
+                        return tote.includes(tagNorm) || mz.includes(tagNorm) || meli.includes(tagNorm) || idPedido.includes(tagNorm) || sobraMeli.includes(tagNorm);
+                    });
+
+                    if (!bateAlgumaTag) return false;
+                }
+
                 return true;
             });
 
@@ -2074,6 +2155,7 @@
             paginaAtualDashboard = 1;
             renderizarDashboard();
         };
+
         window.setFiltroStatus = (status) => { 
             filtroStatusAtivo = status; 
             paginaAtualDashboard = 1; 
@@ -2081,12 +2163,17 @@
             if (select) select.value = status || '';
             renderizarDashboard(); 
         };
+
         window.limparFiltros = () => {
             filtroStatusAtivo = null;
+            tagsBuscaAtivas = [];
             paginaAtualDashboard = 1;
             document.getElementById('filtro-data-inicio').value = '';
             document.getElementById('filtro-data-fim').value = '';
             document.getElementById('filtro-etd').value = '';
+            const inputTag = document.getElementById('input-tag-busca');
+            if (inputTag) inputTag.value = '';
+            renderizarTagsBusca();
             const select = document.getElementById('select-filtro-status');
             if (select) select.value = '';
             renderizarDashboard();
