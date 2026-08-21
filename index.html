@@ -2294,17 +2294,19 @@
             const dataNaoLoc = Object.values(mapNaoLoc);
             destruirOuCriarGrafico('chartLostNaoLocalizado', 'pie', labelsNaoLoc.length ? labelsNaoLoc : ['Nenhum'], dataNaoLoc.length ? dataNaoLoc : [1], labelsNaoLoc.length ? ['#002147', '#EF4444', '#F59E0B', '#6366F1'] : ['#E5E7EB']);
 
+            // AJUSTE AQUI: IGNORA ETD REGISTRADO COMO '-' OU VAZIO (EX: CYCLES)
             const mapEtd = {};
             dados.forEach(t => {
-                const k = t.etd || 'N/D';
-                mapEtd[k] = (mapEtd[k] || 0) + 1;
+                const k = (t.etd || '').trim();
+                if (k && k !== '-') {
+                    mapEtd[k] = (mapEtd[k] || 0) + 1;
+                }
             });
             const labelsEtd = Object.keys(mapEtd);
             const dataEtd = Object.values(mapEtd);
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
-            // CORREÇÃO AQUI: GERAR E RENDERIZAR O GRÁFICO PICKING X PACKING
             let totalPicking = 0;
             let totalPacking = 0;
 
