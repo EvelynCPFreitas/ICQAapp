@@ -26,7 +26,7 @@
             
             <form id="form-login" onsubmit="event.preventDefault(); processarLogin();" class="space-y-4">
                 <div>
-                    <input type="text" id="login_nome" placeholder="Digite seu nome..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
+                    <input type="text" id="login_nome" oninput="verificarInputNomeAdmin(this.value)" placeholder="Digite seu nome..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
                 </div>
 
                 <div id="container-senha-admin" class="hidden space-y-1 text-left">
@@ -881,6 +881,19 @@
                 await deleteDoc(doc(db, "pedidos_alteracao", pedidoId));
             } catch (err) {
                 console.error("Erro ao remover notificação:", err);
+            }
+        };
+
+        window.verificarInputNomeAdmin = (valor) => {
+            const containerSenha = document.getElementById('container-senha-admin');
+            const inputSenha = document.getElementById('login_senha');
+            if (valor.trim().toLowerCase() === 'evelyn') {
+                containerSenha.classList.remove('hidden');
+                inputSenha.setAttribute('required', 'true');
+            } else {
+                containerSenha.classList.add('hidden');
+                inputSenha.removeAttribute('required');
+                inputSenha.value = '';
             }
         };
 
