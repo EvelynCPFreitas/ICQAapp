@@ -1635,13 +1635,14 @@
                 const resPickingVal = document.getElementById('edit_res_picking').value;
                 const resPackingVal = document.getElementById('edit_res_packing').value;
                 const registradoPorVal = document.getElementById('edit_registrado_por').value;
+                const statusSelecionado = document.getElementById('edit_status').value;
 
                 const dadosAtualizados = {
                     tote: document.getElementById('edit_tote').value,
                     mz: document.getElementById('edit_mz').value,
                     meli: document.getElementById('edit_meli').value,
                     qtd: document.getElementById('edit_qtd').value,
-                    status: document.getElementById('edit_status').value,
+                    status: statusSelecionado,
                     etd: document.getElementById('edit_etd').value,
                     registradoPor: registradoPorVal,
                     solicitadoPor: registradoPorVal,
@@ -1652,9 +1653,15 @@
                     observacao: document.getElementById('edit_observacao').value
                 };
 
-                // Ajusta automaticamente o status físico do picking caso tenha sido alterado
+                // Regra de transição de status de Picking para Packing
                 if (resPickingVal === 'Sem divergência') {
                     dadosAtualizados.status_fisico = 'Sim';
+                    
+                    // Se o Packing ainda não foi concluído (está Aguardando ou Sem divergência),
+                    // direciona a tarefa automaticamente para a fila do Packing
+                    if (resPackingVal === 'Aguardando' || resPackingVal === 'Sem divergência') {
+                        dadosAtualizados.status = 'Aguardando Auditoria Packing';
+                    }
                 } else if (resPickingVal !== 'Aguardando') {
                     dadosAtualizados.status_fisico = 'Nao';
                     dadosAtualizados.culpabilidade = resPickingVal;
