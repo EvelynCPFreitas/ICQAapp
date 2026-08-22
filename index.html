@@ -574,6 +574,26 @@
         </div>
     </div>
 
+    <!-- MODAL CASOS DO COLABORADOR -->
+    <div id="modal-casos-colaborador" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-2xl w-full dark:text-white shadow-2xl border border-borderGray/30 relative flex flex-col max-h-[85vh]">
+            <button onclick="fecharModalCasosColaborador()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+            <h2 id="modal-colaborador-titulo" class="text-xl font-bold mb-1 text-primaryBtn dark:text-blue-400">Casos do Colaborador</h2>
+            <p id="modal-colaborador-subtitulo" class="text-xs text-gray-500 dark:text-darkText mb-4"></p>
+            
+            <div id="modal-colaborador-conteudo" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-borderGray/30 mt-4">
+                <button onclick="voltarParaDetalhesTl()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow">
+                    &lt; Voltar
+                </button>
+                <button onclick="fecharModalCasosColaborador()" class="bg-primaryBtn text-white px-5 py-2 rounded-xl text-xs font-bold shadow">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DO GRÁFICO DE TL EXPANDIDO -->
     <div id="modal-grafico-tl-expandido" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-5xl w-full dark:text-white shadow-2xl border border-borderGray/30 relative flex flex-col items-center">
@@ -843,6 +863,7 @@
         const ITENS_POR_PAGINA = 20;
         let chartsInstance = {};
         let dadosFiltradosGraficoCache = [];
+        let tlNomeAtualCache = '';
 
         let usuarioAtual = null;
         let SOU_ADMIN = false;
@@ -2482,6 +2503,7 @@
         };
 
         window.abrirModalDetalhesTl = (nomeTl) => {
+            tlNomeAtualCache = nomeTl;
             const modal = document.getElementById('modal-detalhes-tl');
             const titulo = document.getElementById('modal-tl-titulo');
             const conteudo = document.getElementById('modal-tl-conteudo');
@@ -2508,12 +2530,12 @@
                 let htmlList = `<ul class="divide-y divide-borderGray/30">`;
                 listaOrdenada.forEach(([colab, qtd]) => {
                     const porcentagem = totalErrosTl > 0 ? ((qtd / totalErrosTl) * 100).toFixed(1) : 0;
-                    htmlList += `<li class="py-2 px-3 bg-gray-50 dark:bg-black/20 rounded mb-1 flex items-center justify-between">
+                    htmlList += `<li onclick="abrirCasosColaborador('${colab.replace(/'/g, "\\'")}')" class="py-2 px-3 bg-gray-50 dark:bg-black/20 rounded mb-1 flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-black/40 transition-colors group">
                         <div class="flex items-center gap-2">
-                            <span class="font-medium dark:text-white">${colab}</span>
+                            <span class="font-medium dark:text-white group-hover:text-primaryBtn dark:group-hover:text-blue-400">${colab}</span>
                             <span class="text-xs opacity-60 font-semibold dark:text-white">(${porcentagem}%)</span>
                         </div>
-                        <span class="text-xs font-bold text-gray-500 dark:text-darkText">${qtd} ${qtd === 1 ? 'registro' : 'registros'}</span>
+                        <span class="text-xs font-bold text-gray-500 dark:text-darkText group-hover:underline">${qtd} ${qtd === 1 ? 'registro' : 'registros'} &gt;</span>
                     </li>`;
                 });
                 htmlList += `</ul>`;
@@ -2525,6 +2547,62 @@
 
         window.fecharModalDetalhesTl = () => {
             document.getElementById('modal-detalhes-tl').classList.add('hidden');
+        };
+
+        window.abrirCasosColaborador = (nomeColaborador) => {
+            fecharModalDetalhesTl();
+
+            const modal = document.getElementById('modal-casos-colaborador');
+            const titulo = document.getElementById('modal-colaborador-titulo');
+            const subtitulo = document.getElementById('modal-colaborador-subtitulo');
+            const conteudo = document.getElementById('modal-colaborador-conteudo');
+
+            titulo.innerText = `Casos do Colaborador: ${nomeColaborador}`;
+            subtitulo.innerText = `Team Leader: ${tlNomeAtualCache}`;
+
+            const casos = dadosFiltradosGraficoCache.filter(t => {
+                const tlTask = t.tl || 'Não informado';
+                const colabTask = (t.colaborador || '').trim();
+                return tlTask === tlNomeAtualCache && colabTask === nomeColaborador;
+            });
+
+            if (casos.length === 0) {
+                conteudo.innerHTML = `<p class="italic text-gray-400 text-center py-4">Nenhum caso encontrado para este colaborador.</p>`;
+            } else {
+                let htmlCasos = `<div class="space-y-2">`;
+                casos.forEach(c => {
+                    htmlCasos += `
+                        <div class="p-3 bg-gray-50 dark:bg-black/20 rounded-lg border border-borderGray/30 space-y-1 text-xs">
+                            <div class="flex justify-between items-center border-b border-borderGray/20 pb-1 font-bold dark:text-white">
+                                <span>TOTE: ${c.tote || '-'} | MZ: ${c.mz || '-'} | MELI: ${c.meli || '-'}</span>
+                                <span class="text-[10px] text-blue-600 dark:text-blue-400">Qtd: ${c.qtd || '1'}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-gray-600 dark:text-gray-300 pt-1">
+                                <p><b>Status:</b> ${c.status || '-'}</p>
+                                <p><b>ETD:</b> ${c.etd || '-'}</p>
+                                <p><b>Resultado/Culpabilidade:</b> ${c.resultado_auditoria || c.culpabilidade || '-'}</p>
+                                <p><b>Data:</b> ${formatarDataBR(c.data)}</p>
+                            </div>
+                            ${c.observacao ? `<p class="text-[11px] text-amber-700 dark:text-amber-400 pt-1"><b>Obs:</b> ${c.observacao}</p>` : ''}
+                        </div>
+                    `;
+                });
+                htmlCasos += `</div>`;
+                conteudo.innerHTML = htmlCasos;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.fecharModalCasosColaborador = () => {
+            document.getElementById('modal-casos-colaborador').classList.add('hidden');
+        };
+
+        window.voltarParaDetalhesTl = () => {
+            fecharModalCasosColaborador();
+            if (tlNomeAtualCache) {
+                abrirModalDetalhesTl(tlNomeAtualCache);
+            }
         };
 
         document.querySelectorAll('.nav-btn').forEach(btn => {
