@@ -1529,54 +1529,50 @@
 
             const conteudo = document.getElementById('conteudo-detalhes-tarefa');
 
-            const opcoesPadrao = [
+            const opcoesPicking = [
+                "Sem divergência",
                 "Meli divergente",
                 "Picking Massivo",
                 "Deixado no endereço / Encontrado na bin",
+                "Aguardando"
+            ];
+
+            const opcoesPacking = [
+                "Sem divergência",
                 "Tote finalizada pela bancada com produto",
                 "Troca de etiqueta ou produto (inversão de pedido)",
                 "Packing não bipou todas as unidades",
                 "Inversão de tote",
-                "Inconclusivo"
+                "Inconclusivo",
+                "Aguardando"
             ];
 
-            const resAtual = tarefa.resultado_auditoria || '';
-            const ehPadrao = opcoesPadrao.includes(resAtual);
-            let valorSelect = '';
-            let valorOutro = '';
-
-            if (resAtual === '') {
-                valorSelect = opcoesPadrao[0];
-            } else if (ehPadrao) {
-                valorSelect = resAtual;
-            } else {
-                valorSelect = 'Outros';
-                valorOutro = resAtual;
-            }
+            const resPickingAtual = tarefa.resultado_picking || (tarefa.status_fisico === 'Sim' ? 'Sem divergência' : tarefa.culpabilidade || 'Aguardando');
+            const resPackingAtual = tarefa.resultado_auditoria || 'Aguardando';
 
             const loginRegistrado = tarefa.registradoPor || tarefa.solicitadoPor || '';
 
             conteudo.innerHTML = `
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1 text-xs">
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">TOTE:</label>
-                        <input type="text" id="edit_tote" value="${tarefa.tote || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">TOTE:</label>
+                        <input type="text" id="edit_tote" value="${tarefa.tote || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">MZ:</label>
-                        <input type="text" id="edit_mz" value="${tarefa.mz || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">MZ:</label>
+                        <input type="text" id="edit_mz" value="${tarefa.mz || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">MELI:</label>
-                        <input type="text" id="edit_meli" value="${tarefa.meli || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">MELI:</label>
+                        <input type="text" id="edit_meli" value="${tarefa.meli || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Quantidade:</label>
-                        <input type="number" id="edit_qtd" value="${tarefa.qtd || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">Quantidade:</label>
+                        <input type="number" id="edit_qtd" value="${tarefa.qtd || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Status:</label>
-                        <select id="edit_status" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">Status:</label>
+                        <select id="edit_status" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                             <option value="Pendente" ${tarefa.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
                             <option value="Aguardando Auditoria Packing" ${tarefa.status === 'Aguardando Auditoria Packing' ? 'selected' : ''}>Aguardando Auditoria Packing</option>
                             <option value="Auditado" ${tarefa.status === 'Auditado' ? 'selected' : ''}>Auditado</option>
@@ -1585,39 +1581,41 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">ETD:</label>
-                        <input type="time" id="edit_etd" value="${tarefa.etd || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">ETD:</label>
+                        <input type="time" id="edit_etd" value="${tarefa.etd || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Registrado por (Login):</label>
-                        <input type="text" id="edit_registrado_por" value="${loginRegistrado}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">Registrado por (Login):</label>
+                        <input type="text" id="edit_registrado_por" value="${loginRegistrado}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
+
+                    <!-- RESULTADO AUDITORIA PICKING -->
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Resultado Auditoria:</label>
-                        <select id="edit_resultado_auditoria_select" onchange="window.tratarResultadoAuditoriaEditSelect(this.value)" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                            <option value="Meli divergente" ${valorSelect === 'Meli divergente' ? 'selected' : ''}>Meli divergente</option>
-                            <option value="Picking Massivo" ${valorSelect === 'Picking Massivo' ? 'selected' : ''}>Picking Massivo</option>
-                            <option value="Deixado no endereço / Encontrado na bin" ${valorSelect === 'Deixado no endereço / Encontrado na bin' ? 'selected' : ''}>Deixado no endereço / Encontrado na bin</option>
-                            <option value="Tote finalizada pela bancada com produto" ${valorSelect === 'Tote finalizada pela bancada com produto' ? 'selected' : ''}>Tote finalizada pela bancada com produto</option>
-                            <option value="Troca de etiqueta ou produto (inversão de pedido)" ${valorSelect === 'Troca de etiqueta ou produto (inversão de pedido)' ? 'selected' : ''}>Troca de etiqueta ou produto (inversão de pedido)</option>
-                            <option value="Packing não bipou todas as unidades" ${valorSelect === 'Packing não bipou todas as unidades' ? 'selected' : ''}>Packing não bipou todas as unidades</option>
-                            <option value="Inversão de tote" ${valorSelect === 'Inversão de tote' ? 'selected' : ''}>Inversão de tote</option>
-                            <option value="Inconclusivo" ${valorSelect === 'Inconclusivo' ? 'selected' : ''}>Inconclusivo</option>
-                            <option value="Outros" ${valorSelect === 'Outros' ? 'selected' : ''}>Outros:</option>
+                        <label class="font-bold block text-blue-600 dark:text-blue-400">Resultado Auditoria Picking:</label>
+                        <select id="edit_res_picking" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                            ${opcoesPicking.map(op => `<option value="${op}" ${resPickingAtual === op ? 'selected' : ''}>${op}</option>`).join('')}
                         </select>
-                        <input type="text" id="edit_resultado_auditoria_outro" placeholder="Especifique..." value="${valorOutro}" class="${valorSelect === 'Outros' ? '' : 'hidden'} w-full mt-1.5 p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                    </div>
+
+                    <!-- RESULTADO AUDITORIA PACKING -->
+                    <div>
+                        <label class="font-bold block text-blue-600 dark:text-blue-400">Resultado Auditoria Packing:</label>
+                        <select id="edit_res_packing" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                            ${opcoesPacking.map(op => `<option value="${op}" ${resPackingAtual === op ? 'selected' : ''}>${op}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="font-bold block dark:text-darkText">Colaborador:</label>
+                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Colaborador:</label>
-                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <label class="font-bold block dark:text-darkText">Team Leader:</label>
+                        <input type="text" id="edit_tl" value="${tarefa.tl || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Team Leader:</label>
-                        <input type="text" id="edit_tl" value="${tarefa.tl || ''}" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold block dark:text-darkText">Observação:</label>
-                        <textarea id="edit_observacao" class="w-full p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray h-16">${tarefa.observacao || ''}</textarea>
+                        <label class="font-bold block dark:text-darkText">Observação:</label>
+                        <textarea id="edit_observacao" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray h-16">${tarefa.observacao || ''}</textarea>
                     </div>
                 </div>
             `;
@@ -1627,18 +1625,6 @@
             btnSalvar.onclick = () => salvarEdicaoTarefa(id);
         };
 
-        window.tratarResultadoAuditoriaEditSelect = (valor) => {
-            const inputOutro = document.getElementById('edit_resultado_auditoria_outro');
-            if (inputOutro) {
-                if (valor === 'Outros') {
-                    inputOutro.classList.remove('hidden');
-                } else {
-                    inputOutro.classList.add('hidden');
-                    inputOutro.value = '';
-                }
-            }
-        };
-
         window.salvarEdicaoTarefa = async (id) => {
             if (!SOU_ADMIN) {
                 mostrarToast("Apenas administradores podem salvar alterações!");
@@ -1646,10 +1632,8 @@
             }
 
             try {
-                const selectResultado = document.getElementById('edit_resultado_auditoria_select').value;
-                const outroResultado = document.getElementById('edit_resultado_auditoria_outro').value;
-                
-                const resultadoFinal = (selectResultado === 'Outros') ? outroResultado : selectResultado;
+                const resPickingVal = document.getElementById('edit_res_picking').value;
+                const resPackingVal = document.getElementById('edit_res_packing').value;
                 const registradoPorVal = document.getElementById('edit_registrado_por').value;
 
                 const dadosAtualizados = {
@@ -1661,18 +1645,27 @@
                     etd: document.getElementById('edit_etd').value,
                     registradoPor: registradoPorVal,
                     solicitadoPor: registradoPorVal,
-                    resultado_auditoria: resultadoFinal,
+                    resultado_picking: resPickingVal,
+                    resultado_auditoria: resPackingVal,
                     colaborador: document.getElementById('edit_colaborador').value,
                     tl: document.getElementById('edit_tl').value,
                     observacao: document.getElementById('edit_observacao').value
                 };
+
+                // Ajusta automaticamente o status físico do picking caso tenha sido alterado
+                if (resPickingVal === 'Sem divergência') {
+                    dadosAtualizados.status_fisico = 'Sim';
+                } else if (resPickingVal !== 'Aguardando') {
+                    dadosAtualizados.status_fisico = 'Nao';
+                    dadosAtualizados.culpabilidade = resPickingVal;
+                }
 
                 await updateDoc(doc(db, "tarefas", id), dadosAtualizados);
 
                 window.registrarNaPlanilha({
                     acao: "Edição de Task",
                     usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${id} | TOTE: ${dadosAtualizados.tote}`
+                    detalhes: `ID: ${id} | Picking: ${resPickingVal} | Packing: ${resPackingVal}`
                 });
 
                 mostrarToast("Informações atualizadas com sucesso!");
