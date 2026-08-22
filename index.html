@@ -2309,16 +2309,33 @@
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899', '#14B8A6', '#6366F1', '#F43F5E'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
-            // CÁLCULO ATUALIZADO DO PICKING X PACKING
+            // CÁLCULO REVISADO DO PICKING X PACKING (SEM DUPLICIDADE)
             let totalPicking = 0;
             let totalPacking = 0;
 
             dados.forEach(t => {
-                if (t.auditadoPickingPor || (t.status_fisico && t.status_fisico !== 'Pendente' && !t.adicionadoPackingManual)) {
-                    totalPicking++;
-                }
-                if (t.auditadoPackingPor || t.adicionadoPackingManual) {
+                const res = (t.resultado_auditoria || '').trim();
+                const resPicking = (t.resultado_picking || '').trim();
+
+                // 1. Erros atribuídos ao PACKING
+                if (
+                    t.adicionadoPackingManual || 
+                    t.auditadoPackingPor || 
+                    res === "Tote finalizada pela bancada com produto" || 
+                    res === "Troca de etiqueta ou produto (inversão de pedido)" || 
+                    res === "Packing não bipou todas as unidades"
+                ) {
                     totalPacking++;
+                } 
+                // 2. Erros atribuídos ao PICKING (somente se não foi erro de Packing)
+                else if (
+                    t.auditadoPickingPor || 
+                    t.status_fisico === 'Nao' || 
+                    resPicking === "Meli divergente" || 
+                    resPicking === "Picking Massivo" || 
+                    resPicking === "Deixado no endereço / Encontrado na bin"
+                ) {
+                    totalPicking++;
                 }
             });
 
