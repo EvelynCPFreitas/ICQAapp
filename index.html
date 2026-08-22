@@ -367,6 +367,10 @@
                             <span>Packing não bipou todas as unidades</span>
                         </label>
                         <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="apk_culpabilidade" value="Inversão de tote"> 
+                            <span>Inversão de tote</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
                             <input type="radio" name="apk_culpabilidade" value="Inconclusivo"> 
                             <span>Inconclusivo</span>
                         </label>
@@ -474,6 +478,10 @@
                             <label class="flex items-center gap-2 text-sm cursor-pointer">
                                 <input type="radio" name="culpabilidade_packing" value="Packing não bipou todas as unidades"> 
                                 <span>Packing não bipou todas as unidades</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="culpabilidade_packing" value="Inversão de tote"> 
+                                <span>Inversão de tote</span>
                             </label>
                             <label class="flex items-center gap-2 text-sm cursor-pointer">
                                 <input type="radio" name="culpabilidade_packing" value="Inconclusivo"> 
@@ -1528,6 +1536,7 @@
                 "Tote finalizada pela bancada com produto",
                 "Troca de etiqueta ou produto (inversão de pedido)",
                 "Packing não bipou todas as unidades",
+                "Inversão de tote",
                 "Inconclusivo"
             ];
 
@@ -1592,6 +1601,7 @@
                             <option value="Tote finalizada pela bancada com produto" ${valorSelect === 'Tote finalizada pela bancada com produto' ? 'selected' : ''}>Tote finalizada pela bancada com produto</option>
                             <option value="Troca de etiqueta ou produto (inversão de pedido)" ${valorSelect === 'Troca de etiqueta ou produto (inversão de pedido)' ? 'selected' : ''}>Troca de etiqueta ou produto (inversão de pedido)</option>
                             <option value="Packing não bipou todas as unidades" ${valorSelect === 'Packing não bipou todas as unidades' ? 'selected' : ''}>Packing não bipou todas as unidades</option>
+                            <option value="Inversão de tote" ${valorSelect === 'Inversão de tote' ? 'selected' : ''}>Inversão de tote</option>
                             <option value="Inconclusivo" ${valorSelect === 'Inconclusivo' ? 'selected' : ''}>Inconclusivo</option>
                             <option value="Outros" ${valorSelect === 'Outros' ? 'selected' : ''}>Outros:</option>
                         </select>
@@ -2344,7 +2354,8 @@
                     t.auditadoPackingPor || 
                     res === "Tote finalizada pela bancada com produto" || 
                     res === "Troca de etiqueta ou produto (inversão de pedido)" || 
-                    res === "Packing não bipou todas as unidades"
+                    res === "Packing não bipou todas as unidades" ||
+                    res === "Inversão de tote"
                 ) {
                     totalPacking++;
                 } 
