@@ -6,15 +6,27 @@
     <title>Portal LOST-FOUND</title>
     <!-- Favicon personalizado LF -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 93.3,25 93.3,75 50,95 6.7,75 6.7,25' fill='none' stroke='%23002147' stroke-width='8'/><text x='50' y='64' font-family='Arial, sans-serif' font-size='42' font-weight='bold' fill='%23002147' text-anchor='middle'>LF</text></svg>">
+    
+    <!-- Bibliotecas e Estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- FLATPICKR (Para o Filtro de Calendário de Período) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 
             darkBg: '#090F15', darkCard: '#444E54', darkText: '#B3B7BA', 
             lightBg: '#D3D1CE', lightCard: '#FFFFFF', primaryBtn: '#002147', borderGray: '#6C6D74' 
         }}}}
     </script>
+    <style>
+        /* Ajuste fino para limpar o fundo do input gerado pelo Flatpickr no Tailwind */
+        .flatpickr-custom-input { background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; padding: 0 !important; cursor: pointer; }
+    </style>
 </head>
 <body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
@@ -72,7 +84,6 @@
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                     <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
-                    <!-- Atualização: adicionado salvarSolicitacao() no onsubmit da form -->
                     <form id="form-solicitacao" class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
                         <input type="text" id="sol_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="text" id="sol_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -126,7 +137,6 @@
                             </button>
                         </div>
 
-                        <!-- Atualização: Mudança para type="submit" para forçar validação HTML5 -->
                         <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
                     </form>
                 </div>
@@ -243,13 +253,21 @@
                 </div>
 
                 <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 mb-4 flex flex-wrap gap-3 items-center">
-                    <span class="text-xs font-bold dark:text-darkText uppercase">Filtros:</span>
                     
-                    <div class="flex items-center gap-1.5">
-                        <input type="date" id="filtro-data-inicio" onchange="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Inicial">
-                        <span class="text-xs font-bold dark:text-darkText">até</span>
-                        <input type="date" id="filtro-data-fim" onchange="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray" title="Data Final">
+                    <!-- NOVO FILTRO DE DATA (FLATPICKR) -->
+                    <input type="hidden" id="filtro-data-inicio">
+                    <input type="hidden" id="filtro-data-fim">
+                    <div class="flex items-center gap-1 text-xs px-2">
+                        <span class="font-bold dark:text-darkText">Data:</span>
+                        <div class="relative flex items-center">
+                            <!-- O input será escondido/substituído pela UI visual do flatpickr, ajustamos as classes nele -->
+                            <input type="text" id="filtro-data-range" placeholder="Selecione..." class="flatpickr-custom-input text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium w-40 text-center" readonly>
+                            <div class="pointer-events-none flex items-center -ml-1">
+                                <i data-lucide="chevron-down" class="w-3 h-3 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
                     </div>
+                    <!-- FIM DO NOVO FILTRO -->
 
                     <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     
@@ -878,6 +896,7 @@
         let usuarioAtual = null;
         let SOU_ADMIN = false;
         let tipoPedidoAtual = 'Exclusão';
+        let pickerInstancia = null; // Para o calendário de filtro
 
         let pedidosAlteracaoCache = [];
 
@@ -1898,6 +1917,7 @@
             paginaAtualDashboard = 1;
             document.getElementById('filtro-data-inicio').value = '';
             document.getElementById('filtro-data-fim').value = '';
+            if (pickerInstancia) pickerInstancia.clear();
             document.getElementById('filtro-etd').value = '';
             const inputTag = document.getElementById('input-tag-busca');
             if (inputTag) inputTag.value = '';
@@ -2810,6 +2830,33 @@
             fecharModalCycleManual();
             mostrarToast("Cycle registrado com sucesso!");
         };
+
+        // INICIALIZAÇÃO DO FLATPICKR APÓS CARREGAMENTO DA PÁGINA
+        document.addEventListener("DOMContentLoaded", () => {
+            pickerInstancia = flatpickr("#filtro-data-range", {
+                mode: "range",
+                dateFormat: "Y-m-d", // Formato para o sistema oculto
+                altInput: true,
+                altFormat: "d/M/Y",  // Formato de exibição visual (ex: 25/Aug/2026)
+                locale: {
+                    ...flatpickr.l10ns.pt,
+                    rangeSeparator: " a "
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('filtro-data-inicio').value = instance.formatDate(selectedDates[0], "Y-m-d");
+                        document.getElementById('filtro-data-fim').value = instance.formatDate(selectedDates[1], "Y-m-d");
+                        paginaAtualDashboard = 1;
+                        renderizarDashboard();
+                    } else if (selectedDates.length === 0) {
+                        document.getElementById('filtro-data-inicio').value = '';
+                        document.getElementById('filtro-data-fim').value = '';
+                        paginaAtualDashboard = 1;
+                        renderizarDashboard();
+                    }
+                }
+            });
+        });
 
         // Inicia o sistema verificando se já existe um login ativo salvo
         window.verificarSessaoLogin();
