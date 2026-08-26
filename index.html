@@ -817,7 +817,7 @@
             if (usuarioAtual) {
                 localStorage.setItem("user_last_activity", Date.now());
                 timerInatividade = setTimeout(() => {
-                    mostrarToast("Sessão expirada por inatividade (2 horas). Faça login novamente.");
+                    mostrarToast("Sessão expirada por inatividade (2 hours). Faça login novamente.");
                     fazerLogout();
                 }, TEMPO_INATIVIDADE);
             }
@@ -1987,7 +1987,12 @@
                 }
 
                 const ehLostNaTabela = statusNormalizado.includes('lost');
-                const textoResultado = ehLostNaTabela ? '-' : (d.resultado_auditoria || '-');
+                let textoResultado = d.resultado_auditoria || '-';
+
+                // Se for um caso de Lost, puxa a "alternativa". Se não tiver, tenta o "resultado_auditoria"
+                if (ehLostNaTabela) {
+                    textoResultado = d.alternativa || d.resultado_auditoria || '-';
+                }
 
                 tr.innerHTML = `
                     <td class="p-2">${d.tote || '-'}</td>
