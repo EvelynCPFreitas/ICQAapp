@@ -2343,16 +2343,21 @@
                 const res = (t.resultado_auditoria || '').trim();
                 const resPicking = (t.resultado_picking || '').trim();
 
-                if (
+                // 1. Exceção: Inversão de tote é erro de Picking, mesmo sendo apontado na tela de Packing
+                if (res === "Inversão de tote") {
+                    totalPicking++;
+                }
+                // 2. Erros atribuídos ao PACKING
+                else if (
                     t.adicionadoPackingManual || 
                     t.auditadoPackingPor || 
                     res === "Tote finalizada pela bancada com produto" || 
                     res === "Troca de etiqueta ou produto (inversão de pedido)" || 
-                    res === "Packing não bipou todas as unidades" ||
-                    res === "Inversão de tote"
+                    res === "Packing não bipou todas as unidades"
                 ) {
                     totalPacking++;
                 } 
+                // 3. Erros atribuídos ao PICKING (que não foram Inversão de Tote)
                 else if (
                     t.auditadoPickingPor || 
                     t.status_fisico === 'Nao' || 
