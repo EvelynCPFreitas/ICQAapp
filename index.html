@@ -1342,7 +1342,6 @@
                 const dataPackingHTML = dataPackingFormatada && dataPackingFormatada !== '-' ? ` <span class="opacity-50 text-xs">(${dataPackingFormatada})</span>` : '';
                 htmlDetalhes += `<p><b>Resultado Auditoria Packing:</b> ${tarefa.resultado_auditoria || '-'}${dataPackingHTML}</p>`;
             } else {
-                // Exibe informações de Picking apenas se a task realmente tiver sido auditada no Picking
                 if (tarefa.auditadoPickingPor || (tarefa.status_fisico && tarefa.status_fisico !== 'Pendente')) {
                     const dataPickingFormatada = formatarDataHoraCriacao(tarefa.auditadoPickingEm || tarefa.auditadoEm);
                     const dataPickingHTML = (dataPickingFormatada && dataPickingFormatada !== '-') ? ` <span class="opacity-50 text-xs">(${dataPickingFormatada})</span>` : '';
@@ -1653,18 +1652,16 @@
                     observacao: document.getElementById('edit_observacao').value
                 };
 
-                // Regra de transição de status de Picking para Packing
+                // Regra de transição e sincronização do resultado de exibição geral
                 if (resPickingVal === 'Sem divergência') {
                     dadosAtualizados.status_fisico = 'Sim';
-                    
-                    // Se o Packing ainda não foi concluído (está Aguardando ou Sem divergência),
-                    // direciona a tarefa automaticamente para a fila do Packing
                     if (resPackingVal === 'Aguardando' || resPackingVal === 'Sem divergência') {
                         dadosAtualizados.status = 'Aguardando Auditoria Packing';
                     }
                 } else if (resPickingVal !== 'Aguardando') {
                     dadosAtualizados.status_fisico = 'Nao';
                     dadosAtualizados.culpabilidade = resPickingVal;
+                    dadosAtualizados.resultado_auditoria = resPickingVal;
                 }
 
                 await updateDoc(doc(db, "tarefas", id), dadosAtualizados);
@@ -2129,10 +2126,10 @@
                 await updateDoc(doc(db, "tarefas", currentModalId), {
                     status: 'Auditado', 
                     status_fisico: 'Nao', 
-                    culpabilidade, 
-                    colaborador, 
-                    tl, 
-                    observacao, 
+                    culpabilidade: culpabilidade, 
+                    colaborador: colaborador, 
+                    tl: tl, 
+                    observacao: observacao, 
                     resultado_auditoria: culpabilidade,
                     resultado_picking: culpabilidade,
                     auditadoPickingPor: usuarioAtual,
@@ -2296,7 +2293,6 @@
 
             dadosFiltradosGraficoCache = dados;
 
-            // IGNORA 'Cycle', 'Sem divergência' E 'Aguardando' NO GRÁFICO DE CULPABILIDADE
             const mapCulp = {};
             dados.forEach(t => {
                 const k = (t.resultado_auditoria || '').trim();
@@ -2340,7 +2336,6 @@
             const coresEtd = ['#002147', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#3B82F6', '#EC4899', '#14B8A6', '#6366F1', '#F43F5E'];
             destruirOuCriarGrafico('chartEtd', 'pie', labelsEtd, dataEtd, coresEtd);
 
-            // CÁLCULO REVISADO DO PICKING X PACKING (SEM DUPLICIDADE)
             let totalPicking = 0;
             let totalPacking = 0;
 
@@ -2348,7 +2343,6 @@
                 const res = (t.resultado_auditoria || '').trim();
                 const resPicking = (t.resultado_picking || '').trim();
 
-                // 1. Erros atribuídos ao PACKING
                 if (
                     t.adicionadoPackingManual || 
                     t.auditadoPackingPor || 
@@ -2359,7 +2353,6 @@
                 ) {
                     totalPacking++;
                 } 
-                // 2. Erros atribuídos ao PICKING (somente se não foi erro de Packing)
                 else if (
                     t.auditadoPickingPor || 
                     t.status_fisico === 'Nao' || 
