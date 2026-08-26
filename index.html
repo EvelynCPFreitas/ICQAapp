@@ -72,7 +72,8 @@
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                     <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
-                    <form id="form-solicitacao" class="space-y-4" onsubmit="event.preventDefault();">
+                    <!-- Atualização: adicionado salvarSolicitacao() no onsubmit da form -->
+                    <form id="form-solicitacao" class="space-y-4" onsubmit="event.preventDefault(); salvarSolicitacao();">
                         <input type="text" id="sol_mz" placeholder="MZ" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="text" id="sol_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                         <input type="number" id="sol_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -125,7 +126,8 @@
                             </button>
                         </div>
 
-                        <button type="button" onclick="salvarSolicitacao()" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
+                        <!-- Atualização: Mudança para type="submit" para forçar validação HTML5 -->
+                        <button type="submit" class="w-full bg-primaryBtn text-white py-3 rounded font-bold hover:opacity-90">Salvar e Enviar Solicitação</button>
                     </form>
                 </div>
             </section>
@@ -1167,6 +1169,12 @@
             const qtd = document.getElementById('sol_qtd').value.trim();
             const dataVal = document.getElementById('sol_data').value;
             const etd = document.getElementById('sol_etd').value;
+
+            // VALIDAÇÃO DE CAMPOS VAZIOS / APENAS ESPAÇOS
+            if (!mz || !meli || !qtd || !tote || !dataVal || !etd) {
+                mostrarToast("Por favor, preencha todos os campos obrigatórios.");
+                return;
+            }
 
             let sobrasArr = [];
             if (sobrouProduto === 'Sim') {
