@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal LOST-FOUND</title>
-    <!-- Favicon personalizado LF -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 93.3,25 93.3,75 50,95 6.7,75 6.7,25' fill='none' stroke='%23002147' stroke-width='8'/><text x='50' y='64' font-family='Arial, sans-serif' font-size='42' font-weight='bold' fill='%23002147' text-anchor='middle'>LF</text></svg>">
     
-    <!-- Bibliotecas e Estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- FLATPICKR (Para o Filtro de Calendário de Período) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
@@ -30,7 +27,6 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
-    <!-- TELA / MODAL DE LOGIN -->
     <div id="modal-login" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-8 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 text-center">
             <h2 class="text-2xl font-bold text-primaryBtn dark:text-white mb-2">Portal LOST-FOUND</h2>
@@ -65,7 +61,6 @@
                         <button data-tab="dashboard" class="nav-btn px-3 py-1.5 rounded-md text-xs font-bold text-black dark:text-darkText">Dashboard</button>
                     </div>
 
-                    <!-- USER INFO & TEMA -->
                     <div class="flex items-center gap-3">
                         <div class="text-right hidden sm:block">
                             <span id="user-display-name" class="block text-xs font-bold text-black dark:text-white"></span>
@@ -80,7 +75,6 @@
         </header>
 
         <main class="max-w-7xl mx-auto px-4 py-8">
-            <!-- ABA 1: SOLICITAÇÃO -->
             <section id="tab-solicitacao" class="page-section">
                 <div class="max-w-xl mx-auto bg-lightCard dark:bg-darkCard p-8 rounded-xl shadow-sm border border-borderGray/30">
                     <h2 class="text-2xl font-bold text-black dark:text-darkText mb-6">Nova Solicitação</h2>
@@ -105,7 +99,6 @@
                             </div>
                         </div>
 
-                        <!-- PERGUNTA DE SOBRA DE PRODUTO NA CAIXA -->
                         <div class="p-3 bg-gray-100 dark:bg-black/20 rounded border border-borderGray/30">
                             <label class="text-xs font-bold block mb-2 dark:text-darkText">Sobrou algum produto na caixa?</label>
                             <div class="flex gap-6">
@@ -118,11 +111,9 @@
                             </div>
                         </div>
 
-                        <!-- CAMPOS EXTRAS CASO SIM -->
                         <div id="container-sobra-produto" class="hidden space-y-3 p-3 bg-blue-50/50 dark:bg-black/40 rounded border border-blue-200 dark:border-borderGray">
                             <span class="text-xs font-bold text-primaryBtn dark:text-blue-400 block">Informações do Produto Sobrando:</span>
                             
-                            <!-- Contêiner dinâmico para múltiplos MELIs -->
                             <div id="container-melis" class="space-y-2">
                                 <div class="row-meli-item border p-2 rounded bg-white dark:bg-black/20 space-y-2">
                                     <input type="text" class="input-meli w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white" placeholder="MELI">
@@ -131,7 +122,6 @@
                                 </div>
                             </div>
 
-                            <!-- Botão Adicionar Meli -->
                             <button type="button" onclick="adicionarCampoMeli()" class="mt-2 px-3 py-1.5 text-xs font-bold border border-orange-500 text-orange-600 rounded-full hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors">
                                 + Adicionar Meli
                             </button>
@@ -142,7 +132,6 @@
                 </div>
             </section>
 
-            <!-- ABA 2: AUDITORIA PICKING -->
             <section id="tab-auditoria-picking" class="page-section hidden">
                 <div class="max-w-5xl mx-auto">
                     <h2 class="text-xl font-bold dark:text-darkText mb-4">Auditoria Picking</h2>
@@ -150,7 +139,6 @@
                 </div>
             </section>
 
-            <!-- ABA 3: AUDITORIA PACKING -->
             <section id="tab-auditoria-packing" class="page-section hidden">
                 <div class="max-w-5xl mx-auto">
                     <h2 class="text-xl font-bold dark:text-darkText mb-4">Auditoria Packing</h2>
@@ -158,7 +146,6 @@
                 </div>
             </section>
 
-            <!-- ABA 4: LOST SALVO -->
             <section id="tab-lost-salvo" class="page-section hidden">
                 <div class="max-w-5xl mx-auto flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold dark:text-darkText">Lost Salvo</h2>
@@ -166,7 +153,6 @@
                 <div id="lista-lost-salvo" class="grid gap-3"></div>
             </section>
 
-            <!-- ABA 5: LOST NÃO LOCALIZADO -->
             <section id="tab-lost-nao-localizado" class="page-section hidden">
                 <div class="max-w-5xl mx-auto flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold dark:text-darkText">Lost não localizado</h2>
@@ -174,9 +160,7 @@
                 <div id="lista-lost-nao-localizado" class="grid gap-3"></div>
             </section>
 
-            <!-- ABA 6: DASHBOARD -->
             <section id="tab-dashboard" class="page-section hidden">
-                <!-- CARDS DE ESTATÍSTICAS / VOLUMES -->
                 <div class="grid grid-cols-4 gap-4 mb-6">
                     <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl shadow-sm border border-borderGray/30 text-center">
                         <span class="text-xs font-bold text-gray-500 dark:text-darkText uppercase tracking-wider block mb-2">Volume Total</span>
@@ -200,7 +184,10 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4 gap-2">
+                    <button onclick="exportarCycleSimplificado()" class="px-4 py-2 bg-green-600 text-white rounded text-sm font-bold flex items-center shadow hover:bg-green-700">
+                        Baixar Cycle (CSV)
+                    </button>
                     <button onclick="toggleGraficosPainel()" class="px-4 py-2 bg-primaryBtn text-white rounded text-sm font-bold flex items-center gap-2 shadow">
                         <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Mostrar Gráficos
                     </button>
@@ -220,7 +207,6 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
-                        <!-- LINHA 1: 3 GRÁFICOS DE PIZZA -->
                         <div class="col-span-2 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
                             <span class="text-xs font-bold mb-2 dark:text-darkText">Culpabilidade</span>
                             <div class="w-full h-48 flex justify-center"><canvas id="chartCulpabilidade"></canvas></div>
@@ -234,7 +220,6 @@
                             <div class="w-full h-48 flex justify-center"><canvas id="chartLostNaoLocalizado"></canvas></div>
                         </div>
 
-                        <!-- LINHA 2: ETD DISTRIBUIÇÃO E PICKING X PACKING (LADO A LADO) -->
                         <div class="col-span-3 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center">
                             <span class="text-xs font-bold mb-2 dark:text-darkText">ETD Distribuição</span>
                             <div class="w-full h-48 flex justify-center"><canvas id="chartEtd"></canvas></div>
@@ -244,7 +229,6 @@
                             <div class="w-full h-48 flex justify-center"><canvas id="chartPickingPacking"></canvas></div>
                         </div>
 
-                        <!-- LINHA 3: TEAM LEADERS (SOZINHO EMBAIXO) -->
                         <div onclick="abrirModalGraficoTlExpandido()" class="col-span-6 bg-gray-50 dark:bg-black/20 p-4 rounded border dark:border-borderGray flex flex-col items-center cursor-pointer hover:border-primaryBtn transition-all group">
                             <span class="text-xs font-bold mb-2 dark:text-darkText group-hover:text-primaryBtn dark:group-hover:text-blue-400">Team Leaders (TLs) - <span class="text-[10px] text-blue-500 font-normal">Clique aqui para abrir os gráficos em tela cheia</span></span>
                             <div class="w-full h-48 flex justify-center"><canvas id="chartTls"></canvas></div>
@@ -254,24 +238,19 @@
 
                 <div class="bg-lightCard dark:bg-darkCard p-4 rounded-xl shadow border border-borderGray/30 mb-4 flex flex-wrap gap-3 items-center">
                     
-                    <!-- NOVO FILTRO DE DATA (FLATPICKR) -->
                     <input type="hidden" id="filtro-data-inicio">
                     <input type="hidden" id="filtro-data-fim">
                     <div class="flex items-center gap-1 text-xs px-2">
                         <span class="font-bold dark:text-darkText">Data:</span>
                         <div class="relative flex items-center">
-                            <!-- O input será escondido/substituído pela UI visual do flatpickr, ajustamos as classes nele -->
                             <input type="text" id="filtro-data-range" placeholder="Selecione..." class="flatpickr-custom-input text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium w-40 text-center" readonly>
                             <div class="pointer-events-none flex items-center -ml-1">
                                 <i data-lucide="chevron-down" class="w-3 h-3 text-blue-600 dark:text-blue-400"></i>
                             </div>
                         </div>
                     </div>
-                    <!-- FIM DO NOVO FILTRO -->
-
                     <input type="text" id="filtro-etd" placeholder="Filtrar por ETD..." oninput="paginaAtualDashboard=1; renderizarDashboard()" class="p-1.5 text-xs border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     
-                    <!-- MENU DROPDOWN DE SELEÇÃO DE STATUS -->
                     <div class="relative inline-block">
                         <select id="select-filtro-status" onchange="selecionarFiltroStatusDropdown(this.value)" class="p-1.5 text-xs border rounded font-bold dark:bg-black/20 dark:text-white dark:border-borderGray focus:border-primaryBtn outline-none cursor-pointer">
                             <option value="" selected>Todos os Status</option>
@@ -284,13 +263,11 @@
                         </select>
                     </div>
 
-                    <!-- CAMPO DE PESQUISA MULTI-TAGS -->
                     <div class="flex items-center flex-wrap gap-1.5 p-1 border rounded-lg dark:bg-black/20 dark:border-borderGray bg-white flex-1 min-w-[220px] min-h-[34px]">
                         <div id="container-tags-busca" class="flex items-center flex-wrap gap-1.5"></div>
                         <input type="text" id="input-tag-busca" onkeydown="tratarKeyDownInputTag(event)" placeholder="Digite MZ, MELI ou TOTE e aperte Enter..." class="bg-transparent border-none outline-none text-xs dark:text-white p-1 flex-1 min-w-[120px]">
                     </div>
 
-                    <!-- BOTÕES REORDENADOS COM O MESMO FORMATO (ROUNDED-LG) -->
                     <button onclick="executarBuscaTags()" class="px-4 py-1.5 text-xs rounded-lg border border-blue-600 bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-sm">
                         Buscar
                     </button>
@@ -318,7 +295,6 @@
                         <tbody id="tabela-body"></tbody>
                     </table>
 
-                    <!-- CONTROLES DE PAGINAÇÃO (20 REGISTROS POR PÁGINA) -->
                     <div class="flex justify-between items-center mt-4 pt-3 border-t border-borderGray/30 text-xs dark:text-white">
                         <span id="info-paginacao" class="text-gray-500 dark:text-darkText font-medium">Exibindo 0 de 0 registros</span>
                         <div class="flex items-center gap-3">
@@ -336,7 +312,6 @@
         </main>
     </div>
 
-    <!-- NOTIFICAÇÃO TOAST FLUTUANTE (PARTE INFERIOR - SEM INTERRUPÇÃO) -->
     <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform opacity-0 translate-y-4">
         <div class="bg-gray-900/90 text-white px-5 py-3 rounded-lg shadow-2xl border border-gray-700/50 flex items-center gap-3 text-xs font-semibold backdrop-blur-md max-w-md text-center">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-green-400 shrink-0"></i>
@@ -344,13 +319,11 @@
         </div>
     </div>
 
-    <!-- BOTÕES FLUTUANTES -->
     <button id="btn-floating-auditoria-picking" onclick="abrirModalCycleManual()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-auditoria-packing" onclick="abrirModalAuditoriaPackingManual()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-salvo" onclick="abrirModalLostSalvo()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
     <button id="btn-floating-lost-nao-localizado" onclick="abrirModalLostNaoLocalizado()" class="hidden fixed bottom-6 right-6 bg-primaryBtn text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold z-50 hover:scale-105 transition-transform">+</button>
 
-    <!-- MODAL DE AUDITORIA PACKING MANUAL -->
     <div id="modal-flutuante-auditoria-packing" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Auditoria Packing</h2>
@@ -425,13 +398,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE AUDITORIA EXISTENTE -->
     <div id="modal-auditoria" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl font-bold mb-3">Auditoria</h2>
             <div id="modal-content" class="mb-4 text-sm space-y-1"></div>
             
-            <!-- FLUXO PICKING -->
             <div id="container-picking-fluxo" class="space-y-4">
                 <div class="p-3 bg-gray-100 dark:bg-black/20 rounded border border-borderGray/30">
                     <label class="text-xs font-bold block mb-2">Físico está de acordo com o sistêmico?</label>
@@ -481,7 +452,6 @@
                 </div>
             </div>
 
-            <!-- FLUXO PACKING -->
             <div id="container-packing-fluxo" class="hidden space-y-4">
                 <div id="packing-campos-principais" class="space-y-4">
                     <div>
@@ -536,14 +506,12 @@
                         <textarea id="packing_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
                     </div>
 
-                    <!-- BOTÕES DE AÇÃO DO PACKING -->
                     <div class="flex gap-2 pt-2">
                         <button type="button" onclick="mostrarOpcoesLostSalvoPacking()" class="flex-1 border-2 border-black dark:border-white text-black dark:text-white font-bold py-2.5 rounded text-xs hover:bg-gray-100 dark:hover:bg-black/30 transition-colors shadow">Incluir em lost Salvo</button>
                         <button type="button" onclick="salvarAuditoriaModal()" class="flex-1 bg-primaryBtn text-white font-bold py-2.5 rounded text-xs shadow hover:opacity-90">Salvar Auditoria</button>
                     </div>
                 </div>
 
-                <!-- SUB-TELA PARA SELEÇÃO DE ALTERNATIVAS DO LOST SALVO NO PACKING -->
                 <div id="packing-opcoes-lost-salvo" class="hidden space-y-3 pt-2 border-t border-borderGray/30">
                     <label class="text-xs font-bold block dark:text-darkText">Alternativas de Lost Salvo:</label>
                     <div class="space-y-2">
@@ -578,7 +546,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMAÇÃO -->
     <div id="modal-confirmacao-sem-div" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
             <button onclick="fecharConfirmacaoSemDivergencia()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
@@ -590,7 +557,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES TL & COLABORADORES -->
     <div id="modal-detalhes-tl" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative">
             <button onclick="fecharModalDetalhesTl()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
@@ -602,7 +568,6 @@
         </div>
     </div>
 
-    <!-- MODAL CASOS DO COLABORADOR -->
     <div id="modal-casos-colaborador" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-2xl w-full dark:text-white shadow-2xl border border-borderGray/30 relative flex flex-col max-h-[85vh]">
             <button onclick="fecharModalCasosColaborador()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-xl">&times;</button>
@@ -622,7 +587,6 @@
         </div>
     </div>
 
-    <!-- MODAL DO GRÁFICO DE TL EXPANDIDO -->
     <div id="modal-grafico-tl-expandido" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-5xl w-full dark:text-white shadow-2xl border border-borderGray/30 relative flex flex-col items-center">
             <button onclick="fecharModalGraficoTlExpandido()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-xl">&times;</button>
@@ -639,7 +603,6 @@
         </div>
     </div>
 
-    <!-- MODAL LOST SALVO -->
     <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
@@ -673,7 +636,6 @@
         </div>
     </div>
 
-    <!-- MODAL LOST NÃO LOCALIZADO -->
     <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
@@ -724,12 +686,10 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALHES DA TAREFA (ÍCONE DE OLHO) -->
     <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
             <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
             
-            <!-- ÁREA DO BOTÃO SELETOR NO TOPO (INICIALMENTE OCULTA) -->
             <div id="container-selecao-pedido-topo" class="hidden mb-4 pb-3 border-b border-borderGray/30 flex justify-center gap-3">
                 <button id="btn-seletor-exclusao" onclick="selecionarTipoPedido('Exclusão')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-primaryBtn text-white shadow transition-all">Exclusão</button>
                 <button id="btn-seletor-edicao" onclick="selecionarTipoPedido('Edição')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-gray-200 dark:bg-black/30 text-gray-700 dark:text-gray-300 transition-all">Edição</button>
@@ -766,7 +726,6 @@
         </div>
     </div>
 
-    <!-- MODAL DUPLICIDADE DE SOLICITAÇÃO -->
     <div id="modal-duplicidade-solicitacao" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
             <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -781,7 +740,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CADASTRO MANUAL DE CYCLE (PICKING) -->
     <div id="modal-flutuante-cycle" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 relative">
             <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400">Adicionar Cycle (Picking)</h2>
@@ -799,13 +757,11 @@
         </div>
     </div>
 
-    <!-- ÍCONE FLUTUANTE DE NOTIFICAÇÕES PARA O ADMIN (CANTO ESQUERDO) -->
     <div id="btn-notificacao-admin" onclick="abrirModalNotificacoesAdmin()" class="hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer flex flex-col items-center gap-1 bg-white/80 dark:bg-darkCard/80 p-2 rounded-lg border border-borderGray/40 shadow-xl hover:scale-110 transition-transform">
         <i data-lucide="chevrons-right" class="w-6 h-6 text-primaryBtn dark:text-blue-400 animate-pulse"></i>
         <span id="badge-notificacoes-qtd" class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow">0</span>
     </div>
 
-    <!-- MODAL DE NOTIFICAÇÕES DO ADMIN (PEDIDOS DE EDIÇÃO E EXCLUSÃO) -->
     <div id="modal-notificacoes-admin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-lg w-full dark:text-white shadow-2xl border border-borderGray/30 relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharModalNotificacoesAdmin()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
@@ -819,7 +775,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE E LÓGICA GERAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -1615,7 +1570,6 @@
                         <input type="text" id="edit_registrado_por" value="${loginRegistrado}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
 
-                    <!-- RESULTADO AUDITORIA PICKING -->
                     <div>
                         <label class="font-bold block text-blue-600 dark:text-blue-400">Resultado Auditoria Picking:</label>
                         <select id="edit_res_picking" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -1623,7 +1577,6 @@
                         </select>
                     </div>
 
-                    <!-- RESULTADO AUDITORIA PACKING -->
                     <div>
                         <label class="font-bold block text-blue-600 dark:text-blue-400">Resultado Auditoria Packing:</label>
                         <select id="edit_res_packing" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
@@ -2829,6 +2782,54 @@
 
             fecharModalCycleManual();
             mostrarToast("Cycle registrado com sucesso!");
+        };
+
+        window.exportarCycleSimplificado = () => {
+            // Filtra apenas as tarefas de Cycle
+            const tarefasCycle = tarefasCache.filter(t => t.resultado_auditoria === 'Cycle' || t.status_fisico === 'Nao');
+
+            if (tarefasCycle.length === 0) {
+                mostrarToast("Não há dados de Cycle para exportar.");
+                return;
+            }
+            
+            // Define apenas os 3 cabeçalhos que seu chefe quer
+            const cabecalhos = ["MZ", "Data", "Horário"];
+            
+            // Mapeia os dados pegando apenas essas colunas
+            const linhas = tarefasCycle.map(t => {
+                const mz = t.mz || '-';
+                
+                // Formata a data de YYYY-MM-DD para DD/MM/YYYY
+                let dataStr = t.data || '-';
+                if (dataStr.includes('-')) {
+                    const partes = dataStr.split('-');
+                    dataStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+
+                // Pega a hora exata da criação
+                let horario = '-';
+                if (t.criadoEm) {
+                    const d = t.criadoEm.toDate ? t.criadoEm.toDate() : new Date(t.criadoEm);
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mm = String(d.getMinutes()).padStart(2, '0');
+                    horario = `${hh}:${mm}`;
+                }
+                
+                return [mz, dataStr, horario];
+            });
+
+            // Gera e faz o download do CSV
+            let conteudoCSV = "\uFEFF" + cabecalhos.join(';') + '\n';
+            linhas.forEach(linha => {
+                conteudoCSV += linha.join(';') + '\n';
+            });
+
+            const blob = new Blob([conteudoCSV], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "cycle_simplificado.csv";
+            link.click();
         };
 
         // INICIALIZAÇÃO DO FLATPICKR APÓS CARREGAMENTO DA PÁGINA
