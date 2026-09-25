@@ -2008,251 +2008,6 @@
             renderizarDashboard();
         };
 
-        window.abrirModalAuditoria = (id, tipo) => {
-            currentModalId = id;
-            currentModalTipo = tipo;
-            const tarefa = tarefasCache.find(t => t.id === id);
-            if(!tarefa) return;
-
-            document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
-            
-            let htmlDetalhes = `
-                <p><b>TOTE:</b> ${tarefa.tote}</p>
-                <p><b>MELI:</b> ${tarefa.meli}</p>
-                <p><b>MZ:</b> ${tarefa.mz}</p>
-                <p><b>Qtd:</b> ${tarefa.qtd}</p>
-            `;
-
-            if (tarefa.sobrou_produto === 'Sim') {
-                let textoSobras = '';
-                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
-                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: ${s.meli} | Qtd: ${s.qtd}`).join(' | ');
-                } else {
-                    textoSobras = `MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}`;
-                }
-                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> ${textoSobras}</p>`;
-            }
-
-            document.getElementById('modal-content').innerHTML = htmlDetalhes;
-
-            if(tipo === 'picking') {
-                document.getElementById('container-picking-fluxo').classList.remove('hidden');
-                document.getElementById('container-packing-fluxo').classList.add('hidden');
-                document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
-                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
-                
-                if(document.getElementById('picking_outro_texto')) document.getElementById('picking_outro_texto').value = '';
-                if(document.getElementById('picking_colaborador')) document.getElementById('picking_colaborador').value = '';
-                if(document.getElementById('picking_tl')) document.getElementById('picking_tl').value = '';
-                if(document.getElementById('picking_observacao')) document.getElementById('picking_observacao').value = '';
-
-                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
-                document.getElementById('div-campos-divergencia').classList.add('hidden');
-            } else {
-                document.getElementById('container-picking-fluxo').classList.add('hidden');
-                document.getElementById('container-packing-fluxo').classList.remove('hidden');
-                document.getElementById('packing-campos-principais').classList.remove('hidden');
-                document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
-                
-                const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
-                if(radioDefault) radioDefault.checked = true;
-                if(document.getElementById('packing_outro_texto')) document.getElementById('packing_outro_texto').value = '';
-                if(document.getElementById('packing_colaborador')) document.getElementById('packing_colaborador').value = '';
-                if(document.getElementById('packing_tl')) document.getElementById('packing_tl').value = '';
-                if(document.getElementById('packing_observacao')) document.getElementById('packing_observacao').value = '';
-
-                const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
-                if(altDefault) altDefault.checked = true;
-                if(document.getElementById('ls_packing_outro_texto')) document.getElementById('ls_packing_outro_texto').value = '';
-            }
-            document.getElementById('modal-auditoria').classList.remove('hidden');
-        };
-
-        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
-
-        window.tratarFisicoSistemico = (valor) => {
-            if(valor === 'Sim') {
-                document.getElementById('div-btn-sem-divergencia').classList.remove('hidden');
-                document.getElementById('div-campos-divergencia').classList.add('hidden');
-            } else {
-                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
-                document.getElementById('div-campos-divergencia').classList.remove('hidden');
-            }
-        };
-
-        window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
-        window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
-
-        window.confirmarSemDivergenciaEnvio = async () => {
-            fecharConfirmacaoSemDivergencia();
-            fecharModalAuditoria();
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Aguardando Auditoria Packing', 
-                    status_fisico: 'Sim', 
-                    resultado_auditoria: 'Sem divergência',
-                    resultado_picking: 'Sem divergência',
-                    auditadoPickingPor: usuarioAtual,
-                    auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-                mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
-            }
-        };
-
-        window.salvarAuditoriaPickingNao = async () => {
-            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
-            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('picking_outro_texto').value;
-            const colaborador = document.getElementById('picking_colaborador').value;
-            const tl = document.getElementById('picking_tl').value;
-            const observacao = document.getElementById('picking_observacao').value;
-
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Auditado', 
-                    status_fisico: 'Nao', 
-                    culpabilidade: culpabilidade, 
-                    colaborador: colaborador, 
-                    tl: tl, 
-                    observacao: observacao, 
-                    resultado_auditoria: culpabilidade,
-                    resultado_picking: culpabilidade,
-                    auditadoPickingPor: usuarioAtual,
-                    auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    comportamento: "Salvar Auditoria Picking Divergência",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
-                });
-
-                fecharModalAuditoria();
-                mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
-            }
-        };
-
-        window.salvarAuditoriaModal = async () => {
-            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-            
-            const colaborador = document.getElementById('packing_colaborador').value;
-            const tl = document.getElementById('packing_tl').value;
-            const observacao = document.getElementById('packing_observacao').value;
-
-            if(currentModalId) {
-                await updateDoc(doc(db, "tarefas", currentModalId), { 
-                    status: 'Auditado', 
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    comportamento: "Salvar Auditoria Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
-                });
-
-                fecharModalAuditoria();
-                mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
-            }
-        };
-
-        window.incluirEmLostSalvoModal = async () => {
-            if(currentModalId) {
-                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-                
-                const colaborador = document.getElementById('packing_colaborador').value;
-                const tl = document.getElementById('packing_tl').value;
-                const observacao = document.getElementById('packing_observacao').value;
-
-                await updateDoc(doc(db, "tarefas", currentModalId), { 
-                    status: 'Lost Salvo', 
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    acao: "Movido para Lost Salvo via Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId}`
-                });
-
-                fecharModalAuditoria();
-                
-                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
-                if (btnTabLostSalvo) btnTabLostSalvo.click();
-
-                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
-            }
-        };
-
-        window.mostrarOpcoesLostSalvoPacking = () => {
-            document.getElementById('packing-campos-principais').classList.add('hidden');
-            document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
-        };
-
-        window.voltarFormularioPacking = () => {
-            document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
-            document.getElementById('packing-campos-principais').classList.remove('hidden');
-        };
-
-        window.confirmarEIncluirLostSalvoPacking = async () => {
-            if (currentModalId) {
-                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
-                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
-                if (culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
-
-                const altEl = document.querySelector('input[name="ls_packing_alt"]:checked');
-                let alternativa = altEl ? altEl.value : '';
-                if (alternativa === 'Outro') alternativa = document.getElementById('ls_packing_outro_texto').value;
-
-                const colaborador = document.getElementById('packing_colaborador').value;
-                const tl = document.getElementById('packing_tl').value;
-                const observacao = document.getElementById('packing_observacao').value;
-
-                await updateDoc(doc(db, "tarefas", currentModalId), {
-                    status: 'Lost Salvo',
-                    alternativa: alternativa,
-                    resultado_auditoria: culpabilidade,
-                    colaborador: colaborador,
-                    tl: tl,
-                    observacao: observacao,
-                    auditadoPackingPor: usuarioAtual,
-                    auditadoPackingEm: new Date(),
-                    auditadoPor: usuarioAtual
-                });
-
-                window.registrarNaPlanilha({
-                    acao: "Movido para Lost Salvo via Packing",
-                    usuario: usuarioAtual || 'Anônimo',
-                    detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
-                });
-
-                fecharModalAuditoria();
-
-                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
-                if (btnTabLostSalvo) btnTabLostSalvo.click();
-
-                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
-            }
-        };
-
         window.toggleGraficosPainel = () => {
             const painel = document.getElementById('painel-graficos');
             painel.classList.toggle('hidden');
@@ -2279,17 +2034,79 @@
 
             dadosFiltradosGraficoCache = dados;
 
+            // ---------------------------------------------------------------------------------
+            // NOVA LÓGICA DE CULPABILIDADE (Ordenada, Filtradada e com "Outros")
+            // ---------------------------------------------------------------------------------
             const mapCulp = {};
+            const motivosPermitidos = [
+                "Inconclusivo",
+                "Picking Massivo",
+                "Deixado no endereço / Encontrado na bin",
+                "Meli divergente",
+                "Tote finalizada pela bancada com produto",
+                "Packing não bipou todas as unidades",
+                "Troca de etiqueta ou produto (inversão de pedido)",
+                "Backlog",
+                "Inversão de tote"
+            ];
+            const ignorarValores = ['aguardando', 'sem divergência', 'sem divergencia', 'cycle'];
+
             dados.forEach(t => {
-                const k = (t.resultado_auditoria || '').trim();
-                const kNorm = k.toLowerCase();
-                if (k && kNorm !== 'aguardando' && kNorm !== 'sem divergência' && kNorm !== 'sem divergencia' && kNorm !== 'cycle') {
-                    mapCulp[k] = (mapCulp[k] || 0) + 1;
+                const status = (t.status || '').toLowerCase();
+                
+                // Exclui Lost Salvo do cálculo deste gráfico de erros da operação
+                if (status === 'lost salvo') return; 
+
+                // Tenta encontrar a culpabilidade em um dos campos pertinentes
+                let culpabilidadeAtual = (t.culpabilidade || t.resultado_picking || t.resultado_auditoria || t.alternativa || '').trim();
+                
+                if (culpabilidadeAtual && !ignorarValores.includes(culpabilidadeAtual.toLowerCase())) {
+                    let categoriaFinal = "Outros";
+                    
+                    // Compara com a lista oficial de motivos
+                    for (let motivo of motivosPermitidos) {
+                        if (culpabilidadeAtual.toLowerCase() === motivo.toLowerCase() || 
+                           (motivo === "Backlog" && culpabilidadeAtual.toLowerCase().includes("backlog"))) {
+                            categoriaFinal = motivo;
+                            break;
+                        }
+                    }
+
+                    mapCulp[categoriaFinal] = (mapCulp[categoriaFinal] || 0) + 1;
                 }
             });
-            const labelsCulp = Object.keys(mapCulp);
-            const dataCulp = Object.values(mapCulp);
-            destruirOuCriarGrafico('chartCulpabilidade', 'pie', labelsCulp.length ? labelsCulp : ['Nenhum'], dataCulp.length ? dataCulp : [1], labelsCulp.length ? ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#002147', '#3B82F6', '#EC4899'] : ['#E5E7EB']);
+
+            // Transforma o dicionário num array para poder ordenar do maior para o menor
+            const arrayCulp = Object.keys(mapCulp).map(key => ({ nome: key, count: mapCulp[key] }));
+            arrayCulp.sort((a, b) => b.count - a.count);
+
+            const labelsCulp = [];
+            const dataCulp = [];
+            const colorsCulp = [];
+            
+            // Paleta de cores para os motivos conhecidos
+            const paletaCores = ['#00a650', '#ff7733', '#f23d4f', '#7b3cb3', '#3483fa', '#002147', '#10B981', '#F59E0B', '#EC4899'];
+            let colorIndex = 0;
+
+            arrayCulp.forEach(item => {
+                let color = '#8c8c8c'; // Cor padrão para "Outros"
+                if (item.nome !== "Outros") {
+                    color = paletaCores[colorIndex % paletaCores.length];
+                    colorIndex++;
+                }
+                labelsCulp.push(item.nome);
+                dataCulp.push(item.count);
+                colorsCulp.push(color);
+            });
+
+            // Constrói o gráfico de Culpabilidade com os dados ordenados e coloridos corretamente
+            destruirOuCriarGrafico('chartCulpabilidade', 'pie', 
+                labelsCulp.length ? labelsCulp : ['Nenhum'], 
+                dataCulp.length ? dataCulp : [1], 
+                labelsCulp.length ? colorsCulp : ['#E5E7EB']
+            );
+            // ---------------------------------------------------------------------------------
+
 
             const mapSalvos = {};
             dados.filter(t => t.status === 'Lost Salvo').forEach(t => {
@@ -2329,11 +2146,9 @@
                 const res = (t.resultado_auditoria || '').trim();
                 const resPicking = (t.resultado_picking || '').trim();
 
-                // 1. Exceção: Inversão de tote é erro de Picking, mesmo sendo apontado na tela de Packing
                 if (res === "Inversão de tote") {
                     totalPicking++;
                 }
-                // 2. Erros atribuídos ao PACKING
                 else if (
                     t.adicionadoPackingManual || 
                     t.auditadoPackingPor || 
@@ -2343,7 +2158,6 @@
                 ) {
                     totalPacking++;
                 } 
-                // 3. Erros atribuídos ao PICKING (que não foram Inversão de Tote)
                 else if (
                     t.auditadoPickingPor || 
                     t.status_fisico === 'Nao' || 
