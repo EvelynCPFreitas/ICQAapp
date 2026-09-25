@@ -603,185 +603,12 @@
         </div>
     </div>
 
-    <div id="modal-flutuante-lost-salvo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4">Lost Salvo</h2>
-            <form class="space-y-3" onsubmit="event.preventDefault();">
-                <input type="text" id="ls_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="number" id="ls_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="ls_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="ls_id_pedido" placeholder="ID PEDIDO" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <div>
-                    <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
-                    <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
-                        <input type="time" id="ls_etd" required class="w-full bg-transparent dark:text-white focus:outline-none text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold block mb-1">Data do ETD:</label>
-                    <input type="date" id="ls_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                </div>
-                <div class="space-y-2 pt-2 border-t dark:border-borderGray">
-                    <label class="text-xs font-bold block">Alternativas:</label>
-                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Encontrado no Packing/Inventário" checked> <span class="text-sm">Encontrado no Packing/Inventário</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Encontrado no Shipping"> <span class="text-sm">Encontrado no Shipping</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Caído na Mecanização"> <span class="text-sm">Caído na Mecanização</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="ls_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="ls_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1"></div>
-                </div>
-                <div class="flex gap-2 pt-3">
-                    <button type="button" onclick="salvarLostSalvoManual()" class="flex-1 bg-primaryBtn text-white py-2 rounded font-bold">Salvar</button>
-                    <button type="button" onclick="fecharModalLostSalvo()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-flutuante-lost-nao-localizado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4">Lost não localizado</h2>
-            <form class="space-y-3" onsubmit="event.preventDefault();">
-                <input type="text" id="lnl_meli" placeholder="MELI" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="number" id="lnl_qtd" placeholder="QUANTIDADE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="lnl_tote" placeholder="TOTE" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                <input type="text" id="lnl_id_pedido" placeholder="ID PEDIDO" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                
-                <div>
-                    <label class="text-xs font-bold dark:text-darkText block mb-1">ETD</label>
-                    <div class="flex items-center border rounded p-2 dark:bg-black/20 dark:border-borderGray">
-                        <input type="time" id="lnl_etd" required class="w-full bg-transparent dark:text-white focus:outline-none text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold block mb-1">Data do ETD:</label>
-                    <input type="date" id="lnl_data_etd" required class="w-full p-2 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
-                </div>
-                <div class="space-y-2 pt-2 border-t dark:border-borderGray">
-                    <label class="text-xs font-bold block">Alternativas:</label>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote perdido em MZ" checked> <span class="text-sm">Tote perdido em MZ</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Tote vazio na esteira"> <span class="text-sm">Tote vazio na esteira</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Missed Backlog (5 dias)"> <span class="text-sm">Missed Backlog (5 dias)</span></div>
-                    <div class="flex items-center gap-2"><input type="radio" name="lnl_alt" value="Outro"> <span class="text-sm">Outro:</span> <input type="text" id="lnl_outro_texto" placeholder="Especifique..." class="p-1 text-xs border rounded dark:bg-black/20 dark:text-white flex-1 border-borderGray"></div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
-                    <input type="text" id="lnl_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
-                    <input type="text" id="lnl_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
-                    <textarea id="lnl_observacao" placeholder="Escreva a observação..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray h-16"></textarea>
-                </div>
-
-                <div class="flex gap-2 pt-3">
-                    <button type="button" onclick="salvarLostNaoLocalizadoManual()" class="flex-1 bg-primaryBtn text-white py-2.5 rounded font-bold text-sm shadow">Salvar Auditoria</button>
-                    <button type="button" onclick="fecharModalLostNaoLocalizado()" class="bg-gray-400 text-white px-4 py-2 rounded text-sm">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-detalhes-tarefa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-xl border border-borderGray/30 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="fecharModalDetalhesTarefa()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
-            
-            <div id="container-selecao-pedido-topo" class="hidden mb-4 pb-3 border-b border-borderGray/30 flex justify-center gap-3">
-                <button id="btn-seletor-exclusao" onclick="selecionarTipoPedido('Exclusão')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-primaryBtn text-white shadow transition-all">Exclusão</button>
-                <button id="btn-seletor-edicao" onclick="selecionarTipoPedido('Edição')" class="px-8 py-2.5 rounded-xl font-bold text-sm bg-gray-200 dark:bg-black/30 text-gray-700 dark:text-gray-300 transition-all">Edição</button>
-            </div>
-
-            <h2 id="titulo-modal-detalhes" class="text-xl font-bold mb-3 text-primaryBtn dark:text-blue-400">Detalhes Task</h2>
-            <div id="conteudo-detalhes-tarefa" class="space-y-2 text-sm mb-4"></div>
-            
-            <div class="flex justify-between items-center pt-3 border-t border-borderGray/30">
-                <div id="container-btn-pedido-abrir">
-                    <button onclick="abrirSubtelaPedidoEdicaoExclusao()" class="bg-primaryBtn text-white px-3 py-2 rounded-xl text-[11px] font-bold shadow hover:opacity-90 leading-tight text-center">
-                        Pedido de exclusão<br>edição
-                    </button>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <button id="btn-detalhes-editar" title="Editar" class="hidden p-2 text-blue-500 hover:bg-black/10 rounded">
-                        <i data-lucide="pencil" class="w-4 h-4"></i>
-                    </button>
-                    <button id="btn-detalhes-excluir" title="Excluir" class="hidden p-2 text-red-500 hover:bg-black/10 rounded">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                    <button id="btn-detalhes-salvar" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-xs font-bold transition-all shadow">
-                        OK
-                    </button>
-                    <button id="btn-enviar-pedido" onclick="enviarPedidoEdicaoExclusao()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow transition-all">
-                        Enviar
-                    </button>
-                    <button onclick="fecharModalDetalhesTarefa()" class="bg-primaryBtn text-white px-4 py-1.5 rounded text-xs font-bold">
-                        Fechar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-duplicidade-solicitacao" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-md w-full dark:text-white shadow-2xl border border-borderGray/30 relative text-center">
-            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold mb-2">Registro Duplicado Detectado</h3>
-            <p class="text-xs text-gray-600 dark:text-darkText mb-6">Já existe um registro salvo igual a esse no dia de hoje. Deseja salvar e enviar a solicitação mesmo assim?</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="confirmarEnvioDuplicado()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-bold text-xs shadow">Sim, salvar mesmo assim</button>
-                <button onclick="recusarEnvioDuplicado()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 rounded font-bold text-xs shadow">Não, cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-flutuante-cycle" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 relative">
-            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400">Adicionar Cycle (Picking)</h2>
-            <form class="space-y-4" onsubmit="event.preventDefault();">
-                <div>
-                    <label class="text-xs font-bold block mb-1 dark:text-darkText">MZ:</label>
-                    <input type="text" id="cycle_mz" placeholder="Digite o MZ..." required class="w-full p-2.5 text-sm border rounded dark:bg-black/20 dark:text-white dark:border-borderGray outline-none focus:border-primaryBtn">
-                </div>
-
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="salvarCycleManual()" class="flex-1 bg-primaryBtn text-white py-2.5 rounded font-bold text-xs shadow hover:opacity-90">Salvar Cycle</button>
-                    <button type="button" onclick="fecharModalCycleManual()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded text-xs font-bold">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="btn-notificacao-admin" onclick="abrirModalNotificacoesAdmin()" class="hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer flex flex-col items-center gap-1 bg-white/80 dark:bg-darkCard/80 p-2 rounded-lg border border-borderGray/40 shadow-xl hover:scale-110 transition-transform">
-        <i data-lucide="chevrons-right" class="w-6 h-6 text-primaryBtn dark:text-blue-400 animate-pulse"></i>
-        <span id="badge-notificacoes-qtd" class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow">0</span>
-    </div>
-
-    <div id="modal-notificacoes-admin" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-lightCard dark:bg-darkCard p-6 rounded-xl max-w-lg w-full dark:text-white shadow-2xl border border-borderGray/30 relative max-h-[85vh] overflow-y-auto">
-            <button onclick="fecharModalNotificacoesAdmin()" class="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-lg">&times;</button>
-            <h2 class="text-xl font-bold mb-4 text-primaryBtn dark:text-blue-400 flex items-center gap-2">
-                <i data-lucide="bell" class="w-5 h-5"></i> Solicitantes Pendentes (Edição/Exclusão)
-            </h2>
-            <div id="lista-pedidos-admin" class="space-y-3"></div>
-            <div class="flex justify-end pt-4 border-t border-borderGray/30 mt-4">
-                <button onclick="fecharModalNotificacoesAdmin()" class="bg-primaryBtn text-white px-5 py-2 rounded-xl text-xs font-bold">Fechar</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
-        // GERENCIAMENTO DE TIMEOUT DE 2 HORAS (7.200.000 MILISSEGUNDOS) POR INATIVIDADE
         const TEMPO_INATIVIDADE = 2 * 60 * 60 * 1000;
         let timerInatividade = null;
 
@@ -802,14 +629,12 @@
             }, { passive: true });
         });
 
-        // PROTEÇÃO GLOBAL CONTRA SUBMIT AUTOMÁTICO VIA TECLA ENTER (BIPADOR)
         document.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "submit" && e.target.type !== "button") {
                 e.preventDefault();
             }
         });
 
-        // SISTEMA DE NOTIFICAÇÃO TOAST FLUTUANTE
         let toastTimeout = null;
         window.mostrarToast = function(mensagem) {
             const container = document.getElementById('toast-container');
@@ -851,7 +676,7 @@
         let usuarioAtual = null;
         let SOU_ADMIN = false;
         let tipoPedidoAtual = 'Exclusão';
-        let pickerInstancia = null; // Para o calendário de filtro
+        let pickerInstancia = null; 
 
         let pedidosAlteracaoCache = [];
 
@@ -1144,7 +969,6 @@
             const dataVal = document.getElementById('sol_data').value;
             const etd = document.getElementById('sol_etd').value;
 
-            // VALIDAÇÃO DE CAMPOS VAZIOS / APENAS ESPAÇOS
             if (!mz || !meli || !qtd || !tote || !dataVal || !etd) {
                 mostrarToast("Por favor, preencha todos os campos obrigatórios.");
                 return;
@@ -1586,7 +1410,7 @@
 
                     <div>
                         <label class="font-bold block dark:text-darkText">Colaborador:</label>
-                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white border-borderGray">
                     </div>
                     <div>
                         <label class="font-bold block dark:text-darkText">Team Leader:</label>
@@ -1632,7 +1456,6 @@
                     observacao: document.getElementById('edit_observacao').value
                 };
 
-                // Regra de transição e sincronização do resultado de exibição geral
                 if (resPickingVal === 'Sem divergência') {
                     dadosAtualizados.status_fisico = 'Sim';
                     if (resPackingVal === 'Aguardando' || resPackingVal === 'Sem divergência') {
@@ -1962,7 +1785,6 @@
                 const ehLostNaTabela = statusNormalizado.includes('lost');
                 let textoResultado = d.resultado_auditoria || '-';
 
-                // Se for um caso de Lost, puxa a "alternativa". Se não tiver, tenta o "resultado_auditoria"
                 if (ehLostNaTabela) {
                     textoResultado = d.alternativa || d.resultado_auditoria || '-';
                 }
@@ -2008,6 +1830,253 @@
             renderizarDashboard();
         };
 
+        // --- BLOCO RESTAURADO: FUNÇÕES DE ABRIR E SALVAR AUDITORIAS ---
+        window.abrirModalAuditoria = (id, tipo) => {
+            currentModalId = id;
+            currentModalTipo = tipo;
+            const tarefa = tarefasCache.find(t => t.id === id);
+            if(!tarefa) return;
+
+            document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
+            
+            let htmlDetalhes = `
+                <p><b>TOTE:</b> ${tarefa.tote}</p>
+                <p><b>MELI:</b> ${tarefa.meli}</p>
+                <p><b>MZ:</b> ${tarefa.mz}</p>
+                <p><b>Qtd:</b> ${tarefa.qtd}</p>
+            `;
+
+            if (tarefa.sobrou_produto === 'Sim') {
+                let textoSobras = '';
+                if (tarefa.sobras_detalhes && tarefa.sobras_detalhes.length > 0) {
+                    textoSobras = tarefa.sobras_detalhes.map(s => `MELI: ${s.meli} | Qtd: ${s.qtd}`).join(' | ');
+                } else {
+                    textoSobras = `MELI: ${tarefa.sobra_meli || '-'} | Qtd: ${tarefa.sobra_qtd || '-'}`;
+                }
+                htmlDetalhes += `<p class="text-blue-600 dark:text-blue-400 mt-1"><b>Produto Sobrando:</b> ${textoSobras}</p>`;
+            }
+
+            document.getElementById('modal-content').innerHTML = htmlDetalhes;
+
+            if(tipo === 'picking') {
+                document.getElementById('container-picking-fluxo').classList.remove('hidden');
+                document.getElementById('container-packing-fluxo').classList.add('hidden');
+                document.querySelectorAll('input[name="fisico_sistemico"]').forEach(el => el.checked = false);
+                document.querySelectorAll('input[name="culpabilidade_picking"]').forEach(el => el.checked = false);
+                
+                if(document.getElementById('picking_outro_texto')) document.getElementById('picking_outro_texto').value = '';
+                if(document.getElementById('picking_colaborador')) document.getElementById('picking_colaborador').value = '';
+                if(document.getElementById('picking_tl')) document.getElementById('picking_tl').value = '';
+                if(document.getElementById('picking_observacao')) document.getElementById('picking_observacao').value = '';
+
+                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
+                document.getElementById('div-campos-divergencia').classList.add('hidden');
+            } else {
+                document.getElementById('container-picking-fluxo').classList.add('hidden');
+                document.getElementById('container-packing-fluxo').classList.remove('hidden');
+                document.getElementById('packing-campos-principais').classList.remove('hidden');
+                document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
+                
+                const radioDefault = document.querySelector('input[name="culpabilidade_packing"][value="Tote finalizada pela bancada com produto"]');
+                if(radioDefault) radioDefault.checked = true;
+                if(document.getElementById('packing_outro_texto')) document.getElementById('packing_outro_texto').value = '';
+                if(document.getElementById('packing_colaborador')) document.getElementById('packing_colaborador').value = '';
+                if(document.getElementById('packing_tl')) document.getElementById('packing_tl').value = '';
+                if(document.getElementById('packing_observacao')) document.getElementById('packing_observacao').value = '';
+
+                const altDefault = document.querySelector('input[name="ls_packing_alt"][value="Encontrado no Packing/Inventário"]');
+                if(altDefault) altDefault.checked = true;
+                if(document.getElementById('ls_packing_outro_texto')) document.getElementById('ls_packing_outro_texto').value = '';
+            }
+            document.getElementById('modal-auditoria').classList.remove('hidden');
+        };
+
+        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
+
+        window.tratarFisicoSistemico = (valor) => {
+            if(valor === 'Sim') {
+                document.getElementById('div-btn-sem-divergencia').classList.remove('hidden');
+                document.getElementById('div-campos-divergencia').classList.add('hidden');
+            } else {
+                document.getElementById('div-btn-sem-divergencia').classList.add('hidden');
+                document.getElementById('div-campos-divergencia').classList.remove('hidden');
+            }
+        };
+
+        window.abrirConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.remove('hidden');
+        window.fecharConfirmacaoSemDivergencia = () => document.getElementById('modal-confirmacao-sem-div').classList.add('hidden');
+
+        window.confirmarSemDivergenciaEnvio = async () => {
+            fecharConfirmacaoSemDivergencia();
+            fecharModalAuditoria();
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Aguardando Auditoria Packing', 
+                    status_fisico: 'Sim', 
+                    resultado_auditoria: 'Sem divergência',
+                    resultado_picking: 'Sem divergência',
+                    auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+                mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
+            }
+        };
+
+        window.salvarAuditoriaPickingNao = async () => {
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('picking_outro_texto').value;
+            const colaborador = document.getElementById('picking_colaborador').value;
+            const tl = document.getElementById('picking_tl').value;
+            const observacao = document.getElementById('picking_observacao').value;
+
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Auditado', 
+                    status_fisico: 'Nao', 
+                    culpabilidade: culpabilidade, 
+                    colaborador: colaborador, 
+                    tl: tl, 
+                    observacao: observacao, 
+                    resultado_auditoria: culpabilidade,
+                    resultado_picking: culpabilidade,
+                    auditadoPickingPor: usuarioAtual,
+                    auditadoPickingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Picking Divergência",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
+                fecharModalAuditoria();
+                mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        window.salvarAuditoriaModal = async () => {
+            const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+            let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+            if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+            
+            const colaborador = document.getElementById('packing_colaborador').value;
+            const tl = document.getElementById('packing_tl').value;
+            const observacao = document.getElementById('packing_observacao').value;
+
+            if(currentModalId) {
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Auditado', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    comportamento: "Salvar Auditoria Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
+                });
+
+                fecharModalAuditoria();
+                mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
+            }
+        };
+
+        window.incluirEmLostSalvoModal = async () => {
+            if(currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if(culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+                
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), { 
+                    status: 'Lost Salvo', 
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId}`
+                });
+
+                fecharModalAuditoria();
+                
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
+            }
+        };
+
+        window.mostrarOpcoesLostSalvoPacking = () => {
+            document.getElementById('packing-campos-principais').classList.add('hidden');
+            document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
+        };
+
+        window.voltarFormularioPacking = () => {
+            document.getElementById('packing-opcoes-lost-salvo').classList.add('hidden');
+            document.getElementById('packing-campos-principais').classList.remove('hidden');
+        };
+
+        window.confirmarEIncluirLostSalvoPacking = async () => {
+            if (currentModalId) {
+                const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
+                let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
+                if (culpabilidade === 'Outros') culpabilidade = document.getElementById('packing_outro_texto').value;
+
+                const altEl = document.querySelector('input[name="ls_packing_alt"]:checked');
+                let alternativa = altEl ? altEl.value : '';
+                if (alternativa === 'Outro') alternativa = document.getElementById('ls_packing_outro_texto').value;
+
+                const colaborador = document.getElementById('packing_colaborador').value;
+                const tl = document.getElementById('packing_tl').value;
+                const observacao = document.getElementById('packing_observacao').value;
+
+                await updateDoc(doc(db, "tarefas", currentModalId), {
+                    status: 'Lost Salvo',
+                    alternativa: alternativa,
+                    resultado_auditoria: culpabilidade,
+                    colaborador: colaborador,
+                    tl: tl,
+                    observacao: observacao,
+                    auditadoPackingPor: usuarioAtual,
+                    auditadoPackingEm: new Date(),
+                    auditadoPor: usuarioAtual
+                });
+
+                window.registrarNaPlanilha({
+                    acao: "Movido para Lost Salvo via Packing",
+                    usuario: usuarioAtual || 'Anônimo',
+                    detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
+                });
+
+                fecharModalAuditoria();
+
+                const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
+                if (btnTabLostSalvo) btnTabLostSalvo.click();
+
+                mostrarToast("Solicitação movida para Lost Salvo com sucesso!");
+            }
+        };
+        // --- FIM DO BLOCO RESTAURADO ---
+
         window.toggleGraficosPainel = () => {
             const painel = document.getElementById('painel-graficos');
             painel.classList.toggle('hidden');
@@ -2034,9 +2103,6 @@
 
             dadosFiltradosGraficoCache = dados;
 
-            // ---------------------------------------------------------------------------------
-            // NOVA LÓGICA DE CULPABILIDADE (Ordenada, Filtradada e com "Outros")
-            // ---------------------------------------------------------------------------------
             const mapCulp = {};
             const motivosPermitidos = [
                 "Inconclusivo",
@@ -2054,16 +2120,13 @@
             dados.forEach(t => {
                 const status = (t.status || '').toLowerCase();
                 
-                // Exclui Lost Salvo do cálculo deste gráfico de erros da operação
                 if (status === 'lost salvo') return; 
 
-                // Tenta encontrar a culpabilidade em um dos campos pertinentes
                 let culpabilidadeAtual = (t.culpabilidade || t.resultado_picking || t.resultado_auditoria || t.alternativa || '').trim();
                 
                 if (culpabilidadeAtual && !ignorarValores.includes(culpabilidadeAtual.toLowerCase())) {
                     let categoriaFinal = "Outros";
                     
-                    // Compara com a lista oficial de motivos
                     for (let motivo of motivosPermitidos) {
                         if (culpabilidadeAtual.toLowerCase() === motivo.toLowerCase() || 
                            (motivo === "Backlog" && culpabilidadeAtual.toLowerCase().includes("backlog"))) {
@@ -2076,7 +2139,6 @@
                 }
             });
 
-            // Transforma o dicionário num array para poder ordenar do maior para o menor
             const arrayCulp = Object.keys(mapCulp).map(key => ({ nome: key, count: mapCulp[key] }));
             arrayCulp.sort((a, b) => b.count - a.count);
 
@@ -2084,12 +2146,11 @@
             const dataCulp = [];
             const colorsCulp = [];
             
-            // Paleta de cores para os motivos conhecidos
             const paletaCores = ['#00a650', '#ff7733', '#f23d4f', '#7b3cb3', '#3483fa', '#002147', '#10B981', '#F59E0B', '#EC4899'];
             let colorIndex = 0;
 
             arrayCulp.forEach(item => {
-                let color = '#8c8c8c'; // Cor padrão para "Outros"
+                let color = '#8c8c8c'; 
                 if (item.nome !== "Outros") {
                     color = paletaCores[colorIndex % paletaCores.length];
                     colorIndex++;
@@ -2099,13 +2160,11 @@
                 colorsCulp.push(color);
             });
 
-            // Constrói o gráfico de Culpabilidade com os dados ordenados e coloridos corretamente
             destruirOuCriarGrafico('chartCulpabilidade', 'pie', 
                 labelsCulp.length ? labelsCulp : ['Nenhum'], 
                 dataCulp.length ? dataCulp : [1], 
                 labelsCulp.length ? colorsCulp : ['#E5E7EB']
             );
-            // ---------------------------------------------------------------------------------
 
 
             const mapSalvos = {};
@@ -2599,7 +2658,6 @@
         };
 
         window.exportarCycleSimplificado = () => {
-            // Filtra apenas as tarefas de Cycle
             const tarefasCycle = tarefasCache.filter(t => t.resultado_auditoria === 'Cycle' || t.status_fisico === 'Nao');
 
             if (tarefasCycle.length === 0) {
@@ -2607,21 +2665,17 @@
                 return;
             }
             
-            // Define apenas os 3 cabeçalhos que seu chefe quer
             const cabecalhos = ["MZ", "Data", "Horário"];
             
-            // Mapeia os dados pegando apenas essas colunas
             const linhas = tarefasCycle.map(t => {
                 const mz = t.mz || '-';
                 
-                // Formata a data de YYYY-MM-DD para DD/MM/YYYY
                 let dataStr = t.data || '-';
                 if (dataStr.includes('-')) {
                     const partes = dataStr.split('-');
                     dataStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 }
 
-                // Pega a hora exata da criação
                 let horario = '-';
                 if (t.criadoEm) {
                     const d = t.criadoEm.toDate ? t.criadoEm.toDate() : new Date(t.criadoEm);
@@ -2633,7 +2687,6 @@
                 return [mz, dataStr, horario];
             });
 
-            // Gera e faz o download do CSV
             let conteudoCSV = "\uFEFF" + cabecalhos.join(';') + '\n';
             linhas.forEach(linha => {
                 conteudoCSV += linha.join(';') + '\n';
@@ -2646,13 +2699,12 @@
             link.click();
         };
 
-        // INICIALIZAÇÃO DO FLATPICKR APÓS CARREGAMENTO DA PÁGINA
         document.addEventListener("DOMContentLoaded", () => {
             pickerInstancia = flatpickr("#filtro-data-range", {
                 mode: "range",
-                dateFormat: "Y-m-d", // Formato para o sistema oculto
+                dateFormat: "Y-m-d", 
                 altInput: true,
-                altFormat: "d/M/Y",  // Formato de exibição visual (ex: 25/Aug/2026)
+                altFormat: "d/M/Y",  
                 locale: {
                     ...flatpickr.l10ns.pt,
                     rangeSeparator: " a "
@@ -2673,7 +2725,6 @@
             });
         });
 
-        // Inicia o sistema verificando se já existe um login ativo salvo
         window.verificarSessaoLogin();
 
     </script>
