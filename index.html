@@ -2281,6 +2281,11 @@
 
             const mapCulp = {};
             dados.forEach(t => {
+                // Nova regra: Ignora a tarefa se o status for Lost Salvo ou Lost não localizado
+                if (t.status === 'Lost Salvo' || t.status === 'Lost não localizado') {
+                    return; 
+                }
+
                 const k = (t.resultado_auditoria || '').trim();
                 const kNorm = k.toLowerCase();
                 if (k && kNorm !== 'aguardando' && kNorm !== 'sem divergência' && kNorm !== 'sem divergencia' && kNorm !== 'cycle') {
