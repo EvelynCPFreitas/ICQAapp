@@ -27,6 +27,15 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg transition-colors duration-300 min-h-screen flex flex-col justify-between">
 
+    <!-- Listas globais para autocomplete (carregadas da planilha LDAP) -->
+    <datalist id="lista-colaboradores"></datalist>
+    <datalist id="lista-team-leaders">
+        <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
+        <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
+        <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
+        <option value="BRAYCKSON DOS SANTOS LEAL"></option>
+    </datalist>
+
     <div id="modal-login" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex items-center justify-center p-4">
         <div class="bg-lightCard dark:bg-darkCard p-8 rounded-xl max-w-sm w-full dark:text-white shadow-xl border border-borderGray/30 text-center">
             <h2 class="text-2xl font-bold text-primaryBtn dark:text-white mb-2">Portal LOST-FOUND</h2>
@@ -377,7 +386,7 @@
 
                 <div>
                     <label class="text-xs font-bold block mb-1">COLABORADOR: <span class="text-red-500">*</span></label>
-                    <input type="text" id="apk_colaborador" required placeholder="Nome do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    <input type="text" id="apk_colaborador" list="lista-colaboradores" oninput="preencherTlAutomatico(this.value, 'apk_tl')" required placeholder="Nome ou usuário do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                 </div>
 
                 <div>
@@ -432,17 +441,11 @@
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">COLABORADOR: <span class="text-red-500">*</span></label>
-                        <input type="text" id="picking_colaborador" required placeholder="Nome do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                        <input type="text" id="picking_colaborador" list="lista-colaboradores" oninput="preencherTlAutomatico(this.value, 'picking_tl')" required placeholder="Nome ou usuário do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="picking_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                        <datalist id="lista-team-leaders">
-                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                        </datalist>
                     </div>
                     <div>
                         <label class="text-xs font-bold block mb-1">OBSERVAÇÃO:</label>
@@ -487,18 +490,12 @@
 
                     <div>
                         <label class="text-xs font-bold block mb-1">COLABORADOR: <span class="text-red-500">*</span></label>
-                        <input type="text" id="packing_colaborador" required placeholder="Nome do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                        <input type="text" id="packing_colaborador" list="lista-colaboradores" oninput="preencherTlAutomatico(this.value, 'packing_tl')" required placeholder="Nome ou usuário do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                     </div>
 
                     <div>
                         <label class="text-xs font-bold block mb-1">TEAM LEADER:</label>
                         <input type="text" id="packing_tl" list="lista-team-leaders" placeholder="Selecione ou digite o TL..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
-                        <datalist id="lista-team-leaders">
-                            <option value="MIRELE MEDEIROS DO NASCIMENTO"></option>
-                            <option value="GABRIEL RODRIGUES DE ASSUMPCAO"></option>
-                            <option value="FLAUDISIA ALEXSANDRA DUARTE SILVA"></option>
-                            <option value="BRAYCKSON DOS SANTOS LEAL"></option>
-                        </datalist>
                     </div>
 
                     <div>
@@ -665,7 +662,7 @@
 
                 <div>
                     <label class="text-xs font-bold block mb-1">COLABORADOR:</label>
-                    <input type="text" id="lnl_colaborador" class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
+                    <input type="text" id="lnl_colaborador" list="lista-colaboradores" oninput="preencherTlAutomatico(this.value, 'lnl_tl')" placeholder="Nome ou usuário do colaborador..." class="w-full p-2 text-xs border rounded dark:bg-black/20 dark:text-white border-borderGray">
                 </div>
 
                 <div>
@@ -781,6 +778,46 @@
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
+        // INTEGRAÇÃO COM A PLANILHA LDAP (AUTOCOMPLETE COLABORADOR + TEAM LEADER AUTOMÁTICO)
+        const URL_PLANILHA_LDAP = "https://script.google.com/macros/s/AKfycbztxiqqFLmkSWN2KBBRbVn35hWvSdUaeCkssbLlMB-Ao6T3EfYvjSo-UJayyxWt4A3u/exec";
+        let baseLdap = [];
+
+        window.carregarBaseLdap = async () => {
+            try {
+                const resposta = await fetch(URL_PLANILHA_LDAP);
+                baseLdap = await resposta.json();
+
+                const datalistColab = document.getElementById('lista-colaboradores');
+                if (datalistColab) {
+                    datalistColab.innerHTML = baseLdap
+                        .map(item => `<option value="${item.nome}">${item.usuario}</option>`)
+                        .join('');
+                }
+
+                const tlsUnicos = [...new Set(baseLdap.map(item => item.tl).filter(Boolean))].sort();
+                const datalistTl = document.getElementById('lista-team-leaders');
+                if (datalistTl && tlsUnicos.length > 0) {
+                    datalistTl.innerHTML = tlsUnicos.map(tl => `<option value="${tl}"></option>`).join('');
+                }
+            } catch (erro) {
+                console.error("Erro ao carregar base LDAP:", erro);
+            }
+        };
+
+        window.preencherTlAutomatico = (valorDigitado, idInputTl) => {
+            const busca = valorDigitado.trim().toLowerCase();
+            if (!busca || baseLdap.length === 0) return;
+
+            const encontrado = baseLdap.find(
+                item => item.nome.toLowerCase() === busca || item.usuario.toLowerCase() === busca
+            );
+
+            if (encontrado) {
+                const inputTl = document.getElementById(idInputTl);
+                if (inputTl) inputTl.value = encontrado.tl;
+            }
+        };
+
         // GERENCIAMENTO DE TIMEOUT DE 2 HORAS (7.200.000 MILISSEGUNDOS) POR INATIVIDADE
         const TEMPO_INATIVIDADE = 2 * 60 * 60 * 1000;
         let timerInatividade = null;
@@ -851,7 +888,7 @@
         let usuarioAtual = null;
         let SOU_ADMIN = false;
         let tipoPedidoAtual = 'Exclusão';
-        let pickerInstancia = null; // Para o calendário de filtro
+        let pickerInstancia = null;
 
         let pedidosAlteracaoCache = [];
 
@@ -1144,7 +1181,6 @@
             const dataVal = document.getElementById('sol_data').value;
             const etd = document.getElementById('sol_etd').value;
 
-            // VALIDAÇÃO DE CAMPOS VAZIOS / APENAS ESPAÇOS
             if (!mz || !meli || !qtd || !tote || !dataVal || !etd) {
                 mostrarToast("Por favor, preencha todos os campos obrigatórios.");
                 return;
@@ -1586,11 +1622,11 @@
 
                     <div>
                         <label class="font-bold block dark:text-darkText">Colaborador:</label>
-                        <input type="text" id="edit_colaborador" value="${tarefa.colaborador || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="edit_colaborador" list="lista-colaboradores" oninput="preencherTlAutomatico(this.value, 'edit_tl')" value="${tarefa.colaborador || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
                         <label class="font-bold block dark:text-darkText">Team Leader:</label>
-                        <input type="text" id="edit_tl" value="${tarefa.tl || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
+                        <input type="text" id="edit_tl" list="lista-team-leaders" value="${tarefa.tl || ''}" class="w-full p-1.5 border rounded dark:bg-black/20 dark:text-white dark:border-borderGray">
                     </div>
                     <div>
                         <label class="font-bold block dark:text-darkText">Observação:</label>
@@ -1632,7 +1668,6 @@
                     observacao: document.getElementById('edit_observacao').value
                 };
 
-                // Regra de transição e sincronização do resultado de exibição geral
                 if (resPickingVal === 'Sem divergência') {
                     dadosAtualizados.status_fisico = 'Sim';
                     if (resPackingVal === 'Aguardando' || resPackingVal === 'Sem divergência') {
@@ -1923,7 +1958,6 @@
                     const meli = (t.meli || '').toLowerCase();
                     const idPedido = (t.id_pedido || '').toLowerCase();
                     const sobraMeli = (t.sobra_meli || '').toLowerCase();
-                    // Novos campos de busca adicionados
                     const colaborador = (t.colaborador || '').toLowerCase();
                     const tl = (t.tl || '').toLowerCase();
                     const resultadoAuditoria = (t.resultado_auditoria || '').toLowerCase();
@@ -1986,7 +2020,6 @@
                 const ehLostNaTabela = statusNormalizado.includes('lost');
                 let textoResultado = d.resultado_auditoria || '-';
 
-                // Se for um caso de Lost, puxa a "alternativa". Se não tiver, tenta o "resultado_auditoria"
                 if (ehLostNaTabela) {
                     textoResultado = d.alternativa || d.resultado_auditoria || '-';
                 }
@@ -2362,7 +2395,6 @@
 
             const mapCulp = {};
             dados.forEach(t => {
-                // Nova regra: Ignora a tarefa se o status for Lost Salvo ou Lost não localizado
                 if (t.status === 'Lost Salvo' || t.status === 'Lost não localizado') {
                     return; 
                 }
@@ -2415,11 +2447,9 @@
                 const res = (t.resultado_auditoria || '').trim();
                 const resPicking = (t.resultado_picking || '').trim();
 
-                // 1. Exceção: Inversão de tote é erro de Picking, mesmo sendo apontado na tela de Packing
                 if (res === "Inversão de tote") {
                     totalPicking++;
                 }
-                // 2. Erros atribuídos ao PACKING
                 else if (
                     t.adicionadoPackingManual || 
                     t.auditadoPackingPor || 
@@ -2429,7 +2459,6 @@
                 ) {
                     totalPacking++;
                 } 
-                // 3. Erros atribuídos ao PICKING (que não foram Inversão de Tote)
                 else if (
                     t.auditadoPickingPor || 
                     t.status_fisico === 'Nao' || 
@@ -2879,7 +2908,6 @@
         };
 
         window.exportarCycleSimplificado = () => {
-            // Filtra apenas as tarefas de Cycle
             const tarefasCycle = tarefasCache.filter(t => t.resultado_auditoria === 'Cycle' || t.status_fisico === 'Nao');
 
             if (tarefasCycle.length === 0) {
@@ -2887,21 +2915,17 @@
                 return;
             }
             
-            // Define apenas os 3 cabeçalhos que seu chefe quer
             const cabecalhos = ["MZ", "Data", "Horário"];
             
-            // Mapeia os dados pegando apenas essas colunas
             const linhas = tarefasCycle.map(t => {
                 const mz = t.mz || '-';
                 
-                // Formata a data de YYYY-MM-DD para DD/MM/YYYY
                 let dataStr = t.data || '-';
                 if (dataStr.includes('-')) {
                     const partes = dataStr.split('-');
                     dataStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 }
 
-                // Pega a hora exata da criação
                 let horario = '-';
                 if (t.criadoEm) {
                     const d = t.criadoEm.toDate ? t.criadoEm.toDate() : new Date(t.criadoEm);
@@ -2913,7 +2937,6 @@
                 return [mz, dataStr, horario];
             });
 
-            // Gera e faz o download do CSV
             let conteudoCSV = "\uFEFF" + cabecalhos.join(';') + '\n';
             linhas.forEach(linha => {
                 conteudoCSV += linha.join(';') + '\n';
@@ -2930,9 +2953,9 @@
         document.addEventListener("DOMContentLoaded", () => {
             pickerInstancia = flatpickr("#filtro-data-range", {
                 mode: "range",
-                dateFormat: "Y-m-d", // Formato para o sistema oculto
+                dateFormat: "Y-m-d",
                 altInput: true,
-                altFormat: "d/M/Y",  // Formato de exibição visual (ex: 25/Aug/2026)
+                altFormat: "d/M/Y",
                 locale: {
                     ...flatpickr.l10ns.pt,
                     rangeSeparator: " a "
@@ -2953,7 +2976,8 @@
             });
         });
 
-        // Inicia o sistema verificando se já existe um login ativo salvo
+        // Carrega base de colaboradores/TLs da planilha LDAP e verifica login ativo
+        window.carregarBaseLdap();
         window.verificarSessaoLogin();
 
     </script>
