@@ -1710,6 +1710,16 @@
                     </div>`;
                 }
 
+                // Aviso exibido acima do botão para outros usuários
+                let avisoAuditandoHTML = '';
+                if (d.auditandoPor && d.auditandoPor !== usuarioAtual) {
+                    avisoAuditandoHTML = `
+                        <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full mb-1 whitespace-nowrap animate-pulse">
+                            Auditando por ${d.auditandoPor}
+                        </span>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="flex flex-col flex-wrap w-full pr-4">
                         <div class="flex items-center gap-4 flex-wrap">
@@ -1718,7 +1728,8 @@
                         </div>
                         ${infoSobraHTML}
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-col items-end shrink-0">
+                        ${avisoAuditandoHTML}
                         <button onclick="abrirModalAuditoria('${d.id}', 'picking')" class="px-4 py-2 bg-primaryBtn text-white rounded text-xs font-bold shrink-0">Auditar Picking</button>
                     </div>
                 `;
@@ -2027,6 +2038,13 @@
             const tarefa = tarefasCache.find(t => t.id === id);
             if(!tarefa) return;
 
+            // Marca no Firestore que este usuário começou a auditar o picking
+            if (tipo === 'picking' && usuarioAtual) {
+                updateDoc(doc(db, "tarefas", id), {
+                    auditandoPor: usuarioAtual
+                }).catch(err => console.error("Erro ao marcar auditoria em andamento:", err));
+            }
+
             document.getElementById('modal-titulo').innerText = tipo === 'picking' ? "Auditoria Picking" : "Auditoria Packing";
             
             let htmlDetalhes = `
@@ -2081,7 +2099,19 @@
             document.getElementById('modal-auditoria').classList.remove('hidden');
         };
 
-        window.fecharModalAuditoria = () => document.getElementById('modal-auditoria').classList.add('hidden');
+        window.fecharModalAuditoria = (foiSalvo = false) => {
+            document.getElementById('modal-auditoria').classList.add('hidden');
+
+            // Se fechou/cancelou sem salvar, libera a task (apenas se era o usuário atual auditando)
+            if (!foiSalvo && currentModalId && currentModalTipo === 'picking') {
+                const tarefa = tarefasCache.find(t => t.id === currentModalId);
+                if (tarefa && tarefa.auditandoPor === usuarioAtual) {
+                    updateDoc(doc(db, "tarefas", currentModalId), {
+                        auditandoPor: null
+                    }).catch(err => console.error("Erro ao liberar auditoria:", err));
+                }
+            }
+        };
 
         window.tratarFisicoSistemico = (valor) => {
             if(valor === 'Sim') {
@@ -2098,7 +2128,7 @@
 
         window.confirmarSemDivergenciaEnvio = async () => {
             fecharConfirmacaoSemDivergencia();
-            fecharModalAuditoria();
+            fecharModalAuditoria(true);
             if(currentModalId) {
                 await updateDoc(doc(db, "tarefas", currentModalId), {
                     status: 'Aguardando Auditoria Packing', 
@@ -2107,7 +2137,8 @@
                     resultado_picking: 'Sem divergência',
                     auditadoPickingPor: usuarioAtual,
                     auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
+                    auditadoPor: usuarioAtual,
+                    auditandoPor: null
                 });
                 mostrarToast("Picking conferido sem divergência! Encaminhado para Auditoria Packing.");
             }
@@ -2133,7 +2164,8 @@
                     resultado_picking: culpabilidade,
                     auditadoPickingPor: usuarioAtual,
                     auditadoPickingEm: new Date(),
-                    auditadoPor: usuarioAtual
+                    auditadoPor: usuarioAtual,
+                    auditandoPor: null
                 });
 
                 window.registrarNaPlanilha({
@@ -2142,7 +2174,7 @@
                     detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
                 });
 
-                fecharModalAuditoria();
+                fecharModalAuditoria(true);
                 mostrarToast("Divergência de Picking salva com sucesso! Status final: Auditado.");
             }
         };
@@ -2174,7 +2206,7 @@
                     detalhes: `ID: ${currentModalId} | Culpabilidade: ${culpabilidade}`
                 });
 
-                fecharModalAuditoria();
+                fecharModalAuditoria(true);
                 mostrarToast("Auditoria Packing salva com sucesso! Status final: Auditado.");
             }
         };
@@ -2206,7 +2238,7 @@
                     detalhes: `ID: ${currentModalId}`
                 });
 
-                fecharModalAuditoria();
+                fecharModalAuditoria(true);
                 
                 const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
                 if (btnTabLostSalvo) btnTabLostSalvo.click();
@@ -2257,7 +2289,7 @@
                     detalhes: `ID: ${currentModalId} | Alternativa: ${alternativa}`
                 });
 
-                fecharModalAuditoria();
+                fecharModalAuditoria(true);
 
                 const btnTabLostSalvo = document.querySelector('.nav-btn[data-tab="lost-salvo"]');
                 if (btnTabLostSalvo) btnTabLostSalvo.click();
