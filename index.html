@@ -778,6 +778,48 @@
         
         const db = getFirestore(initializeApp({ apiKey: "AIzaSyCHkwoHVDJVtEYtDzqbhbNp0wqUUGJNfQY", authDomain: "portalicqa.firebaseapp.com", projectId: "portalicqa", storageBucket: "portalicqa.firebasestorage.app", messagingSenderId: "894316718460", appId: "1:894316718460:web:d07e8bc5646e982fe19cf9" }));
 
+        // VALIDAÇÃO DO NOME DO COLABORADOR (PICKING E PACKING)
+        window.validarNomeColaborador = (inputEl) => {
+            const valor = inputEl.value.trim();
+            if (!valor) {
+                mostrarToast("Por favor, preencha o nome do colaborador.");
+                inputEl.focus();
+                return false;
+            }
+
+            // Bloqueia se contiver símbolos inválidos ou números (permite apenas letras, acentos, espaços, apóstrofo e hífen)
+            if (/[^a-zA-ZÀ-ÿ\s'-]/.test(valor)) {
+                mostrarToast("O nome do colaborador não pode conter símbolos como '.', '?' ou '/'.");
+                inputEl.focus();
+                return false;
+            }
+
+            // Conta quantas letras reais (incluindo acentuadas) existem no nome
+            const letras = valor.match(/[a-zA-ZÀ-ÿ]/g) || [];
+            if (letras.length < 3) {
+                mostrarToast("O nome do colaborador deve conter pelo menos 3 letras.");
+                inputEl.focus();
+                return false;
+            }
+
+            // Normaliza removendo acentos, espaços extras e deixando em minúsculo para bloquear termos genéricos
+            const normalizado = valor
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/\s+/g, " ");
+
+            const termosBloqueados = ["sn", "sem nome", "sem"];
+
+            if (termosBloqueados.includes(normalizado)) {
+                mostrarToast("Não é permitido inserir 'SN', 'Sem Nome' ou 'Sem'. Informe o colaborador válido.");
+                inputEl.focus();
+                return false;
+            }
+
+            return true;
+        };
+
         // INTEGRAÇÃO COM A PLANILHA LDAP (AUTOCOMPLETE COLABORADOR + TEAM LEADER AUTOMÁTICO)
         const URL_PLANILHA_LDAP = "https://script.google.com/macros/s/AKfycbzRQ4P0V3iv-8NnEngXBS6domXKa4KQs2nIiD8xojH91ghi2wqmMPUtr3eD4vv5QBg/exec";
         let baseLdap = [];
@@ -2179,12 +2221,8 @@
 
         window.salvarAuditoriaPickingNao = async () => {
             const colaboradorInput = document.getElementById('picking_colaborador');
+            if (!validarNomeColaborador(colaboradorInput)) return;
             const colaborador = colaboradorInput.value.trim();
-            if (!colaborador) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
-                colaboradorInput.focus();
-                return;
-            }
 
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_picking"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -2221,12 +2259,8 @@
 
         window.salvarAuditoriaModal = async () => {
             const colaboradorInput = document.getElementById('packing_colaborador');
+            if (!validarNomeColaborador(colaboradorInput)) return;
             const colaborador = colaboradorInput.value.trim();
-            if (!colaborador) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
-                colaboradorInput.focus();
-                return;
-            }
 
             const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
@@ -2260,12 +2294,8 @@
 
         window.incluirEmLostSalvoModal = async () => {
             const colaboradorInput = document.getElementById('packing_colaborador');
+            if (!validarNomeColaborador(colaboradorInput)) return;
             const colaborador = colaboradorInput.value.trim();
-            if (!colaborador) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
-                colaboradorInput.focus();
-                return;
-            }
 
             if(currentModalId) {
                 const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
@@ -2303,11 +2333,7 @@
 
         window.mostrarOpcoesLostSalvoPacking = () => {
             const colaboradorInput = document.getElementById('packing_colaborador');
-            if (!colaboradorInput.value.trim()) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
-                colaboradorInput.focus();
-                return;
-            }
+            if (!validarNomeColaborador(colaboradorInput)) return;
 
             document.getElementById('packing-campos-principais').classList.add('hidden');
             document.getElementById('packing-opcoes-lost-salvo').classList.remove('hidden');
@@ -2320,13 +2346,11 @@
 
         window.confirmarEIncluirLostSalvoPacking = async () => {
             const colaboradorInput = document.getElementById('packing_colaborador');
-            const colaborador = colaboradorInput.value.trim();
-            if (!colaborador) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
+            if (!validarNomeColaborador(colaboradorInput)) {
                 voltarFormularioPacking();
-                colaboradorInput.focus();
                 return;
             }
+            const colaborador = colaboradorInput.value.trim();
 
             if (currentModalId) {
                 const culpabilidadeEl = document.querySelector('input[name="culpabilidade_packing"]:checked');
@@ -2750,12 +2774,8 @@
 
         window.salvarAuditoriaPackingManual = async () => {
             const colaboradorInput = document.getElementById('apk_colaborador');
+            if (!validarNomeColaborador(colaboradorInput)) return;
             const colaborador = colaboradorInput.value.trim();
-            if (!colaborador) {
-                mostrarToast("Por favor, preencha o nome do colaborador.");
-                colaboradorInput.focus();
-                return;
-            }
 
             const culpabilidadeEl = document.querySelector('input[name="apk_culpabilidade"]:checked');
             let culpabilidade = culpabilidadeEl ? culpabilidadeEl.value : '';
